@@ -13,7 +13,7 @@ Add the ServiceProvider class to the providers array in `config/app.php`:
 ```php
 'providers' => [
     // ... more providers
-    \AG\ElasticApmLaravel\ServiceProvider:class,
+    \AG\ElasticApmLaravel\ServiceProvider::class,
 ],
 ```
 
