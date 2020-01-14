@@ -9,7 +9,6 @@ use AG\ElasticApmLaravel\Contracts\VersionResolver;
 
 class ServiceProvider extends BaseServiceProvider
 {
-    private $start_time;
     private $source_config_path = __DIR__ . '/../config/elastic-apm-laravel.php';
 
     /**
@@ -30,38 +29,17 @@ class ServiceProvider extends BaseServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom($this->source_config_path, 'elastic-apm-laravel');
-        $this->startTransaction($this->registerAgent());
+        $this->registerAgent();
     }
 
     /**
      * Register the APM Agent into the Service Container
      */
-    protected function registerAgent(): Agent
+    protected function registerAgent(): void
     {
-        $agent = new Agent($this->getAgentConfig());
-        $this->app->singleton(Agent::class, function () use ($agent) {
-            return $agent;
+        $this->app->singleton(Agent::class, function () {
+            return new Agent($this->getAgentConfig());
         });
-
-        return $agent;
-    }
-
-    /**
-     * Start the transaction that will measure the request, application start up time,
-     * DB queries, HTTP requests, etc
-     */
-    protected function startTransaction(Agent $agent): void
-    {
-        $transaction = $agent->startTransaction(
-            $this->getTransactionName(),
-            [],
-            $_SERVER['REQUEST_TIME_FLOAT']
-        );
-        $boot_span = $agent->startSpan('Laravel boot', $transaction);
-        $boot_span->setType('app');
-
-        // Save the instance to stop the timer in the future
-        $this->app->instance('boot_span', $boot_span);
     }
 
     /**
@@ -109,16 +87,5 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         return $config;
-    }
-
-    protected function getTransactionName(): string
-    {
-        return $_SERVER['REQUEST_METHOD'] . ' ' . $this->normalizeUri($_SERVER['REQUEST_URI']);
-    }
-
-    protected function normalizeUri(string $uri): string
-    {
-        // Fix leading /
-        return '/' . trim($uri, '/');
     }
 }
