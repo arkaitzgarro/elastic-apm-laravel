@@ -61,7 +61,11 @@ class RecordTransaction
      */
     protected function startTransaction(string $transaction_name): Transaction
     {
-        return $this->agent->startTransaction($transaction_name);
+        return $this->agent->startTransaction(
+            $transaction_name,
+            [],
+            $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true)
+        );
     }
 
     public function addMetadata(Transaction $transaction, Request $request, Response $response): void
@@ -86,23 +90,18 @@ class RecordTransaction
         ]);
     }
 
-    public function terminate(): void
+    public function terminate(Request $request): void
     {
         try {
-            $this->agent->send();
+            $this->agent->sendTransaction($this->getTransactionName($request));
         } catch (Throwable $t) {
-            Log::error($t->getResponse()->getBody());
+            Log::error($t->getMessage());
         }
     }
 
     protected function getTransactionName(Request $request): string
     {
-        $route = $request->route();
-        if ($route instanceof Route) {
-            $uri = $request->route()->getName();
-        } else {
-            $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        }
+        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
         return $request->method() . ' ' . $this->normalizeUri($uri);
     }

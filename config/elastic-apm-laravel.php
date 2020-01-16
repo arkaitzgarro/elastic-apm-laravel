@@ -35,6 +35,9 @@ return [
     ],
 
     'spans' => [
+        // Max number of child items displayed when viewing trace details.
+        'maxTraceItems'=> env('APM_MAXTRACEITEMS', 1000),
+
         // Depth of backtraces
         'backtraceDepth'=> env('APM_BACKTRACEDEPTH', 25),
 
