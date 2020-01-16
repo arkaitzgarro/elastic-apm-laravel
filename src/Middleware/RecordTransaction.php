@@ -2,12 +2,13 @@
 namespace AG\ElasticApmLaravel\Middleware;
 
 use Closure;
+use PhilKra\Events\Span;
 use Throwable;
 use PhilKra\Events\Transaction;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response;
 
 use AG\ElasticApmLaravel\Agent;
 
@@ -40,17 +41,16 @@ class RecordTransaction
      */
     public function handle(Request $request, Closure $next)
     {
-        // Measure the time the application takes to boot
-        app()->make('boot_span')->stop();
-
-        // Get access to main transaction
+        // Start a new transaction
         $transaction_name = $this->getTransactionName($request);
-        $transaction = $this->agent->getTransaction($transaction_name);
+        $transaction = $this->agent->startTransaction($transaction_name);
 
         // Execute the application logic
         $response = $next($request);
 
         $this->addMetadata($transaction, $request, $response);
+
+        $this->addDbQueries($transaction);
 
         // Measure the transaction and measure the time
         $this->agent->stopTransaction($transaction_name);
@@ -78,14 +78,13 @@ class RecordTransaction
             'result' => $response->getStatusCode(),
             'type' => 'HTTP'
         ]);
-
     }
 
-    public function terminate($request, $response): void 
+    public function terminate(): void
     {
         try {
             $this->agent->send();
-        } catch(Throwable $t) {
+        } catch (Throwable $t) {
             Log::error($t->getResponse()->getBody());
         }
     }
@@ -93,10 +92,10 @@ class RecordTransaction
     protected function getTransactionName(Request $request): string
     {
         $route = $request->route();
-        if($route instanceof Route) {
-            $uri = $request->route()->uri();
+        if ($route instanceof Route) {
+            $uri = $request->route()->getName();
         } else {
-            $uri = $_SERVER['REQUEST_URI'];
+            $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         }
 
         return $request->method() . ' ' . $this->normalizeUri($uri);
@@ -110,8 +109,24 @@ class RecordTransaction
 
     protected function formatHeaders(array $headers): array
     {
-        return collect($headers)->map(function ($values, $header) {
+        return collect($headers)->map(function ($values) {
             return head($values);
         })->toArray();
+    }
+
+    /**
+     * @param Transaction $transaction
+     */
+    private function addDbQueries(Transaction $transaction): void
+    {
+        foreach (app('query-log') as $span_data) {
+            /** @var Span $span */
+            $span = $this->agent->factory()->newSpan($span_data['name'], $transaction);
+            $span->setType($span_data['type']);
+            $span->setContext($span_data['context']);
+            $span->stop($span_data['duration']);
+            $span->setStacktrace($span_data['stacktrace']->toArray() ?? []);
+            $this->agent->putEvent($span);
+        }
     }
 }
