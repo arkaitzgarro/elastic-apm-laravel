@@ -43,6 +43,7 @@ class RecordTransaction
     {
         // Start a new transaction
         $transaction_name = $this->getTransactionName($request);
+
         $transaction = $this->agent->startTransaction($transaction_name);
 
         // Execute the application logic
