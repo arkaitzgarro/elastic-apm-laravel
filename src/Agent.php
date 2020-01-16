@@ -2,7 +2,6 @@
 namespace AG\ElasticApmLaravel;
 
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 
 use PhilKra\Agent as PhilKraAgent;
 use AG\ElasticApmLaravel\Events\Span;

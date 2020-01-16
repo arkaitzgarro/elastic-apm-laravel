@@ -33,7 +33,10 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->mergeConfigFrom($this->source_config_path, 'elastic-apm-laravel');
         $this->registerAgent();
-        $this->listenForQueries();
+         
+        if (config('elastic-apm.spans.querylog.enabled') !== false) {
+            $this->listenForQueries();
+        }
     }
 
     /**
