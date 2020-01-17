@@ -8,6 +8,7 @@ use PhilKra\Helper\Timer;
 
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Contracts\VersionResolver;
+use AG\ElasticApmLaravel\Collectors\TimelineDataCollector;
 use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
 
 class ServiceProvider extends BaseServiceProvider
@@ -34,6 +35,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->mergeConfigFrom($this->source_config_path, 'elastic-apm-laravel');
         $this->registerAgent();
          
+        $this->listenForBooted();
         if (config('elastic-apm.spans.querylog.enabled') !== false) {
             $this->listenForQueries();
         }
@@ -50,6 +52,18 @@ class ServiceProvider extends BaseServiceProvider
             $agent->registerCollectors();
 
             return $agent;
+        });
+    }
+
+    protected function listenForBooted(): void
+    {
+        $timeline_collector = $this->app->make(Agent::class)->getCollector(TimelineDataCollector::getName());
+        $this->app->booted(function () use ($timeline_collector) {
+            $start_time = $this->app['request']->server('REQUEST_TIME_FLOAT');
+            if ($start_time && $start_time > 0) {
+                $end_time = microtime(true) - $start_time;
+                $timeline_collector->addMeasure('Laravel boot', 0, $end_time, 'laravel', 'boot');
+            }
         });
     }
 

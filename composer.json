@@ -13,8 +13,14 @@
         "php": ">=7.3",
         "illuminate/routing": "^5.5|^6",
         "illuminate/support": "^5.5|^6",
-        "philkra/elastic-apm-php-agent": "v7.0.0-rc3"
+        "philkra/elastic-apm-php-agent": "dev-master"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/philkra/elastic-apm-php-agent"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "AG\\ElasticApmLaravel\\": "src/"
