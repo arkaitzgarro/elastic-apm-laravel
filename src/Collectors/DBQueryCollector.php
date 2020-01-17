@@ -30,9 +30,7 @@ class DBQueryCollector extends TimelineDataCollector implements DataCollectorInt
             }
         }
 
-        file_put_contents(__DIR__ . '/send.json', json_encode($query->sql) . "\n", FILE_APPEND);
-
-        $start_time = (microtime(true) - $query->time / 1000 - $this->request_start_time) / 1000;
+        $start_time = microtime(true) - $this->request_start_time - $query->time / 1000;
         $end_time = $start_time + $query->time / 1000;
 
         $query = [
@@ -43,7 +41,7 @@ class DBQueryCollector extends TimelineDataCollector implements DataCollectorInt
             'end' => $end_time,
             'context' => [
                 'db' => [
-                    'statement' => $query->sql,
+                    'statement' => (string) $query->sql,
                     'type' => 'sql',
                 ],
             ],

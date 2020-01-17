@@ -4,9 +4,10 @@ namespace AG\ElasticApmLaravel;
 use Illuminate\Support\Collection;
 
 use PhilKra\Agent as PhilKraAgent;
-use AG\ElasticApmLaravel\Events\Span;
+use AG\ElasticApmLaravel\Events\LazySpan;
 use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
 use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
+use AG\ElasticApmLaravel\Collectors\TimelineDataCollector;
 
 /**
  * The Elastic APM agent sends performance metrics and error logs to the APM Server.
@@ -25,7 +26,7 @@ class Agent extends PhilKraAgent
     protected $collectors;
     protected $request_start_time;
 
-    public function __construct(array $config, int $request_start_time)
+    public function __construct(array $config, float $request_start_time)
     {
         parent::__construct($config);
 
@@ -35,6 +36,12 @@ class Agent extends PhilKraAgent
 
     public function registerCollectors(): void
     {
+        // Timeline collector
+        $this->collectors->put(
+            TimelineDataCollector::getName(),
+            new TimelineDataCollector()
+        );
+
         // DB Queries collector
         $this->collectors->put(
             DBQueryCollector::getName(),
@@ -54,9 +61,7 @@ class Agent extends PhilKraAgent
         $transaction = $this->getTransaction($transaction_name);
         $this->collectors->each(function ($collector) use ($transaction, $max_trace_items) {
             $collector->collect()->take($max_trace_items)->each(function ($measure) use ($transaction) {
-                $event = new Span($measure['label'], $transaction);
-                
-                $event->start();
+                $event = new LazySpan($measure['label'], $transaction);
                 $event->setType($measure['type']);
                 $event->setAction($measure['action']);
                 $event->setContext($measure['context']);
