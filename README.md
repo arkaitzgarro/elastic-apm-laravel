@@ -41,6 +41,7 @@ The following environment variables are supported in the default configuration:
 |APM_THRESHOLD      | Query threshold in milliseconds, defaults to `200`. If a query takes longer then 200ms, we enable the query log. Make sure you set `APM_QUERYLOG=auto`. |
 |APM_BACKTRACEDEPTH | Defaults to `25`. Depth of backtrace in query span. |
 |APM_RENDERSOURCE   | Defaults to `true`. Include source code in query span. |
+|APM_MAXTRACEITEMS  | Defaults to `1000`. Max number of child items displayed when viewing trace details. |
 
 You may also publish the `elastic-apm-laravel.php` configuration file to change additional settings:
 

@@ -1,11 +1,14 @@
 <?php
 namespace AG\ElasticApmLaravel;
 
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+
 use PhilKra\Helper\Timer;
 
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Contracts\VersionResolver;
+use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -30,6 +33,10 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->mergeConfigFrom($this->source_config_path, 'elastic-apm-laravel');
         $this->registerAgent();
+         
+        if (config('elastic-apm.spans.querylog.enabled') !== false) {
+            $this->listenForQueries();
+        }
     }
 
     /**
@@ -38,7 +45,19 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerAgent(): void
     {
         $this->app->singleton(Agent::class, function () {
-            return new Agent($this->getAgentConfig());
+            $start_time = $this->app['request']->server('REQUEST_TIME_FLOAT') ?? microtime(true);
+            $agent = new Agent($this->getAgentConfig(), $start_time);
+            $agent->registerCollectors();
+
+            return $agent;
+        });
+    }
+
+    protected function listenForQueries(): void
+    {
+        $query_collector = $this->app->make(Agent::class)->getCollector(DBQueryCollector::getName());
+        $this->app->events->listen(QueryExecuted::class, function (QueryExecuted $query) use ($query_collector) {
+            $query_collector->onQueryExecutedEvent($query);
         });
     }
 
