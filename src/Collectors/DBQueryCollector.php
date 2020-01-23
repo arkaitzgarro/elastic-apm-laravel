@@ -1,9 +1,14 @@
 <?php
 namespace AG\ElasticApmLaravel\Collectors;
 
+use Exception;
+
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Events\QueryExecuted;
+
+use Jasny\DB\MySQL\QuerySplitter;
+
 use AG\ElasticApmLaravel\Collectors\TimelineDataCollector;
 use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
 
@@ -12,15 +17,6 @@ use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
  */
 class DBQueryCollector extends TimelineDataCollector implements DataCollectorInterface
 {
-    protected $request_start_time;
-
-    public function __construct($request_start_time)
-    {
-        parent::__construct();
-
-        $this->request_start_time = $request_start_time;
-    }
-
     public function onQueryExecutedEvent(QueryExecuted $query): void
     {
 
@@ -34,7 +30,7 @@ class DBQueryCollector extends TimelineDataCollector implements DataCollectorInt
         $end_time = $start_time + $query->time / 1000;
 
         $query = [
-            'name' => 'Eloquent Query',
+            'name' => $this->getQueryName($query->sql),
             'type' => 'db.mysql.query',
             'action' => 'query',
             'start' => $start_time,
@@ -60,5 +56,24 @@ class DBQueryCollector extends TimelineDataCollector implements DataCollectorInt
     public static function getName(): string
     {
         return 'query-collector';
+    }
+
+    private function getQueryName(string $sql): string
+    {
+        $fallback = 'Eloquent Query';
+
+        try {
+            $query_type = QuerySplitter::getQueryType($sql);
+            $tables = QuerySplitter::splitTables($sql);
+
+            if (isset($query_type) && is_array($tables)) {
+                // Query type and tables
+                return $query_type . ' ' . join(', ', array_values($tables));
+            }
+
+            return $fallback;
+        } catch (Exception $e) {
+            return $fallback;
+        }
     }
 }

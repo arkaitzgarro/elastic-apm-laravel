@@ -2,6 +2,8 @@
 namespace AG\ElasticApmLaravel;
 
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 use PhilKra\Helper\Timer;
@@ -35,7 +37,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->mergeConfigFrom($this->source_config_path, 'elastic-apm-laravel');
         $this->registerAgent();
          
-        $this->listenForBooted();
+        $this->listenForEvents();
         if (config('elastic-apm.spans.querylog.enabled') !== false) {
             $this->listenForQueries();
         }
@@ -55,14 +57,28 @@ class ServiceProvider extends BaseServiceProvider
         });
     }
 
-    protected function listenForBooted(): void
+    protected function listenForEvents(): void
     {
+        $start_time = $this->app['request']->server('REQUEST_TIME_FLOAT') ?? microtime(true);
         $timeline_collector = $this->app->make(Agent::class)->getCollector(TimelineDataCollector::getName());
+        
+        // Application and Laravel startup times
+        $timeline_collector->startMeasure('app_boot', 'app', 'boot', 'App boot', $start_time);
+        $this->app->booting(function () use ($timeline_collector) {
+            $timeline_collector->stopMeasure('app_boot');
+            $timeline_collector->startMeasure('laravel_boot', 'laravel', 'boot', 'Laravel boot');
+        });
         $this->app->booted(function () use ($timeline_collector) {
-            $start_time = $this->app['request']->server('REQUEST_TIME_FLOAT');
-            if ($start_time && $start_time > 0) {
-                $end_time = microtime(true) - $start_time;
-                $timeline_collector->addMeasure('Laravel boot', 0, $end_time, 'laravel', 'boot');
+            $timeline_collector->stopMeasure('laravel_boot');
+        });
+
+        // Time between route resolution and request handled
+        $this->app->events->listen(RouteMatched::class, function () use ($timeline_collector) {
+            $timeline_collector->startMeasure('request_handled', 'laravel', 'request', $this->getController());
+        });
+        $this->app->events->listen(RequestHandled::class, function () use ($timeline_collector) {
+            if ($timeline_collector->hasStartedMeasure('request_handled')) {
+                $timeline_collector->stopMeasure('request_handled');
             }
         });
     }
@@ -120,5 +136,29 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         return $config;
+    }
+
+    protected function getController()
+    {
+        $router = $this->app['router'];
+
+        $route = $router->current();
+        $controller = $route ? $route->getActionName() : null;
+
+        if ($controller instanceof \Closure) {
+            $controller = 'anonymous function';
+        } elseif (is_object($controller)) {
+            $controller = 'instance of ' . get_class($controller);
+        } elseif (is_array($controller) && count($controller) == 2) {
+            if (is_object($controller[0])) {
+                $controller = get_class($controller[0]) . '->' . $controller[1];
+            } else {
+                $controller = $controller[0] . '::' . $controller[1];
+            }
+        } elseif (! is_string($controller)) {
+            $controller = null;
+        }
+
+        return $controller;
     }
 }

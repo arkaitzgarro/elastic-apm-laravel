@@ -39,7 +39,7 @@ class Agent extends PhilKraAgent
         // Timeline collector
         $this->collectors->put(
             TimelineDataCollector::getName(),
-            new TimelineDataCollector()
+            new TimelineDataCollector($this->request_start_time)
         );
 
         // DB Queries collector
