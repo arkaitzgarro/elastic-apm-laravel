@@ -1,7 +1,10 @@
 <?php
 namespace AG\ElasticApmLaravel\Collectors;
 
+use Exception;
+
 use Illuminate\Support\Collection;
+
 use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
 
 /**
@@ -12,23 +15,31 @@ class TimelineDataCollector implements DataCollectorInterface
 {
     protected $started_measures;
     protected $measures;
+    protected $request_start_time;
 
-    public function __construct()
+    public function __construct(float $request_start_time)
     {
         $this->started_measures = new Collection();
         $this->measures = new Collection();
+        $this->request_start_time = $request_start_time;
     }
 
     /**
      * Starts a measure
      */
-    public function startMeasure(string $name, string $type = 'request', string $label = null): void
-    {
-        $start = microtime(true);
-        $this->startedMeasures->put($name, [
+    public function startMeasure(
+        string $name,
+        string $type = 'request',
+        string $action = null,
+        string $label = null,
+        float $start_time = null
+    ): void {
+        $start = $start_time ?? microtime(true);
+        $this->started_measures->put($name, [
             'label' => $label ?: $name,
-            'start' => $start,
+            'start' => $start - $this->request_start_time,
             'type' => $type,
+            'action' => $action,
         ]);
     }
 
@@ -37,7 +48,7 @@ class TimelineDataCollector implements DataCollectorInterface
      */
     public function hasStartedMeasure(string $name): bool
     {
-        return $this->startedMeasures->has($name);
+        return $this->started_measures->has($name);
     }
 
     /**
@@ -50,8 +61,15 @@ class TimelineDataCollector implements DataCollectorInterface
             throw new Exception("Failed stopping measure '{$name}' because it hasn't been started.");
         }
 
-        $measure = $this->startedMeasures->pull($name);
-        $this->addMeasure($measure['label'], $measure['start'], $end, $params);
+        $measure = $this->started_measures->pull($name);
+        $this->addMeasure(
+            $measure['label'],
+            $measure['start'],
+            $end - $this->request_start_time,
+            $measure['type'],
+            $measure['action'],
+            $params
+        );
     }
 
     /**
