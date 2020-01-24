@@ -36,8 +36,8 @@ class DBQueryCollector extends TimelineDataCollector implements DataCollectorInt
     public function onQueryExecutedEvent(QueryExecuted $query): void
     {
 
-        if (config('elastic-apm.spans.querylog.enabled') === 'auto') {
-            if ($query->time < config('elastic-apm.spans.querylog.threshold')) {
+        if (config('elastic-apm-laravel.spans.querylog.enabled') === 'auto') {
+            if ($query->time < config('elastic-apm-laravel.spans.querylog.threshold')) {
                 return;
             }
         }
