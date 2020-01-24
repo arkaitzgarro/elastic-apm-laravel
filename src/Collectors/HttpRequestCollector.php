@@ -29,10 +29,10 @@ class HttpRequestCollector extends TimelineDataCollector implements DataCollecto
 
     protected function registerEventListeners(): void
     {
-        $start_time = $this->app['request']->server('REQUEST_TIME_FLOAT') ?? microtime(true);
-
         // Application and Laravel startup times
-        $this->startMeasure('app_boot', 'app', 'boot', 'App boot', $start_time);
+        // LARAVEL_START is defined at the entry point of the application
+        // https://github.com/laravel/laravel/blob/master/public/index.php#L10
+        $this->startMeasure('app_boot', 'app', 'boot', 'App boot', LARAVEL_START);
         
         $this->app->booting(function () {
             $this->startMeasure('laravel_boot', 'laravel', 'boot', 'Laravel boot');

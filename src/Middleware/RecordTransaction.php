@@ -41,16 +41,12 @@ class RecordTransaction
     public function handle(Request $request, Closure $next)
     {
         // Start a new transaction
-        $transaction_name = $this->getTransactionName($request);
-        $transaction = $this->startTransaction($transaction_name);
+        $transaction = $this->startTransaction($this->getTransactionName($request));
 
         // Execute the application logic
         $response = $next($request);
 
         $this->addMetadata($transaction, $request, $response);
-
-        // Measure the transaction and measure the time
-        $this->agent->stopTransaction($transaction_name);
 
         return $response;
     }
@@ -93,7 +89,11 @@ class RecordTransaction
     public function terminate(Request $request): void
     {
         try {
-            $this->agent->sendTransaction($this->getTransactionName($request));
+            $transaction_name = $this->getTransactionName($request);
+
+            // Stop the transaction and measure the time
+            $this->agent->stopTransaction($transaction_name);
+            $this->agent->sendTransaction($transaction_name);
         } catch (Throwable $t) {
             Log::error($t->getMessage());
         }
