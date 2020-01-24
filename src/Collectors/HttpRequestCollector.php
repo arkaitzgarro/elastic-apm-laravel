@@ -61,7 +61,7 @@ class HttpRequestCollector extends TimelineDataCollector implements DataCollecto
         });
     }
 
-    protected function getController()
+    protected function getController(): ?string
     {
         $router = $this->app['router'];
 
