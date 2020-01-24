@@ -1,13 +1,14 @@
 <?php
 namespace AG\ElasticApmLaravel;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 
 use PhilKra\Agent as PhilKraAgent;
 use AG\ElasticApmLaravel\Events\LazySpan;
 use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
 use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
-use AG\ElasticApmLaravel\Collectors\TimelineDataCollector;
+use AG\ElasticApmLaravel\Collectors\HttpRequestCollector;
 
 /**
  * The Elastic APM agent sends performance metrics and error logs to the APM Server.
@@ -34,18 +35,20 @@ class Agent extends PhilKraAgent
         $this->collectors = new Collection();
     }
 
-    public function registerCollectors(): void
+    public function registerCollectors(Application $app): void
     {
-        // Timeline collector
-        $this->collectors->put(
-            TimelineDataCollector::getName(),
-            new TimelineDataCollector($this->request_start_time)
-        );
+        if (config('elastic-apm.spans.querylog.enabled') !== false) {
+            // DB Queries collector
+            $this->collectors->put(
+                DBQueryCollector::getName(),
+                new DBQueryCollector($app, $this->request_start_time)
+            );
+        }
 
-        // DB Queries collector
+        // Http request collector
         $this->collectors->put(
-            DBQueryCollector::getName(),
-            new DBQueryCollector($this->request_start_time)
+            HttpRequestCollector::getName(),
+            new HttpRequestCollector($app, $this->request_start_time)
         );
     }
 
