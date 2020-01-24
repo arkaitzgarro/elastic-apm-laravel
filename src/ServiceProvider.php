@@ -29,6 +29,9 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register(): void
     {
+        if (!config('elastic-apm-laravel.active')) {
+            return;
+        }
         $this->mergeConfigFrom($this->source_config_path, 'elastic-apm-laravel');
         $this->registerAgent();
         $this->registerCollectors();
