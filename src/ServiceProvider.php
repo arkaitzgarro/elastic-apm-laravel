@@ -7,7 +7,6 @@ use PhilKra\Helper\Timer;
 
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Contracts\VersionResolver;
-use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
 
 class ServiceProvider extends BaseServiceProvider
 {
