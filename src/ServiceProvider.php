@@ -52,6 +52,10 @@ class ServiceProvider extends BaseServiceProvider
      */
     protected function registerCollectors(): void
     {
+        if (config('elastic-apm-laravel.active') === false) {
+            return;
+        }
+
         $agent = $this->app->make(Agent::class);
         $agent->registerCollectors($this->app);
     }

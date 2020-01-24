@@ -37,7 +37,7 @@ class Agent extends PhilKraAgent
 
     public function registerCollectors(Application $app): void
     {
-        if (config('elastic-apm.spans.querylog.enabled') !== false) {
+        if (config('elastic-apm-laravel.spans.querylog.enabled') !== false) {
             // DB Queries collector
             $this->collectors->put(
                 DBQueryCollector::getName(),
@@ -59,7 +59,7 @@ class Agent extends PhilKraAgent
 
     public function collectEvents(string $transaction_name): void
     {
-        $max_trace_items = config('elastic-apm.spans.maxTraceItems');
+        $max_trace_items = config('elastic-apm-laravel.spans.maxTraceItems');
 
         $transaction = $this->getTransaction($transaction_name);
         $this->collectors->each(function ($collector) use ($transaction, $max_trace_items) {
