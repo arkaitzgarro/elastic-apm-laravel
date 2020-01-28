@@ -17,14 +17,7 @@ Add the ServiceProvider class to the providers array in `config/app.php`:
 ],
 ```
 
-And register the [global middleware](https://laravel.com/docs/5.5/middleware#global-middleware) that will be called on every request in `app/Http/Kernel.php`:
-
-```php
-protected $middleware = [
-    // ... more middlewares
-    \AG\ElasticApmLaravel\Middleware\RecordTransaction::class,
-];
-```
+From here, we will take care of everything based on your configuration. The agent and the middleware will be registered, and transactions will be send to Elastic.
 
 ## Agent configuration
 
@@ -40,7 +33,6 @@ The following environment variables are supported in the default configuration:
 |APM_QUERYLOG       | `true` or `false` defaults to 'true'. Set to `false` to completely disable query logging, or to `auto` if you would like to use the threshold feature. |
 |APM_THRESHOLD      | Query threshold in milliseconds, defaults to `200`. If a query takes longer then 200ms, we enable the query log. Make sure you set `APM_QUERYLOG=auto`. |
 |APM_BACKTRACEDEPTH | Defaults to `25`. Depth of backtrace in query span. |
-|APM_RENDERSOURCE   | Defaults to `true`. Include source code in query span. |
 |APM_MAXTRACEITEMS  | Defaults to `1000`. Max number of child items displayed when viewing trace details. |
 
 You may also publish the `elastic-apm-laravel.php` configuration file to change additional settings:

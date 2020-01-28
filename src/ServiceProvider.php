@@ -1,12 +1,14 @@
 <?php
 namespace AG\ElasticApmLaravel;
 
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 use PhilKra\Helper\Timer;
 
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Contracts\VersionResolver;
+use AG\ElasticApmLaravel\Middleware\RecordTransaction;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -30,7 +32,13 @@ class ServiceProvider extends BaseServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom($this->source_config_path, 'elastic-apm-laravel');
+
+        if (config('elastic-apm-laravel.active') === false) {
+            return;
+        }
+        
         $this->registerAgent();
+        $this->registerMiddleware();
         $this->registerCollectors();
     }
 
@@ -48,14 +56,20 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
+     * Add the middleware to the very top of the list,
+     * aiming to have better time measurements
+     */
+    protected function registerMiddleware(): void
+    {
+        $kernel = $this->app->make(Kernel::class);
+        $kernel->prependMiddleware(RecordTransaction::class);
+    }
+
+    /**
      * Register data collectors and start listening for events
      */
     protected function registerCollectors(): void
     {
-        if (config('elastic-apm-laravel.active') === false) {
-            return;
-        }
-
         $agent = $this->app->make(Agent::class);
         $agent->registerCollectors($this->app);
     }
