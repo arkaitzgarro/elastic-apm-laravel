@@ -46,6 +46,10 @@ class RecordTransaction
         // Execute the application logic
         $response = $next($request);
 
+        if (config('elastic-apm-laravel.transactions.use_route_uri')) {
+            $transaction->setTransactionName($this->getRouteUriTransactionName($request));
+        }
+
         $this->addMetadata($transaction, $request, $response);
 
         return $response;
@@ -101,9 +105,26 @@ class RecordTransaction
 
     protected function getTransactionName(Request $request): string
     {
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $uri = $request->path() ?? $this->getRequestUri();
+        return $request->method() . ' ' . $this->normalizeUri($uri);
+    }
+
+    protected function getRouteUriTransactionName(Request $request): string
+    {
+        $route = $request->route();
+        if ($route instanceof Route) {
+            $uri = $route->uri();
+        } else {
+            $uri = $this->getRequestUri();
+        }
 
         return $request->method() . ' ' . $this->normalizeUri($uri);
+    }
+
+    protected function getRequestUri(): string
+    {
+        // Fallback to script file name, like index.php when URI is not provided
+        return parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? $_SERVER['SCRIPT_FILENAME'];
     }
 
     protected function normalizeUri(string $uri): string
