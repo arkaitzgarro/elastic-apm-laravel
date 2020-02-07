@@ -34,6 +34,13 @@ return [
         'hostname' => gethostname(),
     ],
 
+    'transactions' => [
+
+        //This option will bundle transaction on the route name without variables
+        'use_route_uri' => env('APM_USEROUTEURI', true),
+
+    ],
+
     'spans' => [
         // Max number of child items displayed when viewing trace details.
         'maxTraceItems'=> env('APM_MAXTRACEITEMS', 1000),
