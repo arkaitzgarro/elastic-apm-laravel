@@ -5,8 +5,8 @@ return [
     'active' => env('APM_ACTIVE', true),
 
     'app' => [
-        // The app name that will identify your app in Kibana / Elastic APM
-        'appName' => env('APM_APPNAME', 'Laravel'),
+        // The app name that will identify your app in Kibana / Elastic APM, limited characters allowed
+        'appName' => preg_replace('/[^a-zA-Z0-9 _-]/', '-', env('APM_APPNAME', 'Laravel')),
 
         // The version of your app
         'appVersion' => env('APM_APPVERSION', ''),
