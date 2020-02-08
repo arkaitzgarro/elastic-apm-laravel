@@ -43,3 +43,29 @@ php artisan vendor:publish --tag=config
 ```
 
 Once published, open the `config/elastic-apm-laravel.php` file and review the various settings.
+
+## Development
+
+Get Composer. Follow the instructions defined on the official [Composer page](https://getcomposer.org/doc/00-intro.md), or if you are using `homebrew`, just run:
+
+```bash
+brew install composer
+```
+
+Install project dependencies:
+
+```bash
+composer install
+```
+
+Run the unit test suite:
+
+```bash
+php vendor/bin/codecept run unit
+```
+
+Please adhere to [PSR-2](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md), [Symfony](https://symfony.com/doc/current/contributing/code/standards.html) and [@PhpCsFixer](https://github.com/FriendsOfPHP/PHP-CS-Fixer) coding standard. Run the following commands before pushing your code:
+
+```bash
+php ./vendor/bin/php-cs-fixer fix src --rules=@PSR2,@Symfony,@PhpCsFixer
+```
