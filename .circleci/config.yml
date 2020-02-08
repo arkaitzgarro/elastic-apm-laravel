@@ -27,7 +27,11 @@ jobs:
             - composer-v1-{{ checksum "composer.lock" }}
             - composer-v1-
       - run: composer install -n --prefer-dist
-      - run: ./vendor/bin/codecept run unit
+      - run: ./vendor/bin/codecept run unit --xml unit_test_report.xml
+      - store_test_results:
+          path: tests/_output
+      - store_artifacts:
+          path: tests/_output
 
 workflows:
   version: 2
