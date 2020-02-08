@@ -31,9 +31,6 @@ jobs:
       - run: 
           name: Composer install
           command: composer install -n --prefer-dist
-      - run: 
-          name: Enable Xdebug
-          command: sudo docker-php-ext-enable xdebug 
       - run:
           name: Run unit tests
           command: ./vendor/bin/codecept run unit --xml unit_test_report.xml --coverage
