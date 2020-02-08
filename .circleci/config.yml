@@ -10,7 +10,9 @@ jobs:
           keys:
             - composer-v1-{{ checksum "composer.lock" }}
             - composer-v1-
-      - run: composer install -n --prefer-dist
+      - run: 
+          name: Composer install
+          command: composer install -n --prefer-dist
       - save_cache:
           key: composer-v1-{{ checksum "composer.lock" }}
           paths:
@@ -26,8 +28,12 @@ jobs:
           keys:
             - composer-v1-{{ checksum "composer.lock" }}
             - composer-v1-
-      - run: composer install -n --prefer-dist
-      - run: ./vendor/bin/codecept run unit --xml unit_test_report.xml
+      - run: 
+          name: Composer install
+          command: composer install -n --prefer-dist
+      - run:
+          name: Run unit tests
+          command: ./vendor/bin/codecept run unit --xml unit_test_report.xml --coverage
       - store_test_results:
           path: tests/_output
       - store_artifacts:
