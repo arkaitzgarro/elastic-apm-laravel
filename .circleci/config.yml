@@ -29,7 +29,7 @@ jobs:
             - composer-v1-{{ checksum "composer.lock" }}
             - composer-v1-
       - run: composer install -n --prefer-dist
-      - run: php ./vendor/bin/php-cs-fixer fix src --rules=@PSR2,@Symfony,@PhpCsFixer --dry-run --diff
+      - run: php ./vendor/bin/php-cs-fixer fix --config .php_cs --dry-run --diff
 
   unit_tests:
     docker:

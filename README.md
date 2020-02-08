@@ -1,5 +1,7 @@
 # Elastic APM 
 
+[![CircleCI](https://circleci.com/gh/arkaitzgarro/elastic-apm-laravel.svg?style=svg)](https://circleci.com/gh/arkaitzgarro/elastic-apm-laravel)
+
 Elastic APM agent for v2 intake API. Compatible with Laravel 5.5+.
 
 ## Installation
@@ -64,8 +66,8 @@ Run the unit test suite:
 php vendor/bin/codecept run unit
 ```
 
-Please adhere to [PSR-2](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md), [Symfony](https://symfony.com/doc/current/contributing/code/standards.html) and [@PhpCsFixer](https://github.com/FriendsOfPHP/PHP-CS-Fixer) coding standard. Run the following commands before pushing your code:
+Please adhere to [PSR-2](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md) and [Symfony](https://symfony.com/doc/current/contributing/code/standards.html) coding standard. Run the following commands before pushing your code:
 
 ```bash
-php ./vendor/bin/php-cs-fixer fix src --rules=@PSR2,@Symfony,@PhpCsFixer
+php ./vendor/bin/php-cs-fixer fix --config .php_cs
 ```
