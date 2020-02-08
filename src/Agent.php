@@ -9,6 +9,8 @@ use AG\ElasticApmLaravel\Events\LazySpan;
 use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
 use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
 use AG\ElasticApmLaravel\Collectors\HttpRequestCollector;
+use AG\ElasticApmLaravel\Collectors\FrameworkCollector;
+use AG\ElasticApmLaravel\Collectors\JobCollector;
 
 /**
  * The Elastic APM agent sends performance metrics and error logs to the APM Server.
@@ -45,10 +47,22 @@ class Agent extends PhilKraAgent
             );
         }
 
+        // Laravel init collector
+        $this->collectors->put(
+            FrameworkCollector::getName(),
+            new FrameworkCollector($app, $this->request_start_time)
+        );
+
         // Http request collector
         $this->collectors->put(
             HttpRequestCollector::getName(),
             new HttpRequestCollector($app, $this->request_start_time)
+        );
+
+        // Job collector
+        $this->collectors->put(
+            JobCollector::getName(),
+            new JobCollector($app, $this, $this->request_start_time)
         );
     }
 

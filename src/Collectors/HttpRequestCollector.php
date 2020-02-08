@@ -1,13 +1,9 @@
 <?php
 namespace AG\ElasticApmLaravel\Collectors;
 
-use Exception;
-
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Foundation\Http\Events\RequestHandled;
-
-use Jasny\DB\MySQL\QuerySplitter;
 
 use AG\ElasticApmLaravel\Collectors\TimelineDataCollector;
 use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
@@ -27,24 +23,18 @@ class HttpRequestCollector extends TimelineDataCollector implements DataCollecto
         $this->registerEventListeners();
     }
 
+    public static function getName() : string
+    {
+        return 'request-collector';
+    }
+
     protected function registerEventListeners(): void
     {
-        // Application and Laravel startup times
-        // LARAVEL_START is defined at the entry point of the application
-        // https://github.com/laravel/laravel/blob/master/public/index.php#L10
-        $this->startMeasure('app_boot', 'app', 'boot', 'App boot', LARAVEL_START);
-        
-        $this->app->booting(function () {
-            $this->startMeasure('laravel_boot', 'laravel', 'boot', 'Laravel boot');
-            $this->stopMeasure('app_boot');
-        });
-        
-        $this->app->booted(function () {
-            $this->startMeasure('route_matching', 'laravel', 'request', 'Route matching');
-            if ($this->hasStartedMeasure('laravel_boot')) {
-                $this->stopMeasure('laravel_boot');
-            }
-        });
+        if ($this->isHttpRequest()) {
+            $this->app->booted(function () {
+                $this->startMeasure('route_matching', 'laravel', 'request', 'Route matching');
+            });
+        }
 
         // Time between route resolution and request handled
         $this->app->events->listen(RouteMatched::class, function () {
@@ -83,5 +73,10 @@ class HttpRequestCollector extends TimelineDataCollector implements DataCollecto
         }
 
         return $controller;
+    }
+
+    private function isHttpRequest(): bool
+    {
+        return strpos($_SERVER['SCRIPT_NAME'], 'index.php') !== false;
     }
 }
