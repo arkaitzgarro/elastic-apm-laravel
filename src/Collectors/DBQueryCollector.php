@@ -1,15 +1,12 @@
 <?php
+
 namespace AG\ElasticApmLaravel\Collectors;
 
-use Exception;
-
-use Illuminate\Foundation\Application;
-use Illuminate\Database\Events\QueryExecuted;
-
-use Jasny\DB\MySQL\QuerySplitter;
-
-use AG\ElasticApmLaravel\Collectors\TimelineDataCollector;
 use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
+use Exception;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Foundation\Application;
+use Jasny\DB\MySQL\QuerySplitter;
 
 /**
  * Collects info about the database executed queries.
@@ -26,17 +23,9 @@ class DBQueryCollector extends TimelineDataCollector implements DataCollectorInt
         $this->registerEventListeners();
     }
 
-    protected function registerEventListeners(): void
-    {
-        $this->app->events->listen(QueryExecuted::class, function (QueryExecuted $query) {
-            $this->onQueryExecutedEvent($query);
-        });
-    }
-
     public function onQueryExecutedEvent(QueryExecuted $query): void
     {
-
-        if (config('elastic-apm-laravel.spans.querylog.enabled') === 'auto') {
+        if ('auto' === config('elastic-apm-laravel.spans.querylog.enabled')) {
             if ($query->time < config('elastic-apm-laravel.spans.querylog.threshold')) {
                 return;
             }
@@ -74,6 +63,13 @@ class DBQueryCollector extends TimelineDataCollector implements DataCollectorInt
         return 'query-collector';
     }
 
+    protected function registerEventListeners(): void
+    {
+        $this->app->events->listen(QueryExecuted::class, function (QueryExecuted $query) {
+            $this->onQueryExecutedEvent($query);
+        });
+    }
+
     private function getQueryName(string $sql): string
     {
         $fallback = 'Eloquent Query';
@@ -84,7 +80,7 @@ class DBQueryCollector extends TimelineDataCollector implements DataCollectorInt
 
             if (isset($query_type) && is_array($tables)) {
                 // Query type and tables
-                return $query_type . ' ' . join(', ', array_values($tables));
+                return $query_type.' '.join(', ', array_values($tables));
             }
 
             return $fallback;

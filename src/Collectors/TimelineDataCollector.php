@@ -1,11 +1,10 @@
 <?php
+
 namespace AG\ElasticApmLaravel\Collectors;
 
-use Exception;
-
-use Illuminate\Support\Collection;
-
 use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
+use Exception;
+use Illuminate\Support\Collection;
 
 /**
  * Collects info about the request duration as well as providing
@@ -25,7 +24,7 @@ class TimelineDataCollector implements DataCollectorInterface
     }
 
     /**
-     * Starts a measure
+     * Starts a measure.
      */
     public function startMeasure(
         string $name,
@@ -44,7 +43,7 @@ class TimelineDataCollector implements DataCollectorInterface
     }
 
     /**
-     * Check if a measure exists
+     * Check if a measure exists.
      */
     public function hasStartedMeasure(string $name): bool
     {
@@ -52,7 +51,7 @@ class TimelineDataCollector implements DataCollectorInterface
     }
 
     /**
-     * Stops a measure
+     * Stops a measure.
      */
     public function stopMeasure(string $name, array $params = []): void
     {
@@ -73,7 +72,7 @@ class TimelineDataCollector implements DataCollectorInterface
     }
 
     /**
-     * Adds a measure
+     * Adds a measure.
      */
     public function addMeasure(
         string $label,
@@ -94,7 +93,7 @@ class TimelineDataCollector implements DataCollectorInterface
     }
 
     /**
-     * Returns an array of all measures
+     * Returns an array of all measures.
      */
     public function getMeasures(): Collection
     {

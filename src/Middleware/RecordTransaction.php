@@ -1,15 +1,15 @@
 <?php
+
 namespace AG\ElasticApmLaravel\Middleware;
 
+use AG\ElasticApmLaravel\Agent;
 use Closure;
-use Throwable;
-use PhilKra\Events\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Log;
+use PhilKra\Events\Transaction;
 use Symfony\Component\HttpFoundation\Response;
-
-use AG\ElasticApmLaravel\Agent;
+use Throwable;
 
 /**
  * This middleware will record a transaction from the moment the request hits the server, until the response is sent to the client.
@@ -34,8 +34,6 @@ class RecordTransaction
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
@@ -53,19 +51,6 @@ class RecordTransaction
         $this->addMetadata($transaction, $request, $response);
 
         return $response;
-    }
-
-    /**
-     * Start the transaction that will measure the request, application start up time,
-     * DB queries, HTTP requests, etc
-     */
-    protected function startTransaction(string $transaction_name): Transaction
-    {
-        return $this->agent->startTransaction(
-            $transaction_name,
-            [],
-            $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true)
-        );
     }
 
     public function addMetadata(Transaction $transaction, Request $request, Response $response): void
@@ -86,7 +71,7 @@ class RecordTransaction
 
         $transaction->setMeta([
             'result' => $response->getStatusCode(),
-            'type' => 'HTTP'
+            'type' => 'HTTP',
         ]);
     }
 
@@ -103,10 +88,24 @@ class RecordTransaction
         }
     }
 
+    /**
+     * Start the transaction that will measure the request, application start up time,
+     * DB queries, HTTP requests, etc.
+     */
+    protected function startTransaction(string $transaction_name): Transaction
+    {
+        return $this->agent->startTransaction(
+            $transaction_name,
+            [],
+            $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true)
+        );
+    }
+
     protected function getTransactionName(Request $request): string
     {
         $uri = $request->path() ?? $this->getRequestUri();
-        return $request->method() . ' ' . $this->normalizeUri($uri);
+
+        return $request->method().' '.$this->normalizeUri($uri);
     }
 
     protected function getRouteUriTransactionName(Request $request): string
@@ -118,7 +117,7 @@ class RecordTransaction
             $uri = $this->getRequestUri();
         }
 
-        return $request->method() . ' ' . $this->normalizeUri($uri);
+        return $request->method().' '.$this->normalizeUri($uri);
     }
 
     protected function getRequestUri(): string
@@ -130,7 +129,7 @@ class RecordTransaction
     protected function normalizeUri(string $uri): string
     {
         // Fix leading /
-        return '/' . trim($uri, '/');
+        return '/'.trim($uri, '/');
     }
 
     protected function formatHeaders(array $headers): array
