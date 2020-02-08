@@ -37,7 +37,7 @@ return [
     'transactions' => [
 
         //This option will bundle transaction on the route name without variables
-        'use_route_uri' => env('APM_USEROUTEURI', true),
+        'useRouteUri' => env('APM_USEROUTEURI', true),
 
     ],
 

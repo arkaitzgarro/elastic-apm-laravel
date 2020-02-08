@@ -46,7 +46,7 @@ class RecordTransaction
         // Execute the application logic
         $response = $next($request);
 
-        if (config('elastic-apm-laravel.transactions.use_route_uri')) {
+        if (config('elastic-apm-laravel.transactions.useRouteUri')) {
             $transaction->setTransactionName($this->getRouteUriTransactionName($request));
         }
 
