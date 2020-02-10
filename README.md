@@ -17,7 +17,7 @@ Add the ServiceProvider class to the providers array in `config/app.php`:
 ],
 ```
 
-From here, we will take care of everything based on your configuration. The agent and the middleware will be registered, and transactions will be send to Elastic.
+From here, we will take care of everything based on your configuration. The agent and the middleware will be registered, and transactions will be sent to Elastic.
 
 ## Agent configuration
 
@@ -43,3 +43,15 @@ php artisan vendor:publish --tag=config
 ```
 
 Once published, open the `config/elastic-apm-laravel.php` file and review the various settings.
+
+## Manual span tracking
+
+Requests, jobs, and queries are handled automatically. But if you'd like to record additional spans throughout your app, you can do so via the `StartMeasuring` and `StopMeasuring` events. This allows the package to gracefully ignore the measurements when you disable APM via the APM_ACTIVE config. The arguments on these two event classes are identical to the arguments on the the collector `startMeasuring` and `stopMeasuring` methods. Use it like so:
+
+```php
+event(new StartMeasuring('my-custom-span', 'custom', 'measure', 'My custom span'));
+
+// do something amazing
+
+event(new StopMeasuring('my-custom-span'));
+```
