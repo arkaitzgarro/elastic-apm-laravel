@@ -26,7 +26,7 @@ The following environment variables are supported in the default configuration:
 | Variable          | Description |
 |-------------------|-------------|
 |APM_ACTIVE         | `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data. |
-|APM_APPNAME        | Name of the app as it will appear in APM. |
+|APM_APPNAME        | Name of the app as it will appear in APM. Invalid special characters will be replaced with a hyphen. |
 |APM_APPVERSION     | Version of the app as it will appear in APM. |
 |APM_SERVERURL      | URL to the APM intake service. |
 |APM_SECRETTOKEN    | Secret token, if required. |
