@@ -70,7 +70,7 @@ class ApmConfigTest extends \Codeception\Test\Unit
         putenv('APM_APPNAME="Codeception?App"');
         $config = include($this->configFilePath);
 
-        $this->assertEquals('Codeception?App', $config['app']['appName']);
+        $this->assertEquals('Codeception-App', $config['app']['appName']);
     }
 
     public function testEnvConfigVariables()
