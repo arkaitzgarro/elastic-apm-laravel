@@ -1,7 +1,11 @@
 {
     "name": "arkaitzgarro/elastic-apm-laravel",
     "description": "Laravel APM agent for Elastic v2 intake API",
-    "keywords": ["laravel", "elastic", "apm"],
+    "keywords": [
+        "laravel",
+        "elastic",
+        "apm"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -11,10 +15,17 @@
     ],
     "require": {
         "php": ">=7.3",
+        "illuminate/database": "^5.5|^6",
+        "illuminate/http": "^5.5|^6",
         "illuminate/routing": "^5.5|^6",
         "illuminate/support": "^5.5|^6",
         "philkra/elastic-apm-php-agent": "dev-master",
         "jasny/dbquery-mysql": "^2.0"
+    },
+    "require-dev": {
+        "codeception/codeception": "^4.1",
+        "codeception/module-asserts": "^1.0.0",
+        "symfony/service-contracts": "^2.0"
     },
     "repositories": [
         {
@@ -35,8 +46,5 @@
                 "AG\\ElasticApmLaravel\\ServiceProvider"
             ]
         }
-    },
-    "require-dev": {
-        "laravel/framework": "5.5.x"
     }
 }
