@@ -7,9 +7,13 @@ use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
 use Illuminate\Foundation\Application;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
+use PhilKra\Events\Transaction;
+use Throwable;
 
 /**
- * Collects info about the http request process
+ * Collects info about the job process
  */
 class JobCollector extends TimelineDataCollector implements DataCollectorInterface
 {
@@ -18,9 +22,9 @@ class JobCollector extends TimelineDataCollector implements DataCollectorInterfa
 
     public function __construct(Application $app, Agent $agent, float $request_start_time)
     {
-        $this->app = $app;
         parent::__construct($request_start_time);
 
+        $this->app = $app;
         $this->agent = $agent;
         $this->registerEventListeners();
     }
@@ -32,14 +36,46 @@ class JobCollector extends TimelineDataCollector implements DataCollectorInterfa
 
     protected function registerEventListeners(): void
     {
-        $this->app->events->listen(JobProcessing::class, function () {
-            $this->startMeasure('job_processing', 'job', 'processing', 'Job processing');
+        $this->app->events->listen(JobProcessing::class, function (JobProcessing $event) {
+            $this->startTransaction($this->getTransactionName($event));
         });
 
-        $this->app->events->listen(JobProcessed::class, function () {
-            if ($this->hasStartedMeasure('job_processing')) {
-                $this->stopMeasure('job_processing');
-            }
+        $this->app->events->listen(JobProcessed::class, function (JobProcessed $event) {
+            $transactionName = $this->getTransactionName($event);
+            $this->addMetadata($transactionName, $event->job);
+            $this->stopTransaction($transactionName);
         });
+    }
+
+    protected function startTransaction(string $transactionName): Transaction
+    {
+        return $this->agent->startTransaction(
+            $transactionName,
+            [],
+            $this->request_start_time
+        );
+    }
+
+    protected function addMetadata($transactionName, $job): void
+    {
+        $this->agent->getTransaction($transactionName)->setMeta([
+            'type' => 'job'
+        ]);
+    }
+
+    protected function stopTransaction($transactionName) : void
+    {
+        try {
+            // Stop the transaction and measure the time
+            $this->agent->stopTransaction($transactionName);
+            $this->agent->sendTransaction($transactionName);
+        } catch (Throwable $t) {
+            Log::error($t->getMessage());
+        }
+    }
+
+    protected function getTransactionName($event)
+    {
+        return Arr::get($event->job->payload(), 'displayName', 'Default');
     }
 }

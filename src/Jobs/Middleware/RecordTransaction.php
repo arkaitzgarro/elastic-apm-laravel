@@ -3,20 +3,10 @@
 namespace AG\ElasticApmLaravel\Jobs\Middleware;
 
 use AG\ElasticApmLaravel\Agent;
-use Illuminate\Support\Facades\Log;
-use PhilKra\Events\Transaction;
-use Throwable;
+use AG\ElasticApmLaravel\Collectors\JobCollector;
 
 class RecordTransaction
 {
-    /** @var Agent */
-    private $agent;
-
-    public function __construct(Agent $agent)
-    {
-        $this->agent = $agent;
-    }
-
     /**
      * Wrap the job processing in an APM transaction.
      *
@@ -30,49 +20,15 @@ class RecordTransaction
             return $next($job);
         }
 
-        $transaction = $this->startTransaction($this->getTransactionName($job));
+        /** @var Agent */
+        $agent = app(Agent::class);
+        /** @var JobCollector */
+        $collector = $agent->getCollector(JobCollector::getName());
+
+        $collector->startMeasure('job_processing', 'job', 'processing', get_class($job).' processing');
 
         $next($job);
 
-        $this->addMetadata($transaction, $job);
-
-        $this->stopTransaction($job);
-    }
-
-    public function addMetadata(Transaction $transaction, $job): void
-    {
-        $transaction->setMeta([
-            'type' => 'job'
-        ]);
-    }
-
-    /**
-     * Start the transaction that will measure the job, application start up time, DB queries, etc
-     */
-    protected function startTransaction(string $transaction_name): Transaction
-    {
-        return $this->agent->startTransaction(
-            $transaction_name,
-            [],
-            $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true)
-        );
-    }
-
-    protected function stopTransaction($job) : void
-    {
-        try {
-            $transaction_name = $this->getTransactionName($job);
-
-            // Stop the transaction and measure the time
-            $this->agent->stopTransaction($transaction_name);
-            $this->agent->sendTransaction($transaction_name);
-        } catch (Throwable $t) {
-            Log::error($t->getMessage());
-        }
-    }
-
-    protected function getTransactionName($job)
-    {
-        return get_class($job);
+        $collector->stopMeasure('job_processing');
     }
 }
