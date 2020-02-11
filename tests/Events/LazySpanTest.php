@@ -8,13 +8,15 @@ use PhilKra\Events\EventBean;
 class LazySpanTest extends \Codeception\Test\Unit
 {
     /**
-     * Parent transaction for LazySpan
+     * Parent transaction for LazySpan.
+     *
      * @var \PhilKra\Events\EventBean
      */
     private $parent;
-    
+
     /**
-     * LazySpan instance
+     * LazySpan instance.
+     *
      * @var \AG\ElasticApmLaravel\Events\LazySpan
      */
     private $lazy_span;
@@ -71,11 +73,11 @@ class LazySpanTest extends \Codeception\Test\Unit
     {
         $this->lazy_span->setContext([
             'custom' => [
-                'user' => 1
+                'user' => 1,
             ],
             'labels' => [
-                'test'
-            ]
+                'test',
+            ],
         ]);
         $lazy_span_decoded = json_decode(json_encode($this->lazy_span));
         $context = $lazy_span_decoded->span->context;
@@ -87,7 +89,7 @@ class LazySpanTest extends \Codeception\Test\Unit
     public function testSetStacktraceMethod()
     {
         $this->lazy_span->setStacktrace([
-            'file' => 'code'
+            'file' => 'code',
         ]);
         $lazy_span_decoded = json_decode(json_encode($this->lazy_span));
 

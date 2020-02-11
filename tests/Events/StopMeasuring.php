@@ -17,9 +17,9 @@ class StopMeasuringTest extends \Codeception\Test\Unit
     public function testExtraParameters()
     {
         $event = new StopMeasuring('event-name', [
-            'context' => 'extra-context'
+            'context' => 'extra-context',
         ]);
 
-        $this->assertEquals([ 'context' => 'extra-context' ], $event->params);
+        $this->assertEquals(['context' => 'extra-context'], $event->params);
     }
 }
