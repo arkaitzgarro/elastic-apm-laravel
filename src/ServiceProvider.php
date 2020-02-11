@@ -9,7 +9,7 @@ use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider
 {
-    private $source_config_path = __DIR__.'/../config/elastic-apm-laravel.php';
+    private $source_config_path = __DIR__ . '/../config/elastic-apm-laravel.php';
 
     /**
      * Bootstrap the application events.

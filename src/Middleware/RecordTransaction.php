@@ -105,7 +105,7 @@ class RecordTransaction
     {
         $uri = $request->path() ?? $this->getRequestUri();
 
-        return $request->method().' '.$this->normalizeUri($uri);
+        return $request->method() . ' ' . $this->normalizeUri($uri);
     }
 
     protected function getRouteUriTransactionName(Request $request): string
@@ -117,7 +117,7 @@ class RecordTransaction
             $uri = $this->getRequestUri();
         }
 
-        return $request->method().' '.$this->normalizeUri($uri);
+        return $request->method() . ' ' . $this->normalizeUri($uri);
     }
 
     protected function getRequestUri(): string
@@ -129,7 +129,7 @@ class RecordTransaction
     protected function normalizeUri(string $uri): string
     {
         // Fix leading /
-        return '/'.trim($uri, '/');
+        return '/' . trim($uri, '/');
     }
 
     protected function formatHeaders(array $headers): array

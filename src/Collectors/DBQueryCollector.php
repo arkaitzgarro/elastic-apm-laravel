@@ -80,7 +80,7 @@ class DBQueryCollector extends TimelineDataCollector implements DataCollectorInt
 
             if (isset($query_type) && is_array($tables)) {
                 // Query type and tables
-                return $query_type.' '.join(', ', array_values($tables));
+                return $query_type . ' ' . join(', ', array_values($tables));
             }
 
             return $fallback;

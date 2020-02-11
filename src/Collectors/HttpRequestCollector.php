@@ -66,12 +66,12 @@ class HttpRequestCollector extends TimelineDataCollector implements DataCollecto
         if ($controller instanceof \Closure) {
             $controller = 'anonymous function';
         } elseif (is_object($controller)) {
-            $controller = 'instance of '.get_class($controller);
+            $controller = 'instance of ' . get_class($controller);
         } elseif (is_array($controller) && 2 == count($controller)) {
             if (is_object($controller[0])) {
-                $controller = get_class($controller[0]).'->'.$controller[1];
+                $controller = get_class($controller[0]) . '->' . $controller[1];
             } else {
-                $controller = $controller[0].'::'.$controller[1];
+                $controller = $controller[0] . '::' . $controller[1];
             }
         } elseif (!is_string($controller)) {
             $controller = null;

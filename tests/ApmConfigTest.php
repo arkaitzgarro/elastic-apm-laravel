@@ -4,7 +4,7 @@ namespace AG\Tests;
 
 class ApmConfigTest extends \Codeception\Test\Unit
 {
-    private $configFilePath = __DIR__.'/../config/elastic-apm-laravel.php';
+    private $configFilePath = __DIR__ . '/../config/elastic-apm-laravel.php';
 
     protected function _before()
     {
