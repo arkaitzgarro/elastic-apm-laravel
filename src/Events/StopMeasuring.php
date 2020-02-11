@@ -8,7 +8,7 @@ class StopMeasuring
     public $name;
 
     /** @var array */
-    public $type;
+    public $params;
 
     public function __construct(
         string $name,

@@ -57,7 +57,7 @@ class LazySpan extends TraceableEvent implements JsonSerializable
      *
      * @var array
      */
-    private $contexts = [
+    protected $contexts = [
         'custom' => [],
         'labels' => [],
     ];
