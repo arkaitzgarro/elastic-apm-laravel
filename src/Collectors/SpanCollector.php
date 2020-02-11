@@ -38,9 +38,7 @@ class SpanCollector extends TimelineDataCollector implements DataCollectorInterf
         });
 
         $this->app->events->listen(StopMeasuring::class, function (StopMeasuring $event) {
-            if ($this->hasStartedMeasure($event->name)) {
-                $this->stopMeasure($event->name, $event->params);
-            }
+            $this->stopMeasure($event->name, $event->params);
         });
     }
 }
