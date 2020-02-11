@@ -28,8 +28,12 @@ jobs:
           keys:
             - composer-v1-{{ checksum "composer.lock" }}
             - composer-v1-
-      - run: composer install -n --prefer-dist
-      - run: php ./vendor/bin/php-cs-fixer fix --config .php_cs --dry-run --diff
+      - run: 
+          name: Composer install
+          command: composer install -n --prefer-dist
+      - run:
+          name: Lint PHP code
+          command: php ./vendor/bin/php-cs-fixer fix --config .php_cs --dry-run --diff
 
   unit_tests:
     docker:
