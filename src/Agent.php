@@ -50,6 +50,7 @@ class Agent extends PhilKraAgent
         $this->collectors->put(
             HttpRequestCollector::getName(),
             new HttpRequestCollector($app, $this->request_start_time)
+        );
 
         // Collector for manual measurements throughout the app
         $this->collectors->put(

@@ -2,7 +2,6 @@
 
 namespace AG\ElasticApmLaravel\Collectors;
 
-use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
 use AG\ElasticApmLaravel\Events\StartMeasuring;
 use AG\ElasticApmLaravel\Events\StopMeasuring;
@@ -29,13 +28,12 @@ class SpanCollector extends TimelineDataCollector implements DataCollectorInterf
     protected function registerEventListeners(): void
     {
         $this->app->events->listen(StartMeasuring::class, function (StartMeasuring $event) {
-            // TODO: Throw exception or log warning if measure exists?
             $this->startMeasure(
                 $event->name,
                 $event->type,
                 $event->action,
                 $event->label,
-                $event->startTime,
+                $event->start_time,
             );
         });
 

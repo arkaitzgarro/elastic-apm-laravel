@@ -17,19 +17,19 @@ class StartMeasuring
     public $label;
 
     /** @var float|null */
-    public $startTime;
+    public $start_time;
 
     public function __construct(
         string $name,
         string $type = 'request',
         ?string $action = null,
         ?string $label = null,
-        ?float $startTime = null
+        ?float $start_time = null
     ) {
         $this->name = $name;
         $this->type = $type;
         $this->action = $action;
         $this->label = $label;
-        $this->startTime = $startTime;
+        $this->start_time = $start_time;
     }
 }

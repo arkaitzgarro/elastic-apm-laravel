@@ -48,14 +48,16 @@ Once published, open the `config/elastic-apm-laravel.php` file and review the va
 
 ## Manual span tracking
 
-Requests, jobs, and queries are handled automatically. But if you'd like to record additional spans throughout your app, you can do so via the `StartMeasuring` and `StopMeasuring` events. This allows the package to gracefully ignore the measurements when you disable APM via the APM_ACTIVE config. The arguments on these two event classes are identical to the arguments on the the collector `startMeasuring` and `stopMeasuring` methods. Use it like so:
+Requests, jobs, and queries are handled automatically, but if you'd like to record additional spans throughout your app, you can do so via the `ApmCollector` facade. If APM_ACTIVE is not set, these measurements will be gracefully ignored. Usage:
 
 ```php
-event(new StartMeasuring('my-custom-span', 'custom', 'measure', 'My custom span'));
+use AG\ElasticApmLaravel\Facades\ApmCollector;
+
+ApmCollector::startMeasure('my-custom-span', 'custom', 'measure', 'My custom span');
 
 // do something amazing
 
-event(new StopMeasuring('my-custom-span'));
+ApmCollector::stopMeasure('my-custom-span');
 ```
 
 ## Development
