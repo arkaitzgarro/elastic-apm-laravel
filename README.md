@@ -1,5 +1,7 @@
 # Elastic APM 
 
+[![CircleCI](https://circleci.com/gh/arkaitzgarro/elastic-apm-laravel.svg?style=svg)](https://circleci.com/gh/arkaitzgarro/elastic-apm-laravel)
+
 Elastic APM agent for v2 intake API. Compatible with Laravel 5.5+.
 
 ## Installation
@@ -43,3 +45,29 @@ php artisan vendor:publish --tag=config
 ```
 
 Once published, open the `config/elastic-apm-laravel.php` file and review the various settings.
+
+## Development
+
+Get Composer. Follow the instructions defined on the official [Composer page](https://getcomposer.org/doc/00-intro.md), or if you are using `homebrew`, just run:
+
+```bash
+brew install composer
+```
+
+Install project dependencies:
+
+```bash
+composer install
+```
+
+Run the unit test suite:
+
+```bash
+php vendor/bin/codecept run unit
+```
+
+Please adhere to [PSR-2](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md) and [Symfony](https://symfony.com/doc/current/contributing/code/standards.html) coding standard. Run the following commands before pushing your code:
+
+```bash
+php ./vendor/bin/php-cs-fixer fix --config .php_cs
+```
