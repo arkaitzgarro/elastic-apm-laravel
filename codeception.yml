@@ -15,3 +15,6 @@ paths:
      
 coverage:
     enabled: true
+    include:
+        - src/*
+        - config/*
