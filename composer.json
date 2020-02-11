@@ -25,7 +25,8 @@
     "require-dev": {
         "codeception/codeception": "^4.1",
         "codeception/module-asserts": "^1.0.0",
-        "symfony/service-contracts": "^2.0"
+        "symfony/service-contracts": "^2.0",
+        "friendsofphp/php-cs-fixer": "^2.16"
     },
     "repositories": [
         {

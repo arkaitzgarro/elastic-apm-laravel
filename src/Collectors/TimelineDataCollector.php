@@ -1,11 +1,9 @@
 <?php
+
 namespace AG\ElasticApmLaravel\Collectors;
 
-use Exception;
-
-use Illuminate\Support\Collection;
-
 use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -26,7 +24,7 @@ class TimelineDataCollector implements DataCollectorInterface
     }
 
     /**
-     * Starts a measure
+     * Starts a measure.
      */
     public function startMeasure(
         string $name,
@@ -38,6 +36,7 @@ class TimelineDataCollector implements DataCollectorInterface
         $start = $start_time ?? microtime(true);
         if ($this->hasStartedMeasure($name)) {
             Log::warning("Did not start measure '{$name}' because it's already started.");
+
             return;
         }
 
@@ -50,7 +49,7 @@ class TimelineDataCollector implements DataCollectorInterface
     }
 
     /**
-     * Check if a measure exists
+     * Check if a measure exists.
      */
     public function hasStartedMeasure(string $name): bool
     {
@@ -58,13 +57,14 @@ class TimelineDataCollector implements DataCollectorInterface
     }
 
     /**
-     * Stops a measure
+     * Stops a measure.
      */
     public function stopMeasure(string $name, array $params = []): void
     {
         $end = microtime(true);
         if (!$this->hasStartedMeasure($name)) {
             Log::warning("Did not stop measure '{$name}' because it hasn't been started.");
+
             return;
         }
 
@@ -80,7 +80,7 @@ class TimelineDataCollector implements DataCollectorInterface
     }
 
     /**
-     * Adds a measure
+     * Adds a measure.
      */
     public function addMeasure(
         string $label,
@@ -101,7 +101,7 @@ class TimelineDataCollector implements DataCollectorInterface
     }
 
     /**
-     * Returns an array of all measures
+     * Returns an array of all measures.
      */
     public function getMeasures(): Collection
     {
