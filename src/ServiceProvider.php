@@ -4,6 +4,7 @@ namespace AG\ElasticApmLaravel;
 
 use AG\ElasticApmLaravel\Contracts\VersionResolver;
 use AG\ElasticApmLaravel\Middleware\RecordTransaction;
+use AG\ElasticApmLaravel\Services\ApmCollectorService;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
@@ -26,6 +27,9 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->mergeConfigFrom($this->source_config_path, 'elastic-apm-laravel');
 
+        // Always available, even when inactive
+        $this->registerFacades();
+
         if (false === config('elastic-apm-laravel.active')) {
             return;
         }
@@ -33,6 +37,16 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerAgent();
         $this->registerMiddleware();
         $this->registerCollectors();
+    }
+
+    /**
+     * Register Facades into the Service Container.
+     */
+    protected function registerFacades(): void
+    {
+        $this->app->bind('apm-collector', function ($app) {
+            return $app->make(ApmCollectorService::class);
+        });
     }
 
     /**
