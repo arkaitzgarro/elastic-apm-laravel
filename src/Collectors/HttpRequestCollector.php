@@ -1,15 +1,14 @@
 <?php
+
 namespace AG\ElasticApmLaravel\Collectors;
 
-use Illuminate\Foundation\Application;
-use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Foundation\Http\Events\RequestHandled;
-
-use AG\ElasticApmLaravel\Collectors\TimelineDataCollector;
 use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Http\Events\RequestHandled;
+use Illuminate\Routing\Events\RouteMatched;
 
 /**
- * Collects info about the http request process
+ * Collects info about the http request process.
  */
 class HttpRequestCollector extends TimelineDataCollector implements DataCollectorInterface
 {
@@ -23,7 +22,7 @@ class HttpRequestCollector extends TimelineDataCollector implements DataCollecto
         $this->registerEventListeners();
     }
 
-    public static function getName() : string
+    public static function getName(): string
     {
         return 'request-collector';
     }
@@ -62,13 +61,13 @@ class HttpRequestCollector extends TimelineDataCollector implements DataCollecto
             $controller = 'anonymous function';
         } elseif (is_object($controller)) {
             $controller = 'instance of ' . get_class($controller);
-        } elseif (is_array($controller) && count($controller) == 2) {
+        } elseif (is_array($controller) && 2 == count($controller)) {
             if (is_object($controller[0])) {
                 $controller = get_class($controller[0]) . '->' . $controller[1];
             } else {
                 $controller = $controller[0] . '::' . $controller[1];
             }
-        } elseif (! is_string($controller)) {
+        } elseif (!is_string($controller)) {
             $controller = null;
         }
 
@@ -77,6 +76,6 @@ class HttpRequestCollector extends TimelineDataCollector implements DataCollecto
 
     private function isHttpRequest(): bool
     {
-        return strpos($_SERVER['SCRIPT_NAME'], 'index.php') !== false;
+        return false !== strpos($_SERVER['SCRIPT_NAME'], 'index.php');
     }
 }

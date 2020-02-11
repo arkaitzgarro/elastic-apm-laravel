@@ -20,13 +20,14 @@ class RecordTransaction
     /**
      * Wrap the job processing in an APM transaction.
      *
-     * @param  mixed  $job
-     * @param  callable  $next
+     * @param mixed    $job
+     * @param callable $next
+     *
      * @return mixed
      */
     public function handle($job, $next)
     {
-        if (config('elastic-apm-agent.active') === false) {
+        if (false === config('elastic-apm-agent.active')) {
             return $next($job);
         }
 
@@ -42,12 +43,12 @@ class RecordTransaction
     public function addMetadata(Transaction $transaction, $job): void
     {
         $transaction->setMeta([
-            'type' => 'job'
+            'type' => 'job',
         ]);
     }
 
     /**
-     * Start the transaction that will measure the job, application start up time, DB queries, etc
+     * Start the transaction that will measure the job, application start up time, DB queries, etc.
      */
     protected function startTransaction(string $transaction_name): Transaction
     {
@@ -58,7 +59,7 @@ class RecordTransaction
         );
     }
 
-    protected function stopTransaction($job) : void
+    protected function stopTransaction($job): void
     {
         try {
             $transaction_name = $this->getTransactionName($job);

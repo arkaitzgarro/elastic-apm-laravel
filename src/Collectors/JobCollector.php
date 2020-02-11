@@ -9,7 +9,7 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 
 /**
- * Collects info about the http request process
+ * Collects info about the http request process.
  */
 class JobCollector extends TimelineDataCollector implements DataCollectorInterface
 {
