@@ -1,10 +1,9 @@
 <?php
+
 namespace AG\ElasticApmLaravel\Collectors;
 
-use Illuminate\Foundation\Application;
-
-use AG\ElasticApmLaravel\Collectors\TimelineDataCollector;
 use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
+use Illuminate\Foundation\Application;
 
 /**
  * Collects info about the Laravel initialization.
@@ -21,7 +20,7 @@ class FrameworkCollector extends TimelineDataCollector implements DataCollectorI
         $this->registerEventListeners();
     }
 
-    public static function getName() : string
+    public static function getName(): string
     {
         return 'framework-collector';
     }
