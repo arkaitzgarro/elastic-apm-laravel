@@ -19,7 +19,7 @@ Add the ServiceProvider class to the providers array in `config/app.php`:
 
 From here, we will take care of everything based on your configuration. The agent and the middleware will be registered, and transactions will be send to Elastic.
 
-However, there is a caveat if you'd like to include Job tracking. You must include Job middleware manually or these transactions will not be recorded (Laravel 6+ only https://laravel.com/docs/6.x/queues#job-middleware):
+To get an additional recorded span, you may include the provided job middleware (Laravel 6+ only https://laravel.com/docs/6.x/queues#job-middleware):
 
 ```php
 public function middleware()
