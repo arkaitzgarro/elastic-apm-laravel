@@ -19,7 +19,7 @@ Add the ServiceProvider class to the providers array in `config/app.php`:
 ],
 ```
 
-From here, we will take care of everything based on your configuration. The agent and the middleware will be registered, and transactions will be send to Elastic.
+From here, we will take care of everything based on your configuration. The agent and the middleware will be registered, and transactions will be sent to Elastic.
 
 ## Agent configuration
 
@@ -45,6 +45,20 @@ php artisan vendor:publish --tag=config
 ```
 
 Once published, open the `config/elastic-apm-laravel.php` file and review the various settings.
+
+## Manual span tracking
+
+Requests, jobs, and queries are handled automatically, but if you'd like to record additional spans throughout your app, you can do so via the `ApmCollector` facade. If APM_ACTIVE is not set, these measurements will be gracefully ignored. Usage:
+
+```php
+use AG\ElasticApmLaravel\Facades\ApmCollector;
+
+ApmCollector::startMeasure('my-custom-span', 'custom', 'measure', 'My custom span');
+
+// do something amazing
+
+ApmCollector::stopMeasure('my-custom-span');
+```
 
 ## Development
 
