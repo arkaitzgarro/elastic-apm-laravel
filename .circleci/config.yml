@@ -18,6 +18,23 @@ jobs:
           paths:
             - vendor
 
+  code_linter:
+    docker:
+      - image: circleci/php:7.3
+    working_directory: ~/elastic-apm-laravel
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - composer-v1-{{ checksum "composer.lock" }}
+            - composer-v1-
+      - run: 
+          name: Composer install
+          command: composer install -n --prefer-dist
+      - run:
+          name: Lint PHP code
+          command: php ./vendor/bin/php-cs-fixer fix --config .php_cs --dry-run --diff
+
   unit_tests:
     docker:
       - image: circleci/php:7.3
@@ -44,6 +61,9 @@ workflows:
   build_and_test:
     jobs:
       - build
+      - code_linter:
+          requires:
+            - build
       - unit_tests:
           requires:
             - build

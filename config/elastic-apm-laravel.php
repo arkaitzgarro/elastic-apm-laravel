@@ -5,8 +5,8 @@ return [
     'active' => env('APM_ACTIVE', true),
 
     'app' => [
-        // The app name that will identify your app in Kibana / Elastic APM
-        'appName' => env('APM_APPNAME', 'Laravel'),
+        // The app name that will identify your app in Kibana / Elastic APM, limited characters allowed
+        'appName' => preg_replace('/[^a-zA-Z0-9 _-]/', '-', env('APM_APPNAME', 'Laravel')),
 
         // The version of your app
         'appVersion' => env('APM_APPVERSION', ''),
@@ -35,18 +35,16 @@ return [
     ],
 
     'transactions' => [
-
         //This option will bundle transaction on the route name without variables
         'useRouteUri' => env('APM_USEROUTEURI', true),
-
     ],
 
     'spans' => [
         // Max number of child items displayed when viewing trace details.
-        'maxTraceItems'=> env('APM_MAXTRACEITEMS', 1000),
+        'maxTraceItems' => env('APM_MAXTRACEITEMS', 1000),
 
         // Depth of backtraces
-        'backtraceDepth'=> env('APM_BACKTRACEDEPTH', 25),
+        'backtraceDepth' => env('APM_BACKTRACEDEPTH', 25),
 
         'querylog' => [
             // Set to false to completely disable query logging, or to 'auto' if you would like to use the threshold feature.

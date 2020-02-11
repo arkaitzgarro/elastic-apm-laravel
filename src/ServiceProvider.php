@@ -1,14 +1,11 @@
 <?php
+
 namespace AG\ElasticApmLaravel;
 
-use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Support\ServiceProvider as BaseServiceProvider;
-
-use PhilKra\Helper\Timer;
-
-use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Contracts\VersionResolver;
 use AG\ElasticApmLaravel\Middleware\RecordTransaction;
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -16,8 +13,6 @@ class ServiceProvider extends BaseServiceProvider
 
     /**
      * Bootstrap the application events.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -26,38 +21,35 @@ class ServiceProvider extends BaseServiceProvider
 
     /**
      * Register the service provider.
-     *
-     * @return void
      */
     public function register(): void
     {
         $this->mergeConfigFrom($this->source_config_path, 'elastic-apm-laravel');
 
-        if (config('elastic-apm-laravel.active') === false) {
+        if (false === config('elastic-apm-laravel.active')) {
             return;
         }
-        
+
         $this->registerAgent();
         $this->registerMiddleware();
         $this->registerCollectors();
     }
 
     /**
-     * Register the APM Agent into the Service Container
+     * Register the APM Agent into the Service Container.
      */
     protected function registerAgent(): void
     {
         $this->app->singleton(Agent::class, function () {
             $start_time = $this->app['request']->server('REQUEST_TIME_FLOAT') ?? microtime(true);
-            $agent = new Agent($this->getAgentConfig(), $start_time);
 
-            return $agent;
+            return new Agent($this->getAgentConfig(), $start_time);
         });
     }
 
     /**
      * Add the middleware to the very top of the list,
-     * aiming to have better time measurements
+     * aiming to have better time measurements.
      */
     protected function registerMiddleware(): void
     {
@@ -66,7 +58,7 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
-     * Register data collectors and start listening for events
+     * Register data collectors and start listening for events.
      */
     protected function registerCollectors(): void
     {
@@ -75,9 +67,9 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
-     * Publish the config file
+     * Publish the config file.
      *
-     * @param  string $configPath
+     * @param string $configPath
      */
     protected function publishConfig(): void
     {
@@ -85,9 +77,7 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
-     * Get the config path
-     *
-     * @return string
+     * Get the config path.
      */
     protected function getConfigPath(): string
     {

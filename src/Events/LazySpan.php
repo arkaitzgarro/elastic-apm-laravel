@@ -1,19 +1,17 @@
 <?php
+
 namespace AG\ElasticApmLaravel\Events;
 
 use JsonSerializable;
-
-use PhilKra\Helper\Encoding;
 use PhilKra\Events\EventBean;
 use PhilKra\Events\TraceableEvent;
+use PhilKra\Helper\Encoding;
 use PhilKra\Traits\Events\Stacktrace;
 
 /**
+ * Spans.
  *
- * Spans
- *
- * @link https://www.elastic.co/guide/en/apm/server/master/span-api.html
- *
+ * @see https://www.elastic.co/guide/en/apm/server/master/span-api.html
  */
 class LazySpan extends TraceableEvent implements JsonSerializable
 {
@@ -37,7 +35,7 @@ class LazySpan extends TraceableEvent implements JsonSerializable
     /**
      * @var string
      */
-    protected $action = null;
+    protected $action;
 
     /**
      * @var string
@@ -50,24 +48,23 @@ class LazySpan extends TraceableEvent implements JsonSerializable
     protected $stacktrace = [];
 
     /**
-     * Extended Contexts such as Custom and/or User
-     *
-     * @var array
-     */
-    private $contexts = [
-        'custom'   => [],
-        'labels'   => [],
-    ];
-
-    /**
      * @var int
      */
     protected $timestamp;
 
     /**
-     * @param string.   $name
-     * @param EventBean $parent
-     * @param array.    $context
+     * Extended Contexts such as Custom and/or User.
+     *
+     * @var array
+     */
+    private $contexts = [
+        'custom' => [],
+        'labels' => [],
+    ];
+
+    /**
+     * @param string. $name
+     * @param array.  $context
      */
     public function __construct(string $name, EventBean $parent)
     {
@@ -79,28 +76,26 @@ class LazySpan extends TraceableEvent implements JsonSerializable
     }
 
     /**
-    * Get the Event Name
-    *
-    * @return string
-    */
-    public function getName() : string
+     * Get the Event Name.
+     */
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * Set the Span's start time
+     * Set the Span's start time.
      *
      * @param string $action
      */
     public function setStartTime(float $start_time): void
     {
         $this->start_time = $start_time;
-        $this->timestamp =  $this->timestamp + $this->start_time * 1000;
+        $this->timestamp = $this->timestamp + $this->start_time * 1000;
     }
 
     /**
-     * Set the Span's end time
+     * Set the Span's end time.
      *
      * @param string $action
      */
@@ -110,9 +105,7 @@ class LazySpan extends TraceableEvent implements JsonSerializable
     }
 
     /**
-     * Set the Span's Type
-     *
-     * @param string $action
+     * Set the Span's Type.
      */
     public function setAction(string $action): void
     {
@@ -120,9 +113,7 @@ class LazySpan extends TraceableEvent implements JsonSerializable
     }
 
     /**
-     * Set the Spans' Action
-     *
-     * @param string $type
+     * Set the Spans' Action.
      */
     public function setType(string $type): void
     {
@@ -130,9 +121,7 @@ class LazySpan extends TraceableEvent implements JsonSerializable
     }
 
     /**
-     * Set the Spans' contexts
-     *
-     * @param array $contexts
+     * Set the Spans' contexts.
      */
     public function setContext(array $contexts): void
     {
@@ -140,11 +129,9 @@ class LazySpan extends TraceableEvent implements JsonSerializable
     }
 
     /**
-     * Set a complimentary Stacktrace for the Span
+     * Set a complimentary Stacktrace for the Span.
      *
-     * @link https://www.elastic.co/guide/en/apm/server/master/span-api.html
-     *
-     * @param array $stacktrace
+     * @see https://www.elastic.co/guide/en/apm/server/master/span-api.html
      */
     public function setStacktrace(array $stacktrace): void
     {
@@ -152,30 +139,28 @@ class LazySpan extends TraceableEvent implements JsonSerializable
     }
 
     /**
-     * Serialize Span Event
+     * Serialize Span Event.
      *
-     * @link https://www.elastic.co/guide/en/apm/server/master/span-api.html
-     *
-     * @return array
+     * @see https://www.elastic.co/guide/en/apm/server/master/span-api.html
      */
     public function jsonSerialize(): array
     {
         return [
             'span' => [
-                'id'             => $this->getId(),
+                'id' => $this->getId(),
                 'transaction_id' => $this->getParentId(),
-                'trace_id'       => $this->getTraceId(),
-                'parent_id'      => $this->getParentId(),
-                'type'           => Encoding::keywordField($this->type),
-                'action'         => Encoding::keywordField($this->action),
-                'context'        => $this->contexts,
-                'start'          => $this->start_time,
-                'duration'       => $this->duration,
-                'name'           => Encoding::keywordField($this->getName()),
-                'stacktrace'     => $this->stacktrace,
-                'sync'           => false,
-                'timestamp'      => $this->timestamp,
-            ]
+                'trace_id' => $this->getTraceId(),
+                'parent_id' => $this->getParentId(),
+                'type' => Encoding::keywordField($this->type),
+                'action' => Encoding::keywordField($this->action),
+                'context' => $this->contexts,
+                'start' => $this->start_time,
+                'duration' => $this->duration,
+                'name' => Encoding::keywordField($this->getName()),
+                'stacktrace' => $this->stacktrace,
+                'sync' => false,
+                'timestamp' => $this->timestamp,
+            ],
         ];
     }
 }
