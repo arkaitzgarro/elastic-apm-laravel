@@ -87,8 +87,8 @@ class TimelineDataCollector implements DataCollectorInterface
         float $start,
         float $end,
         string $type = 'request',
-        string $action = 'request',
-        array $context = []
+        ?string $action = 'request',
+        ?array $context = []
     ): void {
         $this->measures->push([
             'label' => $label,
@@ -98,14 +98,6 @@ class TimelineDataCollector implements DataCollectorInterface
             'action' => $action,
             'context' => $context,
         ]);
-    }
-
-    /**
-     * Returns an array of all measures.
-     */
-    public function getMeasures(): Collection
-    {
-        return $this->measures;
     }
 
     public function collect(): Collection

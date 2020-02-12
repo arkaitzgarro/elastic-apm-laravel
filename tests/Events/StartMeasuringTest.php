@@ -3,8 +3,9 @@
 namespace AG\Tests\Events;
 
 use AG\ElasticApmLaravel\Events\StartMeasuring;
+use Codeception\Test\Unit;
 
-class StartMeasuringTest extends \Codeception\Test\Unit
+class StartMeasuringTest extends Unit
 {
     public function testInstanceCreation()
     {
