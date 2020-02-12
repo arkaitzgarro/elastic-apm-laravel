@@ -3,9 +3,10 @@
 namespace AG\Tests\Events;
 
 use AG\ElasticApmLaravel\Events\LazySpan;
+use Codeception\Test\Unit;
 use PhilKra\Events\EventBean;
 
-class LazySpanTest extends \Codeception\Test\Unit
+class LazySpanTest extends Unit
 {
     /**
      * Parent transaction for LazySpan.

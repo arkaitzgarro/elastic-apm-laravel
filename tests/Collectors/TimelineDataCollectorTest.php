@@ -3,11 +3,14 @@
 namespace AG\Tests\Collectors;
 
 use AG\ElasticApmLaravel\Collectors\TimelineDataCollector;
+use Codeception\Test\Unit;
 use DMS\PHPUnitExtensions\ArraySubset\Assert;
 use Illuminate\Support\Facades\Log;
 
-class TimelineDataCollectorTest extends \Codeception\Test\Unit
+class TimelineDataCollectorTest extends Unit
 {
+    private const SPAN_NAME = 'test-measure';
+
     /**
      * TimelineDataCollector instance.
      *
@@ -33,7 +36,7 @@ class TimelineDataCollectorTest extends \Codeception\Test\Unit
     public function testStartMeasure()
     {
         $this->collector->startMeasure(
-            'test-measure',
+            self::SPAN_NAME,
             'request',
             'GET',
             'GET /endpoint',
@@ -55,11 +58,11 @@ class TimelineDataCollectorTest extends \Codeception\Test\Unit
     {
         Log::shouldReceive('warning')
             ->once()
-            ->with("Did not start measure 'test-measure' because it's already started.");
+            ->with("Did not start measure '" . self::SPAN_NAME . "' because it's already started.");
 
-        $this->collector->startMeasure('test-measure');
+        $this->collector->startMeasure(self::SPAN_NAME);
         $this->collector->startMeasure(
-            'test-measure',
+            self::SPAN_NAME,
             'request',
             'GET',
             'GET /endpoint',
@@ -71,22 +74,22 @@ class TimelineDataCollectorTest extends \Codeception\Test\Unit
 
     public function testHasStartedMeasure()
     {
-        $this->collector->startMeasure('test-measure');
-        $this->assertEquals(true, $this->collector->hasStartedMeasure('test-measure'));
+        $this->collector->startMeasure(self::SPAN_NAME);
+        $this->assertEquals(true, $this->collector->hasStartedMeasure(self::SPAN_NAME));
     }
 
     public function testNotStartedMeasure()
     {
-        $this->assertEquals(false, $this->collector->hasStartedMeasure('test-measure'));
+        $this->assertEquals(false, $this->collector->hasStartedMeasure(self::SPAN_NAME));
     }
 
     public function testStopNonStartedMeasure()
     {
         Log::shouldReceive('warning')
             ->once()
-            ->with("Did not stop measure 'test-measure' because it hasn't been started.");
+            ->with("Did not stop measure '" . self::SPAN_NAME . "' because it hasn't been started.");
 
-        $this->collector->stopMeasure('test-measure');
+        $this->collector->stopMeasure(self::SPAN_NAME);
 
         $this->assertEquals(0, $this->collector->collect()->count());
     }

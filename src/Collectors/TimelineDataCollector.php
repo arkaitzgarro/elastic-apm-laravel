@@ -86,7 +86,7 @@ class TimelineDataCollector implements DataCollectorInterface
         string $label,
         float $start,
         float $end,
-        ?string $type = 'request',
+        string $type = 'request',
         ?string $action = 'request',
         ?array $context = []
     ): void {
