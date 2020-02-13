@@ -19,6 +19,39 @@ Add the ServiceProvider class to the providers array in `config/app.php`:
 
 From here, we will take care of everything based on your configuration. The agent and the middleware will be registered, and transactions will be send to Elastic.
 
+## Collectors
+The default collectors typically listen on events to measure portions of the request such as framework loading, database queries, or jobs.
+
+The SpanCollector in particular allows you to measure any section of your own code via the `ApmCollector` Facade:
+
+```php
+use AG\ElasticApmLaravel\Facades\ApmCollector;
+
+ApmCollector::startMeasure('my-custom-span', 'custom', 'measure', 'My custom span');
+
+// do something amazing
+
+ApmCollector::stopMeasure('my-custom-span');
+```
+
+To record an additional span around your job execution, you may include the provided job middleware (Laravel 6+ only https://laravel.com/docs/6.x/queues#job-middleware):
+
+```php
+public function middleware()
+{
+    return [
+        app(\AG\ElasticApmLaravel\Jobs\Middleware\RecordTransaction::class),
+    ];
+}
+```
+
+Finally, you can add your own collector to the agent!
+
+```
+$agent = app(\AG\ElasticApmLaravel\Agent::class);
+$agent->addCollector(new MyCollector());
+```
+
 ## Agent configuration
 
 The following environment variables are supported in the default configuration:
