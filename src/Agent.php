@@ -96,14 +96,4 @@ class Agent extends PhilKraAgent
             });
         });
     }
-
-    /**
-     * Send Data to APM Service.
-     */
-    public function sendTransaction(string $transaction_name): bool
-    {
-        $this->collectEvents($transaction_name);
-
-        return parent::send();
-    }
 }
