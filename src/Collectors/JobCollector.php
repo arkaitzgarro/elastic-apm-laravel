@@ -13,7 +13,7 @@ use PhilKra\Events\Transaction;
 use Throwable;
 
 /**
- * Collects info about the job process
+ * Collects info about the job process.
  */
 class JobCollector extends TimelineDataCollector implements DataCollectorInterface
 {
@@ -41,34 +41,34 @@ class JobCollector extends TimelineDataCollector implements DataCollectorInterfa
         });
 
         $this->app->events->listen(JobProcessed::class, function (JobProcessed $event) {
-            $transactionName = $this->getTransactionName($event);
-            $this->addMetadata($transactionName, $event->job);
-            $this->stopTransaction($transactionName);
+            $transaction_name = $this->getTransactionName($event);
+            $this->addMetadata($transaction_name, $event->job);
+            $this->stopTransaction($transaction_name);
         });
     }
 
-    protected function startTransaction(string $transactionName): Transaction
+    protected function startTransaction(string $transaction_name): Transaction
     {
         return $this->agent->startTransaction(
-            $transactionName,
+            $transaction_name,
             [],
             $this->request_start_time
         );
     }
 
-    protected function addMetadata($transactionName, $job): void
+    protected function addMetadata($transaction_name, $job): void
     {
-        $this->agent->getTransaction($transactionName)->setMeta([
-            'type' => 'job'
+        $this->agent->getTransaction($transaction_name)->setMeta([
+            'type' => 'job',
         ]);
     }
 
-    protected function stopTransaction($transactionName) : void
+    protected function stopTransaction($transaction_name): void
     {
         try {
             // Stop the transaction and measure the time
-            $this->agent->stopTransaction($transactionName);
-            $this->agent->sendTransaction($transactionName);
+            $this->agent->stopTransaction($transaction_name);
+            $this->agent->sendTransaction($transaction_name);
         } catch (Throwable $t) {
             Log::error($t->getMessage());
         }

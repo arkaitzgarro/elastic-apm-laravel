@@ -65,7 +65,7 @@ class Agent extends PhilKraAgent
             JobCollector::getName(),
             new JobCollector($app, $this, $this->request_start_time)
         );
-        
+
         // Collector for manual measurements throughout the app
         $this->collectors->put(
             SpanCollector::getName(),

@@ -26,7 +26,7 @@ class RecordTransaction
         /** @var JobCollector */
         $collector = $agent->getCollector(JobCollector::getName());
 
-        $collector->startMeasure('job_processing', 'job', 'processing', get_class($job).' processing');
+        $collector->startMeasure('job_processing', 'job', 'processing', get_class($job) . ' processing');
 
         $next($job);
 
