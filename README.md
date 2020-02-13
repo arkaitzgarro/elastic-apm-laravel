@@ -38,7 +38,8 @@ The following environment variables are supported in the default configuration:
 
 | Variable          | Description |
 |-------------------|-------------|
-|APM_ACTIVE         | `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data. |
+|APM_ACTIVE         | `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data; span collection will also be disabled. |
+|APM_ACTIVE_CLI     | `true` or `false` defaults to `true`. If `false`, the agent will not collect or send transaction or span data for non-HTTP requests but HTTP requests will still follow APM_ACTIVE. |
 |APM_APPNAME        | Name of the app as it will appear in APM. Invalid special characters will be replaced with a hyphen. |
 |APM_APPVERSION     | Version of the app as it will appear in APM. |
 |APM_SERVERURL      | URL to the APM intake service. |
