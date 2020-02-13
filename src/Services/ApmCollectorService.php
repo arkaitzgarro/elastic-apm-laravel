@@ -2,8 +2,11 @@
 
 namespace AG\ElasticApmLaravel\Services;
 
+use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Events\StartMeasuring;
 use AG\ElasticApmLaravel\Events\StopMeasuring;
+use PhilKra\Events\Transaction;
+use Throwable;
 
 class ApmCollectorService
 {
@@ -22,5 +25,14 @@ class ApmCollectorService
         array $params = []
     ) {
         event(new StopMeasuring($name, $params));
+    }
+
+    public function captureThrowable(Throwable $thrown, array $context = [], ?Transaction $parent = null)
+    {
+        if (false === config('elastic-apm-laravel.active')) {
+            return;
+        }
+
+        app(Agent::class)->captureThrowable($thrown, $context, $parent);
     }
 }
