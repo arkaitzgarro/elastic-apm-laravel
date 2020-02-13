@@ -17,7 +17,7 @@ class RecordTransaction
      */
     public function handle($job, $next)
     {
-        if (false === config('elastic-apm-agent.active') || false === config('elastic-apm-agent.cli.active')) {
+        if (false === config('elastic-apm-laravel.active') || false === config('elastic-apm-laravel.cli.active')) {
             return $next($job);
         }
 
