@@ -4,6 +4,11 @@ return [
     // Sets whether the apm reporting should be active or not
     'active' => env('APM_ACTIVE', true),
 
+    'cli' => [
+        // Sets whether the apm reporting should also be active for non-HTTP requests
+        'active' => env('APM_ACTIVE_CLI', true),
+    ],
+
     'app' => [
         // The app name that will identify your app in Kibana / Elastic APM, limited characters allowed
         'appName' => preg_replace('/[^a-zA-Z0-9 _-]/', '-', env('APM_APPNAME', 'Laravel')),

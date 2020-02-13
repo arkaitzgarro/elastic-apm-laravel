@@ -30,7 +30,10 @@ class ServiceProvider extends BaseServiceProvider
         // Always available, even when inactive
         $this->registerFacades();
 
-        if (false === config('elastic-apm-laravel.active')) {
+        if (
+            false === config('elastic-apm-laravel.active')
+            || ('cli' === php_sapi_name() && false === config('elastic-apm-laravel.cli.active'))
+        ) {
             return;
         }
 

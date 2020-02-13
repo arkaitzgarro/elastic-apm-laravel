@@ -29,7 +29,7 @@ class HttpRequestCollector extends TimelineDataCollector implements DataCollecto
 
     protected function registerEventListeners(): void
     {
-        if ($this->isHttpRequest()) {
+        if ('cli' !== php_sapi_name()) {
             $this->app->booted(function () {
                 $this->startMeasure('route_matching', 'laravel', 'request', 'Route matching');
             });
@@ -72,10 +72,5 @@ class HttpRequestCollector extends TimelineDataCollector implements DataCollecto
         }
 
         return $controller;
-    }
-
-    private function isHttpRequest(): bool
-    {
-        return false !== strpos($_SERVER['SCRIPT_NAME'], 'index.php');
     }
 }
