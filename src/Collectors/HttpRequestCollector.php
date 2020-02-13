@@ -38,15 +38,11 @@ class HttpRequestCollector extends TimelineDataCollector implements DataCollecto
         // Time between route resolution and request handled
         $this->app->events->listen(RouteMatched::class, function () {
             $this->startMeasure('request_handled', 'laravel', 'request', $this->getController());
-            if ($this->hasStartedMeasure('route_matching')) {
-                $this->stopMeasure('route_matching');
-            }
+            $this->stopMeasure('route_matching');
         });
 
         $this->app->events->listen(RequestHandled::class, function () {
-            if ($this->hasStartedMeasure('request_handled')) {
-                $this->stopMeasure('request_handled');
-            }
+            $this->stopMeasure('request_handled');
         });
     }
 

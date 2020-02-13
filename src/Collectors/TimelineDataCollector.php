@@ -3,8 +3,8 @@
 namespace AG\ElasticApmLaravel\Collectors;
 
 use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
-use Exception;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Collects info about the request duration as well as providing
@@ -34,6 +34,12 @@ class TimelineDataCollector implements DataCollectorInterface
         float $start_time = null
     ): void {
         $start = $start_time ?? microtime(true);
+        if ($this->hasStartedMeasure($name)) {
+            Log::warning("Did not start measure '{$name}' because it's already started.");
+
+            return;
+        }
+
         $this->started_measures->put($name, [
             'label' => $label ?: $name,
             'start' => $start - $this->request_start_time,
@@ -57,7 +63,9 @@ class TimelineDataCollector implements DataCollectorInterface
     {
         $end = microtime(true);
         if (!$this->hasStartedMeasure($name)) {
-            throw new Exception("Failed stopping measure '{$name}' because it hasn't been started.");
+            Log::warning("Did not stop measure '{$name}' because it hasn't been started.");
+
+            return;
         }
 
         $measure = $this->started_measures->pull($name);
@@ -79,8 +87,8 @@ class TimelineDataCollector implements DataCollectorInterface
         float $start,
         float $end,
         string $type = 'request',
-        string $action = 'request',
-        array $context = []
+        ?string $action = 'request',
+        ?array $context = []
     ): void {
         $this->measures->push([
             'label' => $label,
@@ -90,14 +98,6 @@ class TimelineDataCollector implements DataCollectorInterface
             'action' => $action,
             'context' => $context,
         ]);
-    }
-
-    /**
-     * Returns an array of all measures.
-     */
-    public function getMeasures(): Collection
-    {
-        return $this->measures;
     }
 
     public function collect(): Collection
