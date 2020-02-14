@@ -9,12 +9,12 @@ use Illuminate\Database\Events\QueryExecuted;
 use Jasny\DB\MySQL\QuerySplitter;
 
 use AG\ElasticApmLaravel\Collectors\TimelineDataCollector;
-use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
+use AG\ElasticApmLaravel\Contracts\DataCollector;
 
 /**
  * Collects info about the database executed queries.
  */
-class DBQueryCollector extends TimelineDataCollector implements DataCollectorInterface
+class DBQueryCollector extends TimelineDataCollector implements DataCollector
 {
     protected $app;
 
@@ -35,7 +35,6 @@ class DBQueryCollector extends TimelineDataCollector implements DataCollectorInt
 
     public function onQueryExecutedEvent(QueryExecuted $query): void
     {
-
         if (config('elastic-apm-laravel.spans.querylog.enabled') === 'auto') {
             if ($query->time < config('elastic-apm-laravel.spans.querylog.threshold')) {
                 return;

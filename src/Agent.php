@@ -6,9 +6,9 @@ use Illuminate\Support\Collection;
 
 use PhilKra\Agent as PhilKraAgent;
 use AG\ElasticApmLaravel\Events\LazySpan;
-use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
 use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
 use AG\ElasticApmLaravel\Collectors\HttpRequestCollector;
+use AG\ElasticApmLaravel\Contracts\DataCollector;
 
 /**
  * The Elastic APM agent sends performance metrics and error logs to the APM Server.
@@ -46,7 +46,7 @@ class Agent extends PhilKraAgent
         $this->addCollector(new HttpRequestCollector($app, $this->request_start_time));
     }
 
-    public function addCollector(DataCollectorInterface $collector)
+    public function addCollector(DataCollector $collector)
     {
         $this->collectors->put(
             $collector->getName(),
@@ -54,7 +54,7 @@ class Agent extends PhilKraAgent
         );
     }
 
-    public function getCollector(string $name): DataCollectorInterface
+    public function getCollector(string $name): DataCollector
     {
         return $this->collectors->get($name);
     }

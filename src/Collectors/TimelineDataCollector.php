@@ -5,13 +5,13 @@ use Exception;
 
 use Illuminate\Support\Collection;
 
-use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
+use AG\ElasticApmLaravel\Contracts\DataCollector;
 
 /**
  * Collects info about the request duration as well as providing
  * a way to log duration of any operations.
  */
-class TimelineDataCollector implements DataCollectorInterface
+class TimelineDataCollector implements DataCollector
 {
     protected $started_measures;
     protected $measures;

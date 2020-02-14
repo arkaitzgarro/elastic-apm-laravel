@@ -10,12 +10,12 @@ use Illuminate\Foundation\Http\Events\RequestHandled;
 use Jasny\DB\MySQL\QuerySplitter;
 
 use AG\ElasticApmLaravel\Collectors\TimelineDataCollector;
-use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
+use AG\ElasticApmLaravel\Contracts\DataCollector;
 
 /**
  * Collects info about the http request process
  */
-class HttpRequestCollector extends TimelineDataCollector implements DataCollectorInterface
+class HttpRequestCollector extends TimelineDataCollector implements DataCollector
 {
     protected $app;
 
