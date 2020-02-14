@@ -12,16 +12,6 @@ use Illuminate\Routing\Events\RouteMatched;
  */
 class HttpRequestCollector extends TimelineDataCollector implements DataCollector
 {
-    protected $app;
-
-    public function __construct(Application $app, float $request_start_time)
-    {
-        parent::__construct($request_start_time);
-
-        $this->app = $app;
-        $this->registerEventListeners();
-    }
-
     protected function registerEventListeners(): void
     {
         // Application and Laravel startup times

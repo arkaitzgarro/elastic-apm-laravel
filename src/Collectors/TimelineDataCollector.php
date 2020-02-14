@@ -2,7 +2,9 @@
 
 namespace AG\ElasticApmLaravel\Collectors;
 
+use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -10,17 +12,39 @@ use Illuminate\Support\Facades\Log;
  * Collects info about the request duration as well as providing
  * a way to log duration of any operations.
  */
-class TimelineDataCollector implements DataCollector
+abstract class TimelineDataCollector implements DataCollector
 {
+    /** @var Application */
+    protected $app;
+
+    /** @var Agent */
+    protected $agent;
+
+    /** @var Collection */
     protected $started_measures;
+
+    /** @var Collection */
     protected $measures;
+
+    /** @var float */
     protected $request_start_time;
 
-    public function __construct(float $request_start_time)
+    public function __construct(Application $app, Agent $agent)
     {
+        $this->app = $app;
+        $this->agent = $agent;
+
         $this->started_measures = new Collection();
         $this->measures = new Collection();
-        $this->request_start_time = $request_start_time;
+
+        $this->request_start_time = $this->agent->getRequestStartTime();
+
+        $this->registerEventListeners();
+    }
+
+    public function getName(): string
+    {
+        return 'timeline';
     }
 
     /**
@@ -109,9 +133,8 @@ class TimelineDataCollector implements DataCollector
         return $this->measures;
     }
 
-    public static function getName(): string
+    protected function registerEventListeners(): void
     {
-        return 'timeline';
     }
 
     private function toMilliseconds(float $time): float

@@ -5,7 +5,6 @@ namespace AG\ElasticApmLaravel\Collectors;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use Exception;
 use Illuminate\Database\Events\QueryExecuted;
-use Illuminate\Foundation\Application;
 use Jasny\DB\MySQL\QuerySplitter;
 
 /**
@@ -13,14 +12,9 @@ use Jasny\DB\MySQL\QuerySplitter;
  */
 class DBQueryCollector extends TimelineDataCollector implements DataCollector
 {
-    protected $app;
-
-    public function __construct(Application $app, float $request_start_time)
+    public function getName(): string
     {
-        parent::__construct($request_start_time);
-
-        $this->app = $app;
-        $this->registerEventListeners();
+        return 'query-collector';
     }
 
     public function onQueryExecutedEvent(QueryExecuted $query): void
@@ -56,11 +50,6 @@ class DBQueryCollector extends TimelineDataCollector implements DataCollector
             $query['action'],
             $query['context']
         );
-    }
-
-    public static function getName(): string
-    {
-        return 'query-collector';
     }
 
     protected function registerEventListeners(): void

@@ -5,22 +5,13 @@ namespace AG\ElasticApmLaravel\Collectors;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use AG\ElasticApmLaravel\Events\StartMeasuring;
 use AG\ElasticApmLaravel\Events\StopMeasuring;
-use Illuminate\Foundation\Application;
 
 /**
  * Generic collector for spans measured manually throughout the app.
  */
 class SpanCollector extends TimelineDataCollector implements DataCollector
 {
-    public function __construct(Application $app, float $request_start_time)
-    {
-        parent::__construct($request_start_time);
-
-        $this->app = $app;
-        $this->registerEventListeners();
-    }
-
-    public static function getName(): string
+    public function getName(): string
     {
         return 'span-collector';
     }

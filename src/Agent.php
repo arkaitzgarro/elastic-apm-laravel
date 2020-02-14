@@ -36,18 +36,18 @@ class Agent extends PhilKraAgent
         $this->collectors = new Collection();
     }
 
-    public function registerCollectors(Application $app): void
+    public function registerCollectors(): void
     {
         if (false !== config('elastic-apm-laravel.spans.querylog.enabled')) {
             // DB Queries collector
-            $this->addCollector(new DBQueryCollector($app, $this->request_start_time));
+            $this->addCollector(app(DBQueryCollector::class));
         }
 
         // Http request collector
-        $this->addCollector(new HttpRequestCollector($app, $this->request_start_time));
+        $this->addCollector(app(HttpRequestCollector::class));
 
         // Collector for manual measurements throughout the app
-        $this->addCollector(new SpanCollector($app, $this->request_start_time));
+        $this->addCollector(app(SpanCollector::class));
     }
 
     public function addCollector(DataCollector $collector)
@@ -90,5 +90,10 @@ class Agent extends PhilKraAgent
         $this->collectEvents($transaction_name);
 
         return parent::send();
+    }
+
+    public function getRequestStartTime()
+    {
+        return $this->request_start_time;
     }
 }
