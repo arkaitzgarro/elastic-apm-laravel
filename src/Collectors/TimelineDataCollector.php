@@ -1,11 +1,10 @@
 <?php
+
 namespace AG\ElasticApmLaravel\Collectors;
 
-use Exception;
-
-use Illuminate\Support\Collection;
-
 use AG\ElasticApmLaravel\Contracts\DataCollector;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Collects info about the request duration as well as providing
@@ -25,7 +24,7 @@ class TimelineDataCollector implements DataCollector
     }
 
     /**
-     * Starts a measure
+     * Starts a measure.
      */
     public function startMeasure(
         string $name,
@@ -35,6 +34,12 @@ class TimelineDataCollector implements DataCollector
         float $start_time = null
     ): void {
         $start = $start_time ?? microtime(true);
+        if ($this->hasStartedMeasure($name)) {
+            Log::warning("Did not start measure '{$name}' because it's already started.");
+
+            return;
+        }
+
         $this->started_measures->put($name, [
             'label' => $label ?: $name,
             'start' => $start - $this->request_start_time,
@@ -44,7 +49,7 @@ class TimelineDataCollector implements DataCollector
     }
 
     /**
-     * Check if a measure exists
+     * Check if a measure exists.
      */
     public function hasStartedMeasure(string $name): bool
     {
@@ -52,13 +57,15 @@ class TimelineDataCollector implements DataCollector
     }
 
     /**
-     * Stops a measure
+     * Stops a measure.
      */
     public function stopMeasure(string $name, array $params = []): void
     {
         $end = microtime(true);
         if (!$this->hasStartedMeasure($name)) {
-            throw new Exception("Failed stopping measure '{$name}' because it hasn't been started.");
+            Log::warning("Did not stop measure '{$name}' because it hasn't been started.");
+
+            return;
         }
 
         $measure = $this->started_measures->pull($name);
@@ -73,15 +80,15 @@ class TimelineDataCollector implements DataCollector
     }
 
     /**
-     * Adds a measure
+     * Adds a measure.
      */
     public function addMeasure(
         string $label,
         float $start,
         float $end,
         string $type = 'request',
-        string $action = 'request',
-        array $context = []
+        ?string $action = 'request',
+        ?array $context = []
     ): void {
         $this->measures->push([
             'label' => $label,
@@ -91,14 +98,6 @@ class TimelineDataCollector implements DataCollector
             'action' => $action,
             'context' => $context,
         ]);
-    }
-
-    /**
-     * Returns an array of all measures
-     */
-    public function getMeasures(): Collection
-    {
-        return $this->measures;
     }
 
     public function collect(): Collection

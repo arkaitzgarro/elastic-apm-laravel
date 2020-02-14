@@ -1,10 +1,10 @@
 <?php
 
-namespace AG\Tests;
+namespace AG\Tests\config;
 
 class ApmConfigTest extends \Codeception\Test\Unit
 {
-    private $configFilePath = __DIR__ . '/../config/elastic-apm-laravel.php';
+    private $configFilePath = __DIR__ . '/../../config/elastic-apm-laravel.php';
 
     protected function _before()
     {
@@ -24,7 +24,7 @@ class ApmConfigTest extends \Codeception\Test\Unit
 
     public function testDefaultValues()
     {
-        $config = include($this->configFilePath);
+        $config = include $this->configFilePath;
 
         $this->assertTrue($config['active']);
 
@@ -58,7 +58,7 @@ class ApmConfigTest extends \Codeception\Test\Unit
         putenv('APM_ACTIVE=false');
         putenv('APM_APPNAME="Codeception App"');
         putenv('APM_APPVERSION="1.0.0"');
-        $config = include($this->configFilePath);
+        $config = include $this->configFilePath;
 
         $this->assertFalse($config['active']);
         $this->assertEquals('Codeception App', $config['app']['appName']);
@@ -68,15 +68,15 @@ class ApmConfigTest extends \Codeception\Test\Unit
     public function testAppNameSpecialCharacters()
     {
         putenv('APM_APPNAME="Codeception?App"');
-        $config = include($this->configFilePath);
+        $config = include $this->configFilePath;
 
-        $this->assertEquals('Codeception?App', $config['app']['appName']);
+        $this->assertEquals('Codeception-App', $config['app']['appName']);
     }
 
     public function testEnvConfigVariables()
     {
         putenv('APM_ENVIRONMENT="production"');
-        $config = include($this->configFilePath);
+        $config = include $this->configFilePath;
 
         $this->assertEquals('production', $config['env']['environment']);
     }
@@ -85,7 +85,7 @@ class ApmConfigTest extends \Codeception\Test\Unit
     {
         putenv('APM_SERVERURL="https://cloud.elastic.io:8200"');
         putenv('APM_SECRETTOKEN="super_secret_value"');
-        $config = include($this->configFilePath);
+        $config = include $this->configFilePath;
 
         $this->assertEquals('https://cloud.elastic.io:8200', $config['server']['serverUrl']);
         $this->assertEquals('super_secret_value', $config['server']['secretToken']);
@@ -94,7 +94,7 @@ class ApmConfigTest extends \Codeception\Test\Unit
     public function testTransactionsConfigEnvVariables()
     {
         putenv('APM_USEROUTEURI=false');
-        $config = include($this->configFilePath);
+        $config = include $this->configFilePath;
 
         $this->assertFalse($config['transactions']['useRouteUri']);
     }
@@ -105,7 +105,7 @@ class ApmConfigTest extends \Codeception\Test\Unit
         putenv('APM_BACKTRACEDEPTH=10');
         putenv('APM_QUERYLOG="auto"');
         putenv('APM_THRESHOLD=50');
-        $config = include($this->configFilePath);
+        $config = include $this->configFilePath;
 
         $this->assertEquals(10, $config['spans']['maxTraceItems']);
         $this->assertEquals(10, $config['spans']['backtraceDepth']);

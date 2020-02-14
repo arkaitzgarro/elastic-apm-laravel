@@ -1,5 +1,7 @@
 # Elastic APM 
 
+[![CircleCI](https://circleci.com/gh/arkaitzgarro/elastic-apm-laravel.svg?style=svg)](https://circleci.com/gh/arkaitzgarro/elastic-apm-laravel)
+
 Elastic APM agent for v2 intake API. Compatible with Laravel 5.5+.
 
 ## Installation
@@ -17,7 +19,7 @@ Add the ServiceProvider class to the providers array in `config/app.php`:
 ],
 ```
 
-From here, we will take care of everything based on your configuration. The agent and the middleware will be registered, and transactions will be send to Elastic.
+From here, we will take care of everything based on your configuration. The agent and the middleware will be registered, and transactions will be sent to Elastic.
 
 ## Collectors
 The default collectors typically listen on events to measure portions of the request such as framework loading, database queries, or jobs.
@@ -59,7 +61,7 @@ The following environment variables are supported in the default configuration:
 | Variable          | Description |
 |-------------------|-------------|
 |APM_ACTIVE         | `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data. |
-|APM_APPNAME        | Name of the app as it will appear in APM. |
+|APM_APPNAME        | Name of the app as it will appear in APM. Invalid special characters will be replaced with a hyphen. |
 |APM_APPVERSION     | Version of the app as it will appear in APM. |
 |APM_SERVERURL      | URL to the APM intake service. |
 |APM_SECRETTOKEN    | Secret token, if required. |
@@ -76,3 +78,43 @@ php artisan vendor:publish --tag=config
 ```
 
 Once published, open the `config/elastic-apm-laravel.php` file and review the various settings.
+
+## Manual span tracking
+
+Requests, jobs, and queries are handled automatically, but if you'd like to record additional spans throughout your app, you can do so via the `ApmCollector` facade. If APM_ACTIVE is not set, these measurements will be gracefully ignored. Usage:
+
+```php
+use AG\ElasticApmLaravel\Facades\ApmCollector;
+
+ApmCollector::startMeasure('my-custom-span', 'custom', 'measure', 'My custom span');
+
+// do something amazing
+
+ApmCollector::stopMeasure('my-custom-span');
+```
+
+## Development
+
+Get Composer. Follow the instructions defined on the official [Composer page](https://getcomposer.org/doc/00-intro.md), or if you are using `homebrew`, just run:
+
+```bash
+brew install composer
+```
+
+Install project dependencies:
+
+```bash
+composer install
+```
+
+Run the unit test suite:
+
+```bash
+php vendor/bin/codecept run unit
+```
+
+Please adhere to [PSR-2](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md) and [Symfony](https://symfony.com/doc/current/contributing/code/standards.html) coding standard. Run the following commands before pushing your code:
+
+```bash
+php ./vendor/bin/php-cs-fixer fix --config .php_cs
+```

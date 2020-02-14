@@ -1,14 +1,15 @@
 <?php
+
 namespace AG\ElasticApmLaravel;
 
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Collection;
-
-use PhilKra\Agent as PhilKraAgent;
-use AG\ElasticApmLaravel\Events\LazySpan;
 use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
 use AG\ElasticApmLaravel\Collectors\HttpRequestCollector;
+use AG\ElasticApmLaravel\Collectors\SpanCollector;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
+use AG\ElasticApmLaravel\Events\LazySpan;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Collection;
+use PhilKra\Agent as PhilKraAgent;
 
 /**
  * The Elastic APM agent sends performance metrics and error logs to the APM Server.
@@ -37,13 +38,16 @@ class Agent extends PhilKraAgent
 
     public function registerCollectors(Application $app): void
     {
-        if (config('elastic-apm-laravel.spans.querylog.enabled') !== false) {
+        if (false !== config('elastic-apm-laravel.spans.querylog.enabled')) {
             // DB Queries collector
             $this->addCollector(new DBQueryCollector($app, $this->request_start_time));
         }
 
         // Http request collector
         $this->addCollector(new HttpRequestCollector($app, $this->request_start_time));
+
+        // Collector for manual measurements throughout the app
+        $this->addCollector(new SpanCollector($app, $this->request_start_time));
     }
 
     public function addCollector(DataCollector $collector)
@@ -79,7 +83,7 @@ class Agent extends PhilKraAgent
     }
 
     /**
-     * Send Data to APM Service
+     * Send Data to APM Service.
      */
     public function sendTransaction(string $transaction_name): bool
     {
