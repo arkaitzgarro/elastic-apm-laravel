@@ -4,7 +4,6 @@ use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Collectors\EventDataCollector;
 use Codeception\Test\Unit;
 use DMS\PHPUnitExtensions\ArraySubset\Assert;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Log;
 
 class CustomCollector extends EventDataCollector

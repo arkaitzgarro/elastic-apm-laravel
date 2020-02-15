@@ -30,7 +30,7 @@ class ApmCollectorServiceTest extends Unit
             ->once()
             ->with('elastic-apm-laravel.active')
             ->andReturn(true);
-        
+
         $this->collectorService = new ApmCollectorService(
             $this->appMock,
             $this->eventsMock,
@@ -116,7 +116,7 @@ class ApmCollectorServiceTest extends Unit
 
         $agentMock->shouldReceive('addCollector')
             ->with($collectorMock);
-        
+
         $this->appMock->shouldReceive('make')
             ->with(Agent::class)
             ->andReturn($agentMock);
