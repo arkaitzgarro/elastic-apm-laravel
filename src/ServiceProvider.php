@@ -80,7 +80,7 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerCollectors(): void
     {
         $agent = $this->app->make(Agent::class);
-        $agent->registerCollectors($this->app);
+        $agent->registerCollectors();
     }
 
     /**

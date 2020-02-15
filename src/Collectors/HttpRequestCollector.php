@@ -2,27 +2,16 @@
 
 namespace AG\ElasticApmLaravel\Collectors;
 
-use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
-use Illuminate\Foundation\Application;
+use AG\ElasticApmLaravel\Contracts\DataCollector;
 use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Routing\Events\RouteMatched;
 
 /**
  * Collects info about the http request process.
  */
-class HttpRequestCollector extends TimelineDataCollector implements DataCollectorInterface
+class HttpRequestCollector extends TimelineDataCollector implements DataCollector
 {
-    protected $app;
-
-    public function __construct(Application $app, float $request_start_time)
-    {
-        parent::__construct($request_start_time);
-
-        $this->app = $app;
-        $this->registerEventListeners();
-    }
-
-    public static function getName(): string
+    public function getName(): string
     {
         return 'request-collector';
     }
