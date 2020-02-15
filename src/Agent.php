@@ -4,8 +4,8 @@ namespace AG\ElasticApmLaravel;
 
 use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
 use AG\ElasticApmLaravel\Collectors\HttpRequestCollector;
-use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
 use AG\ElasticApmLaravel\Collectors\SpanCollector;
+use AG\ElasticApmLaravel\Contracts\DataCollector;
 use AG\ElasticApmLaravel\Events\LazySpan;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
@@ -36,30 +36,29 @@ class Agent extends PhilKraAgent
         $this->collectors = new Collection();
     }
 
-    public function registerCollectors(Application $app): void
+    public function registerCollectors(): void
     {
         if (false !== config('elastic-apm-laravel.spans.querylog.enabled')) {
             // DB Queries collector
-            $this->collectors->put(
-                DBQueryCollector::getName(),
-                new DBQueryCollector($app, $this->request_start_time)
-            );
+            $this->addCollector(app(DBQueryCollector::class));
         }
 
         // Http request collector
-        $this->collectors->put(
-            HttpRequestCollector::getName(),
-            new HttpRequestCollector($app, $this->request_start_time)
-        );
+        $this->addCollector(app(HttpRequestCollector::class));
 
         // Collector for manual measurements throughout the app
+        $this->addCollector(app(SpanCollector::class));
+    }
+
+    public function addCollector(DataCollector $collector)
+    {
         $this->collectors->put(
-            SpanCollector::getName(),
-            new SpanCollector($app, $this->request_start_time)
+            $collector->getName(),
+            $collector
         );
     }
 
-    public function getCollector(string $name): DataCollectorInterface
+    public function getCollector(string $name): DataCollector
     {
         return $this->collectors->get($name);
     }
@@ -91,5 +90,10 @@ class Agent extends PhilKraAgent
         $this->collectEvents($transaction_name);
 
         return parent::send();
+    }
+
+    public function getRequestStartTime()
+    {
+        return $this->request_start_time;
     }
 }
