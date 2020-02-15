@@ -22,6 +22,7 @@ Add the ServiceProvider class to the providers array in `config/app.php`:
 From here, we will take care of everything based on your configuration. The agent and the middleware will be registered, and transactions will be sent to Elastic.
 
 ## Collectors
+
 The default collectors typically listen on events to measure portions of the request such as framework loading, database queries, or jobs.
 
 The SpanCollector in particular allows you to measure any section of your own code via the `ApmCollector` Facade:
@@ -47,11 +48,59 @@ public function middleware()
 }
 ```
 
-Finally, you can add your own collector to the agent!
+### Add a collector for other events
+
+You can add extra collector(s) to listen to your own application events or Laravel events like `Illuminate\Mail\Events\MessageSending` for example. We created a base collector that already includes functionality to measure events, that you can extend from:
+
+```php
+// app/Collectors/MailMessageCollector.php
+
+namespace YourApp\Collectors;
+
+use AG\ElasticApmLaravel\Contracts\DataCollector;
+use AG\ElasticApmLaravel\Collectors\EventDataCollector;
+
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Mail\Events\MessageSent;
+
+class MailMessageCollector extends EventDataCollector implements DataCollector
+{
+    public function getName(): string
+    {
+        return 'mail-message-collector';
+    }
+
+    protected function registerEventListeners(): void
+    {
+        $this->app->events->listen(MessageSending::class, function (\Swift_Message $message) {
+            $this->startMeasure(
+                'mail #' . $message->getId(),
+                'mail.delivery',
+            );
+        });
+
+        $this->app->events->listen(StopMeasuring::class, function (\Swift_Message $message) {
+            $this->stopMeasure('mail #' . $message->getId());
+        });
+    }
+}
 
 ```
-$agent = app(\AG\ElasticApmLaravel\Agent::class);
-$agent->addCollector(new MyCollector());
+
+Don't forget to register your collector when the application starts:
+
+```php
+// app/Providers/AppServiceProvider.php
+
+use AG\ElasticApmLaravel\Facades\ApmCollector;
+
+use YourApp\Collectors\MailMessageCollector;
+
+public function boot()
+{
+    // ...
+    ApmCollector::addCollector(MailMessageCollector::class);
+}
 ```
 
 ## Agent configuration

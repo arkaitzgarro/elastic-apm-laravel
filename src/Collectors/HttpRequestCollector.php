@@ -10,7 +10,7 @@ use Illuminate\Routing\Events\RouteMatched;
 /**
  * Collects info about the http request process.
  */
-class HttpRequestCollector extends TimelineDataCollector implements DataCollector
+class HttpRequestCollector extends EventDataCollector implements DataCollector
 {
     protected function registerEventListeners(): void
     {

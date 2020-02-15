@@ -1,26 +1,46 @@
 <?php
 
-namespace AG\Tests\Collectors;
-
-use AG\ElasticApmLaravel\Collectors\TimelineDataCollector;
+use AG\ElasticApmLaravel\Agent;
+use AG\ElasticApmLaravel\Collectors\EventDataCollector;
 use Codeception\Test\Unit;
 use DMS\PHPUnitExtensions\ArraySubset\Assert;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Log;
 
-class TimelineDataCollectorTest extends Unit
+class CustomCollector extends EventDataCollector
+{
+    public function getName(): string
+    {
+        return 'custom-collector';
+    }
+
+    public function registerEventListeners(): void
+    {
+        Log::info('registerEventListeners method has been called.');
+    }
+}
+
+class CustomCollectorTest extends Unit
 {
     private const SPAN_NAME = 'test-measure';
 
     /**
-     * TimelineDataCollector instance.
+     * EventDataCollector instance.
      *
-     * @var \AG\ElasticApmLaravel\Collectors\TimelineDataCollector
+     * @var \AG\ElasticApmLaravel\Collectors\EventDataCollector
      */
     private $collector;
 
     protected function _before()
     {
-        $this->collector = new TimelineDataCollector(0);
+        $this->agentMock = Mockery::mock(Agent::class);
+
+        $this->agentMock->shouldReceive('getRequestStartTime')->andReturn(1000.0);
+        Log::shouldReceive('info')
+            ->once()
+            ->with('registerEventListeners method has been called.');
+
+        $this->collector = new CustomCollector($this->agentMock);
     }
 
     public function testEmptyMeasures()
@@ -30,7 +50,7 @@ class TimelineDataCollectorTest extends Unit
 
     public function testCollectorName()
     {
-        $this->assertEquals('timeline', TimelineDataCollector::getName());
+        $this->assertEquals('custom-collector', $this->collector->getName());
     }
 
     public function testStartMeasure()
@@ -47,7 +67,7 @@ class TimelineDataCollectorTest extends Unit
         $this->assertEquals(1, $this->collector->collect()->count());
         Assert::assertArraySubset([
             'label' => 'GET /endpoint',
-            'start' => 1000000.0,
+            'start' => 0.0,
             'type' => 'request',
             'action' => 'GET',
             'context' => [],

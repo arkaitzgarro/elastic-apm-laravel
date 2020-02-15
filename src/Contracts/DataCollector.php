@@ -9,4 +9,6 @@ interface DataCollector
     public function collect(): Collection;
 
     public function getName(): string;
+
+    public function registerEventListeners(): void;
 }

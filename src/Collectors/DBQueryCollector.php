@@ -10,7 +10,7 @@ use Jasny\DB\MySQL\QuerySplitter;
 /**
  * Collects info about the database executed queries.
  */
-class DBQueryCollector extends TimelineDataCollector implements DataCollector
+class DBQueryCollector extends EventDataCollector implements DataCollector
 {
     public function getName(): string
     {

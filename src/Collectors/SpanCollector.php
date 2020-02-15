@@ -9,7 +9,7 @@ use AG\ElasticApmLaravel\Events\StopMeasuring;
 /**
  * Generic collector for spans measured manually throughout the app.
  */
-class SpanCollector extends TimelineDataCollector implements DataCollector
+class SpanCollector extends EventDataCollector implements DataCollector
 {
     public function getName(): string
     {
