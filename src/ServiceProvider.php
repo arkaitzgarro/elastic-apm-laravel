@@ -13,15 +13,7 @@ class ServiceProvider extends BaseServiceProvider
     private $source_config_path = __DIR__ . '/../config/elastic-apm-laravel.php';
 
     /**
-     * Bootstrap the application events.
-     */
-    public function boot(): void
-    {
-        $this->publishConfig();
-    }
-
-    /**
-     * Register the service provider.
+     * Register the package Facade and APM agent.
      */
     public function register(): void
     {
@@ -35,6 +27,20 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         $this->registerAgent();
+    }
+
+    /**
+     * Add the global transaction middleware
+     * and default event collectors.
+     */
+    public function boot(): void
+    {
+        $this->publishConfig();
+
+        if (false === config('elastic-apm-laravel.active')) {
+            return;
+        }
+
         $this->registerMiddleware();
         $this->registerCollectors();
     }
