@@ -16,7 +16,7 @@ class SpanCollector extends EventDataCollector implements DataCollector
         return 'span-collector';
     }
 
-    protected function registerEventListeners(): void
+    public function registerEventListeners(): void
     {
         $this->app->events->listen(StartMeasuring::class, function (StartMeasuring $event) {
             $this->startMeasure(

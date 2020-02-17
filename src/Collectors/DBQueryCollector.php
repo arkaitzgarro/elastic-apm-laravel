@@ -17,7 +17,14 @@ class DBQueryCollector extends EventDataCollector implements DataCollector
         return 'query-collector';
     }
 
-    public function onQueryExecutedEvent(QueryExecuted $query): void
+    public function registerEventListeners(): void
+    {
+        $this->app->events->listen(QueryExecuted::class, function (QueryExecuted $query) {
+            $this->onQueryExecutedEvent($query);
+        });
+    }
+
+    private function onQueryExecutedEvent(QueryExecuted $query): void
     {
         if ('auto' === config('elastic-apm-laravel.spans.querylog.enabled')) {
             if ($query->time < config('elastic-apm-laravel.spans.querylog.threshold')) {
@@ -50,13 +57,6 @@ class DBQueryCollector extends EventDataCollector implements DataCollector
             $query['action'],
             $query['context']
         );
-    }
-
-    protected function registerEventListeners(): void
-    {
-        $this->app->events->listen(QueryExecuted::class, function (QueryExecuted $query) {
-            $this->onQueryExecutedEvent($query);
-        });
     }
 
     private function getQueryName(string $sql): string

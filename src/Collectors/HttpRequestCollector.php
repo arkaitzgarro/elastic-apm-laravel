@@ -12,7 +12,12 @@ use Illuminate\Routing\Events\RouteMatched;
  */
 class HttpRequestCollector extends EventDataCollector implements DataCollector
 {
-    protected function registerEventListeners(): void
+    public function getName(): string
+    {
+        return 'request-collector';
+    }
+
+    public function registerEventListeners(): void
     {
         // Application and Laravel startup times
         // LARAVEL_START is defined at the entry point of the application
@@ -36,7 +41,11 @@ class HttpRequestCollector extends EventDataCollector implements DataCollector
         });
 
         $this->app->events->listen(RequestHandled::class, function () {
-            $this->stopMeasure('request_handled');
+            // Some middlewares might return a response
+            // before the RouteMatched has been dispatched
+            if ($this->hasStartedMeasure('request_handled')) {
+                $this->stopMeasure('request_handled');
+            }
         });
     }
 
