@@ -36,7 +36,6 @@ class JobCollector extends TimelineDataCollector implements DataCollector
 
         $this->app->events->listen(JobFailed::class, function (JobFailed $event) {
             $transaction_name = $this->getTransactionName($event);
-            $this->addMetadata($transaction_name, $event->job);
             $this->stopTransaction($transaction_name);
             $this->setTransactionResult($transaction_name, 400);
         });
@@ -66,17 +65,6 @@ class JobCollector extends TimelineDataCollector implements DataCollector
     {
         $this->agent->getTransaction($transaction_name)->setMeta([
             'result' => $result,
-        ]);
-    }
-
-    /**
-     * $job is unused here but is included so that the extra info is available if someone extends this class
-     * to add more detail in this method.
-     */
-    protected function addMetadata(string $transaction_name, $job): void
-    {
-        $this->agent->getTransaction($transaction_name)->setMeta([
-            'type' => 'job',
         ]);
     }
 
