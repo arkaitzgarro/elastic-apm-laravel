@@ -2,12 +2,10 @@
 
 namespace AG\ElasticApmLaravel\Collectors;
 
-use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
-use Illuminate\Foundation\Application;
+use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use PhilKra\Events\Transaction;
 use Throwable;
@@ -25,13 +23,22 @@ class JobCollector extends TimelineDataCollector implements DataCollector
     protected function registerEventListeners(): void
     {
         $this->app->events->listen(JobProcessing::class, function (JobProcessing $event) {
-            $this->startTransaction($this->getTransactionName($event));
+            $transaction_name = $this->getTransactionName($event);
+            $this->startTransaction($transaction_name);
+            $this->setTransactionType($transaction_name);
         });
 
         $this->app->events->listen(JobProcessed::class, function (JobProcessed $event) {
             $transaction_name = $this->getTransactionName($event);
+            $this->stopTransaction($transaction_name);
+            $this->setTransactionResult($transaction_name, 200);
+        });
+
+        $this->app->events->listen(JobFailed::class, function (JobFailed $event) {
+            $transaction_name = $this->getTransactionName($event);
             $this->addMetadata($transaction_name, $event->job);
             $this->stopTransaction($transaction_name);
+            $this->setTransactionResult($transaction_name, 400);
         });
     }
 
@@ -42,6 +49,24 @@ class JobCollector extends TimelineDataCollector implements DataCollector
             [],
             $this->request_start_time
         );
+    }
+
+    protected function setTransactionType(string $transaction_name): void
+    {
+        $this->agent->getTransaction($transaction_name)->setMeta([
+            'type' => 'job',
+        ]);
+    }
+
+    /**
+     * Jobs don't have a response code like HTTP but we'll add the 200 success or 400 failure anyway
+     * because it helps with filtering in Elastic.
+     */
+    protected function setTransactionResult(string $transaction_name, int $result): void
+    {
+        $this->agent->getTransaction($transaction_name)->setMeta([
+            'result' => $result,
+        ]);
     }
 
     /**
