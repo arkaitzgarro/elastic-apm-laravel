@@ -10,7 +10,7 @@ use Illuminate\Foundation\Application;
  */
 class FrameworkCollector extends TimelineDataCollector implements DataCollector
 {
-    public static function getName(): string
+    public function getName(): string
     {
         return 'framework-collector';
     }

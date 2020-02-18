@@ -17,7 +17,7 @@ use Throwable;
  */
 class JobCollector extends TimelineDataCollector implements DataCollector
 {
-    public static function getName(): string
+    public function getName(): string
     {
         return 'job-collector';
     }
