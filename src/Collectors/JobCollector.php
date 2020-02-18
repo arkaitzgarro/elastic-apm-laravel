@@ -56,14 +56,18 @@ class JobCollector extends TimelineDataCollector implements DataCollectorInterfa
         );
     }
 
-    protected function addMetadata($transaction_name, $job): void
+    /**
+     * $job is unused here but is included so that the extra info is available if someone extends this class
+     * to add more detail in this method.
+     */
+    protected function addMetadata(string $transaction_name, $job): void
     {
         $this->agent->getTransaction($transaction_name)->setMeta([
             'type' => 'job',
         ]);
     }
 
-    protected function stopTransaction($transaction_name): void
+    protected function stopTransaction(string $transaction_name): void
     {
         try {
             // Stop the transaction and measure the time
@@ -74,7 +78,7 @@ class JobCollector extends TimelineDataCollector implements DataCollectorInterfa
         }
     }
 
-    protected function getTransactionName($event)
+    protected function getTransactionName($event) : string
     {
         return Arr::get($event->job->payload(), 'displayName', 'Default');
     }

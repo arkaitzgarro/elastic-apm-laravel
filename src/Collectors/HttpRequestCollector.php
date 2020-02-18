@@ -18,11 +18,9 @@ class HttpRequestCollector extends TimelineDataCollector implements DataCollecto
 
     protected function registerEventListeners(): void
     {
-        if ('cli' !== php_sapi_name()) {
-            $this->app->booted(function () {
-                $this->startMeasure('route_matching', 'laravel', 'request', 'Route matching');
-            });
-        }
+        $this->app->booted(function () {
+            $this->startMeasure('route_matching', 'laravel', 'request', 'Route matching');
+        });
 
         // Time between route resolution and request handled
         $this->app->events->listen(RouteMatched::class, function () {

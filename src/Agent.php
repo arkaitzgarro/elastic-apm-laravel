@@ -48,7 +48,9 @@ class Agent extends PhilKraAgent
         $this->addCollector(app(FrameworkCollector::class));
 
         // Http request collector
-        $this->addCollector(app(HttpRequestCollector::class));
+        if ('cli' !== php_sapi_name()) {
+            $this->addCollector(app(HttpRequestCollector::class));
+        }
 
         // Job collector
         $this->addCollector(app(JobCollector::class));
