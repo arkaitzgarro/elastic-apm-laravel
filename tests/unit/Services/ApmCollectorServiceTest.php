@@ -115,13 +115,16 @@ class ApmCollectorServiceTest extends Unit
         $collectorMock = Mockery::mock(DataCollector::class);
 
         $agentMock->shouldReceive('addCollector')
+            ->once()
             ->with($collectorMock);
 
         $this->appMock->shouldReceive('make')
+            ->once()
             ->with(Agent::class)
             ->andReturn($agentMock);
 
         $this->appMock->shouldReceive('make')
+            ->once()
             ->with('App\Collectors\MyCollector')
             ->andReturn($collectorMock);
 
