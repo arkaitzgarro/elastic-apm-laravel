@@ -36,7 +36,10 @@ class CustomCollectorTest extends Unit
         $appMock = Mockery::mock(Application::class);
         $agentMock = Mockery::mock(Agent::class);
 
-        $agentMock->shouldReceive('getRequestStartTime')->andReturn(1000.0);
+        $agentMock->shouldReceive('getRequestStartTime')
+            ->once()
+            ->andReturn(1000.0);
+
         Log::shouldReceive('info')
             ->once()
             ->with('registerEventListeners method has been called.');
