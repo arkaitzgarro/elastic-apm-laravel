@@ -10,16 +10,6 @@ use Illuminate\Foundation\Application;
  */
 class FrameworkCollector extends TimelineDataCollector implements DataCollector
 {
-    protected $app;
-
-    public function __construct(Application $app, float $request_start_time)
-    {
-        parent::__construct($request_start_time);
-
-        $this->app = $app;
-        $this->registerEventListeners();
-    }
-
     public static function getName(): string
     {
         return 'framework-collector';

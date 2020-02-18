@@ -17,18 +17,6 @@ use Throwable;
  */
 class JobCollector extends TimelineDataCollector implements DataCollector
 {
-    protected $app;
-    protected $agent;
-
-    public function __construct(Application $app, Agent $agent, float $request_start_time)
-    {
-        parent::__construct($request_start_time);
-
-        $this->app = $app;
-        $this->agent = $agent;
-        $this->registerEventListeners();
-    }
-
     public static function getName(): string
     {
         return 'job-collector';
