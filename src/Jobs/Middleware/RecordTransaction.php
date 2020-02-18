@@ -2,8 +2,7 @@
 
 namespace AG\ElasticApmLaravel\Jobs\Middleware;
 
-use AG\ElasticApmLaravel\Agent;
-use AG\ElasticApmLaravel\Collectors\JobCollector;
+use AG\ElasticApmLaravel\Facades\ApmCollector;
 
 class RecordTransaction
 {
@@ -21,15 +20,10 @@ class RecordTransaction
             return $next($job);
         }
 
-        /** @var Agent */
-        $agent = app(Agent::class);
-        /** @var JobCollector */
-        $collector = $agent->getCollector(JobCollector::getName());
-
-        $collector->startMeasure('job_processing', 'job', 'processing', get_class($job) . ' processing');
+        ApmCollector::startMeasure('job_processing', 'job', 'processing', get_class($job) . ' processing');
 
         $next($job);
 
-        $collector->stopMeasure('job_processing');
+        ApmCollector::stopMeasure('job_processing');
     }
 }
