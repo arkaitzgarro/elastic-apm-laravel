@@ -68,6 +68,6 @@ class JobCollector extends TimelineDataCollector implements DataCollector
 
     protected function getTransactionName($event): string
     {
-        return Arr::get($event->job->payload(), 'displayName', 'Default');
+        return $event->job->resolveName();
     }
 }
