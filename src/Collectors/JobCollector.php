@@ -3,7 +3,7 @@
 namespace AG\ElasticApmLaravel\Collectors;
 
 use AG\ElasticApmLaravel\Agent;
-use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
+use AG\ElasticApmLaravel\Contracts\DataCollector;
 use Illuminate\Foundation\Application;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
@@ -15,7 +15,7 @@ use Throwable;
 /**
  * Collects info about the job process.
  */
-class JobCollector extends TimelineDataCollector implements DataCollectorInterface
+class JobCollector extends TimelineDataCollector implements DataCollector
 {
     protected $app;
     protected $agent;
@@ -78,7 +78,7 @@ class JobCollector extends TimelineDataCollector implements DataCollectorInterfa
         }
     }
 
-    protected function getTransactionName($event) : string
+    protected function getTransactionName($event): string
     {
         return Arr::get($event->job->payload(), 'displayName', 'Default');
     }

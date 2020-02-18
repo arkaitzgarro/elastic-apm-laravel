@@ -2,13 +2,13 @@
 
 namespace AG\ElasticApmLaravel\Collectors;
 
-use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
+use AG\ElasticApmLaravel\Contracts\DataCollector;
 use Illuminate\Foundation\Application;
 
 /**
  * Collects info about the Laravel initialization.
  */
-class FrameworkCollector extends TimelineDataCollector implements DataCollectorInterface
+class FrameworkCollector extends TimelineDataCollector implements DataCollector
 {
     protected $app;
 
