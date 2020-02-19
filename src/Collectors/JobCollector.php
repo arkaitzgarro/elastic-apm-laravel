@@ -37,7 +37,7 @@ class JobCollector extends EventDataCollector implements DataCollector
         $this->app->events->listen(JobFailed::class, function (JobFailed $event) {
             $transaction_name = $this->getTransactionName($event);
             $this->stopTransaction($transaction_name);
-            $this->setTransactionResult($transaction_name, 400);
+            $this->setTransactionResult($transaction_name, 500);
         });
     }
 
@@ -58,7 +58,7 @@ class JobCollector extends EventDataCollector implements DataCollector
     }
 
     /**
-     * Jobs don't have a response code like HTTP but we'll add the 200 success or 400 failure anyway
+     * Jobs don't have a response code like HTTP but we'll add the 200 success or 500 failure anyway
      * because it helps with filtering in Elastic.
      */
     protected function setTransactionResult(string $transaction_name, int $result): void
