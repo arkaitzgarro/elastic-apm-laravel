@@ -10,14 +10,21 @@ use Jasny\DB\MySQL\QuerySplitter;
 /**
  * Collects info about the database executed queries.
  */
-class DBQueryCollector extends TimelineDataCollector implements DataCollector
+class DBQueryCollector extends EventDataCollector implements DataCollector
 {
     public function getName(): string
     {
         return 'query-collector';
     }
 
-    public function onQueryExecutedEvent(QueryExecuted $query): void
+    public function registerEventListeners(): void
+    {
+        $this->app->events->listen(QueryExecuted::class, function (QueryExecuted $query) {
+            $this->onQueryExecutedEvent($query);
+        });
+    }
+
+    private function onQueryExecutedEvent(QueryExecuted $query): void
     {
         if ('auto' === config('elastic-apm-laravel.spans.querylog.enabled')) {
             if ($query->time < config('elastic-apm-laravel.spans.querylog.threshold')) {
@@ -50,13 +57,6 @@ class DBQueryCollector extends TimelineDataCollector implements DataCollector
             $query['action'],
             $query['context']
         );
-    }
-
-    protected function registerEventListeners(): void
-    {
-        $this->app->events->listen(QueryExecuted::class, function (QueryExecuted $query) {
-            $this->onQueryExecutedEvent($query);
-        });
     }
 
     private function getQueryName(string $sql): string

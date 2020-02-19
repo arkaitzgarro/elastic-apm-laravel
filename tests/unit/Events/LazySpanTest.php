@@ -1,7 +1,5 @@
 <?php
 
-namespace AG\Tests\Events;
-
 use AG\ElasticApmLaravel\Events\LazySpan;
 use Codeception\Test\Unit;
 use PhilKra\Events\EventBean;
