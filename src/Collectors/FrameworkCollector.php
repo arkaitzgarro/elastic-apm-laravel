@@ -3,19 +3,18 @@
 namespace AG\ElasticApmLaravel\Collectors;
 
 use AG\ElasticApmLaravel\Contracts\DataCollector;
-use Illuminate\Foundation\Application;
 
 /**
  * Collects info about the Laravel initialization.
  */
-class FrameworkCollector extends TimelineDataCollector implements DataCollector
+class FrameworkCollector extends EventDataCollector implements DataCollector
 {
     public function getName(): string
     {
         return 'framework-collector';
     }
 
-    protected function registerEventListeners(): void
+    public function registerEventListeners(): void
     {
         // Application and Laravel startup times
         // LARAVEL_START is defined at the entry point of the application

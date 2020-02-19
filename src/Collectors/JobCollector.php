@@ -13,14 +13,14 @@ use Throwable;
 /**
  * Collects info about the job process.
  */
-class JobCollector extends TimelineDataCollector implements DataCollector
+class JobCollector extends EventDataCollector implements DataCollector
 {
     public function getName(): string
     {
         return 'job-collector';
     }
 
-    protected function registerEventListeners(): void
+    public function registerEventListeners(): void
     {
         $this->app->events->listen(JobProcessing::class, function (JobProcessing $event) {
             $transaction_name = $this->getTransactionName($event);

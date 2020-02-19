@@ -30,6 +30,10 @@ class ApmCollectorServiceTest extends Unit
             ->once()
             ->with('elastic-apm-laravel.active')
             ->andReturn(true);
+        $this->configMock->shouldReceive('get')
+            ->once()
+            ->with('elastic-apm-laravel.cli.active')
+            ->andReturn(true);
 
         $this->collectorService = new ApmCollectorService(
             $this->appMock,
@@ -136,6 +140,28 @@ class ApmCollectorServiceTest extends Unit
         $this->configMock->shouldReceive('get')
             ->once()
             ->with('elastic-apm-laravel.active')
+            ->andReturn(false);
+
+        $this->collectorService = new ApmCollectorService(
+            $this->appMock,
+            $this->eventsMock,
+            $this->configMock
+        );
+
+        $this->appMock->shouldNotReceive('make');
+
+        $this->collectorService->addCollector('App\Collectors\MyCollector');
+    }
+
+    public function testAddCollectorWithDisabledAgentForCli()
+    {
+        $this->configMock->shouldReceive('get')
+            ->once()
+            ->with('elastic-apm-laravel.active')
+            ->andReturn(true);
+        $this->configMock->shouldReceive('get')
+            ->once()
+            ->with('elastic-apm-laravel.cli.active')
             ->andReturn(false);
 
         $this->collectorService = new ApmCollectorService(

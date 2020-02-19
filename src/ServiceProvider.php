@@ -22,10 +22,7 @@ class ServiceProvider extends BaseServiceProvider
         // Always available, even when inactive
         $this->registerFacades();
 
-        if (
-            false === config('elastic-apm-laravel.active')
-            || ('cli' === php_sapi_name() && false === config('elastic-apm-laravel.cli.active'))
-        ) {
+        if ($this->isAgentDisabled()) {
             return;
         }
 
@@ -40,7 +37,7 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->publishConfig();
 
-        if (false === config('elastic-apm-laravel.active')) {
+        if ($this->isAgentDisabled()) {
             return;
         }
 
@@ -132,5 +129,11 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         return $config;
+    }
+
+    private function isAgentDisabled(): bool
+    {
+        return false === config('elastic-apm-laravel.active')
+            || ('cli' === php_sapi_name() && false === config('elastic-apm-laravel.cli.active'));
     }
 }
