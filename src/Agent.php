@@ -59,7 +59,7 @@ class Agent extends PhilKraAgent
         $this->addCollector(app(SpanCollector::class));
     }
 
-    public function addCollector(DataCollector $collector)
+    public function addCollector(DataCollector $collector): void
     {
         $this->collectors->put(
             $collector->getName(),
@@ -91,7 +91,7 @@ class Agent extends PhilKraAgent
         });
     }
 
-    public function getRequestStartTime()
+    public function getRequestStartTime(): float
     {
         return $this->request_start_time;
     }

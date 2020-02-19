@@ -9,10 +9,10 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Collects info about the request duration as well as providing
- * a way to log duration of any operations.
+ * Abstract class that provides base functionality to measure
+ * events dispatched by the framnewrok or your application code.
  */
-abstract class TimelineDataCollector implements DataCollector
+abstract class EventDataCollector implements DataCollector
 {
     /** @var Application */
     protected $app;
@@ -33,18 +33,12 @@ abstract class TimelineDataCollector implements DataCollector
     {
         $this->app = $app;
         $this->agent = $agent;
-
         $this->started_measures = new Collection();
         $this->measures = new Collection();
 
-        $this->request_start_time = $this->agent->getRequestStartTime();
+        $this->request_start_time = $agent->getRequestStartTime();
 
         $this->registerEventListeners();
-    }
-
-    public function getName(): string
-    {
-        return 'timeline';
     }
 
     /**
@@ -131,10 +125,6 @@ abstract class TimelineDataCollector implements DataCollector
         });
 
         return $this->measures;
-    }
-
-    protected function registerEventListeners(): void
-    {
     }
 
     private function toMilliseconds(float $time): float
