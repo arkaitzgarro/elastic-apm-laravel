@@ -16,7 +16,7 @@ class HttpRequestCollector extends EventDataCollector implements DataCollector
         return 'request-collector';
     }
 
-    protected function registerEventListeners(): void
+    public function registerEventListeners(): void
     {
         $this->app->booted(function () {
             $this->startMeasure('route_matching', 'laravel', 'request', 'Route matching');
