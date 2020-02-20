@@ -1,4 +1,4 @@
-# Elastic APM 
+# Elastic APM
 
 [![CircleCI](https://circleci.com/gh/arkaitzgarro/elastic-apm-laravel.svg?style=svg)](https://circleci.com/gh/arkaitzgarro/elastic-apm-laravel)
 [![Latest Stable Version](https://poser.pugx.org/arkaitzgarro/elastic-apm-laravel/v/stable)](https://packagist.org/packages/arkaitzgarro/elastic-apm-laravel)
@@ -111,7 +111,8 @@ The following environment variables are supported in the default configuration:
 
 | Variable          | Description |
 |-------------------|-------------|
-|APM_ACTIVE         | `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data. |
+|APM_ACTIVE         | `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data; span collection will also be disabled. |
+|APM_ACTIVE_CLI     | `true` or `false` defaults to `true`. If `false`, the agent will not collect or send transaction or span data for non-HTTP requests but HTTP requests will still follow APM_ACTIVE. When APM_ACTIVE is `false`, this will have no effect. |
 |APM_APPNAME        | Name of the app as it will appear in APM. Invalid special characters will be replaced with a hyphen. |
 |APM_APPVERSION     | Version of the app as it will appear in APM. |
 |APM_SERVERURL      | URL to the APM intake service. |
@@ -129,20 +130,6 @@ php artisan vendor:publish --tag=config
 ```
 
 Once published, open the `config/elastic-apm-laravel.php` file and review the various settings.
-
-## Manual span tracking
-
-Requests, jobs, and queries are handled automatically, but if you'd like to record additional spans throughout your app, you can do so via the `ApmCollector` facade. If APM_ACTIVE is not set, these measurements will be gracefully ignored. Usage:
-
-```php
-use AG\ElasticApmLaravel\Facades\ApmCollector;
-
-ApmCollector::startMeasure('my-custom-span', 'custom', 'measure', 'My custom span');
-
-// do something amazing
-
-ApmCollector::stopMeasure('my-custom-span');
-```
 
 ## Development
 

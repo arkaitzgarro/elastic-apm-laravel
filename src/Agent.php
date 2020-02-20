@@ -3,11 +3,12 @@
 namespace AG\ElasticApmLaravel;
 
 use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
+use AG\ElasticApmLaravel\Collectors\FrameworkCollector;
 use AG\ElasticApmLaravel\Collectors\HttpRequestCollector;
+use AG\ElasticApmLaravel\Collectors\JobCollector;
 use AG\ElasticApmLaravel\Collectors\SpanCollector;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use AG\ElasticApmLaravel\Events\LazySpan;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use PhilKra\Agent as PhilKraAgent;
 
@@ -43,8 +44,16 @@ class Agent extends PhilKraAgent
             $this->addCollector(app(DBQueryCollector::class));
         }
 
+        // Laravel init collector
+        $this->addCollector(app(FrameworkCollector::class));
+
         // Http request collector
-        $this->addCollector(app(HttpRequestCollector::class));
+        if ('cli' !== php_sapi_name()) {
+            $this->addCollector(app(HttpRequestCollector::class));
+        }
+
+        // Job collector
+        $this->addCollector(app(JobCollector::class));
 
         // Collector for manual measurements throughout the app
         $this->addCollector(app(SpanCollector::class));
@@ -80,16 +89,6 @@ class Agent extends PhilKraAgent
                 $this->putEvent($event);
             });
         });
-    }
-
-    /**
-     * Send Data to APM Service.
-     */
-    public function sendTransaction(string $transaction_name): bool
-    {
-        $this->collectEvents($transaction_name);
-
-        return parent::send();
     }
 
     public function getRequestStartTime(): float
