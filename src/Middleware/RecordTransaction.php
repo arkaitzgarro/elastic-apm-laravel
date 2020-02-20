@@ -4,6 +4,7 @@ namespace AG\ElasticApmLaravel\Middleware;
 
 use AG\ElasticApmLaravel\Agent;
 use Closure;
+use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Log;
@@ -25,10 +26,12 @@ use Throwable;
 class RecordTransaction
 {
     protected $agent;
+    protected $config;
 
-    public function __construct(Agent $agent)
+    public function __construct(Agent $agent, Config $config)
     {
         $this->agent = $agent;
+        $this->config = $config;
     }
 
     /**
@@ -44,7 +47,7 @@ class RecordTransaction
         // Execute the application logic
         $response = $next($request);
 
-        if (config('elastic-apm-laravel.transactions.useRouteUri')) {
+        if ($this->config->get('elastic-apm-laravel.transactions.useRouteUri')) {
             $transaction->setTransactionName($this->getRouteUriTransactionName($request));
         }
 
