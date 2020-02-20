@@ -1,7 +1,5 @@
 <?php
 
-namespace AG\Tests\Events;
-
 use AG\ElasticApmLaravel\Events\StartMeasuring;
 use Codeception\Test\Unit;
 

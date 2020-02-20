@@ -5,11 +5,38 @@ namespace AG\ElasticApmLaravel\Services;
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Events\StartMeasuring;
 use AG\ElasticApmLaravel\Events\StopMeasuring;
+use Illuminate\Config\Repository as Config;
+use Illuminate\Events\Dispatcher;
+use Illuminate\Foundation\Application;
 use PhilKra\Events\Transaction;
 use Throwable;
 
 class ApmCollectorService
 {
+    /**
+     * @var Illuminate\Foundation\Application
+     */
+    protected $app;
+
+    /**
+     * @var Illuminate\Events\Dispatcher
+     */
+    protected $events;
+
+    /**
+     * @var bool
+     */
+    private $is_agent_disabled;
+
+    public function __construct(Application $app, Dispatcher $events, Config $config)
+    {
+        $this->app = $app;
+        $this->events = $events;
+
+        $this->is_agent_disabled = false === $config->get('elastic-apm-laravel.active')
+            || ('cli' === php_sapi_name() && false === $config->get('elastic-apm-laravel.cli.active'));
+    }
+
     public function startMeasure(
         string $name,
         string $type = 'request',
@@ -17,22 +44,46 @@ class ApmCollectorService
         ?string $label = null,
         ?float $start_time = null
     ) {
-        event(new StartMeasuring($name, $type, $action, $label, $start_time));
+        $this->events->dispatch(
+            new StartMeasuring(
+                $name,
+                $type,
+                $action,
+                $label,
+                $start_time
+            )
+        );
     }
 
     public function stopMeasure(
         string $name,
         array $params = []
     ) {
-        event(new StopMeasuring($name, $params));
+        $this->events->dispatch(
+            new StopMeasuring(
+                $name,
+                $params
+            )
+        );
+    }
+
+    public function addCollector(string $collector_class): void
+    {
+        if ($this->is_agent_disabled) {
+            return;
+        }
+
+        $this->app->make(Agent::class)->addCollector(
+            $this->app->make($collector_class)
+        );
     }
 
     public function captureThrowable(Throwable $thrown, array $context = [], ?Transaction $parent = null)
     {
-        if (false === config('elastic-apm-laravel.active')) {
+        if ($this->is_agent_disabled) {
             return;
         }
 
-        app(Agent::class)->captureThrowable($thrown, $context, $parent);
+        $this->app->make(Agent::class)->captureThrowable($thrown, $context, $parent);
     }
 }

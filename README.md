@@ -1,6 +1,8 @@
-# Elastic APM 
+# Elastic APM
 
 [![CircleCI](https://circleci.com/gh/arkaitzgarro/elastic-apm-laravel.svg?style=svg)](https://circleci.com/gh/arkaitzgarro/elastic-apm-laravel)
+[![Latest Stable Version](https://poser.pugx.org/arkaitzgarro/elastic-apm-laravel/v/stable)](https://packagist.org/packages/arkaitzgarro/elastic-apm-laravel)
+[![License](https://poser.pugx.org/arkaitzgarro/elastic-apm-laravel/license)](https://packagist.org/packages/arkaitzgarro/elastic-apm-laravel)
 
 Elastic APM agent for v2 intake API. Compatible with Laravel 5.5+.
 
@@ -21,13 +23,96 @@ Add the ServiceProvider class to the providers array in `config/app.php`:
 
 From here, we will take care of everything based on your configuration. The agent and the middleware will be registered, and transactions will be sent to Elastic.
 
+## Collectors
+
+The default collectors typically listen on events to measure portions of the request such as framework loading, database queries, or jobs.
+
+The SpanCollector in particular allows you to measure any section of your own code via the `ApmCollector` Facade:
+
+```php
+use AG\ElasticApmLaravel\Facades\ApmCollector;
+
+ApmCollector::startMeasure('my-custom-span', 'custom', 'measure', 'My custom span');
+
+// do something amazing
+
+ApmCollector::stopMeasure('my-custom-span');
+```
+
+To record an additional span around your job execution, you may include the provided job middleware (Laravel 6+ only https://laravel.com/docs/6.x/queues#job-middleware):
+
+```php
+public function middleware()
+{
+    return [
+        app(\AG\ElasticApmLaravel\Jobs\Middleware\RecordTransaction::class),
+    ];
+}
+```
+
+### Add a collector for other events
+
+You can add extra collector(s) to listen to your own application events or Laravel events like `Illuminate\Mail\Events\MessageSending` for example. We created a base collector that already includes functionality to measure events, that you can extend from:
+
+```php
+// app/Collectors/MailMessageCollector.php
+
+namespace YourApp\Collectors;
+
+use AG\ElasticApmLaravel\Contracts\DataCollector;
+use AG\ElasticApmLaravel\Collectors\EventDataCollector;
+
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Mail\Events\MessageSent;
+
+class MailMessageCollector extends EventDataCollector implements DataCollector
+{
+    public function getName(): string
+    {
+        return 'mail-message-collector';
+    }
+
+    protected function registerEventListeners(): void
+    {
+        $this->app->events->listen(MessageSending::class, function (\Swift_Message $message) {
+            $this->startMeasure(
+                'mail #' . $message->getId(),
+                'mail.delivery',
+            );
+        });
+
+        $this->app->events->listen(StopMeasuring::class, function (\Swift_Message $message) {
+            $this->stopMeasure('mail #' . $message->getId());
+        });
+    }
+}
+
+```
+
+Don't forget to register your collector when the application starts:
+
+```php
+// app/Providers/AppServiceProvider.php
+
+use AG\ElasticApmLaravel\Facades\ApmCollector;
+
+use YourApp\Collectors\MailMessageCollector;
+
+public function boot()
+{
+    // ...
+    ApmCollector::addCollector(MailMessageCollector::class);
+}
+```
+
 ## Agent configuration
 
 The following environment variables are supported in the default configuration:
 
 | Variable          | Description |
 |-------------------|-------------|
-|APM_ACTIVE         | `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data. |
+|APM_ACTIVE         | `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data; span collection will also be disabled. |
+|APM_ACTIVE_CLI     | `true` or `false` defaults to `true`. If `false`, the agent will not collect or send transaction or span data for non-HTTP requests but HTTP requests will still follow APM_ACTIVE. When APM_ACTIVE is `false`, this will have no effect. |
 |APM_APPNAME        | Name of the app as it will appear in APM. Invalid special characters will be replaced with a hyphen. |
 |APM_APPVERSION     | Version of the app as it will appear in APM. |
 |APM_SERVERURL      | URL to the APM intake service. |
@@ -45,20 +130,6 @@ php artisan vendor:publish --tag=config
 ```
 
 Once published, open the `config/elastic-apm-laravel.php` file and review the various settings.
-
-## Manual span tracking
-
-Requests, jobs, and queries are handled automatically, but if you'd like to record additional spans throughout your app, you can do so via the `ApmCollector` facade. If APM_ACTIVE is not set, these measurements will be gracefully ignored. Usage:
-
-```php
-use AG\ElasticApmLaravel\Facades\ApmCollector;
-
-ApmCollector::startMeasure('my-custom-span', 'custom', 'measure', 'My custom span');
-
-// do something amazing
-
-ApmCollector::stopMeasure('my-custom-span');
-```
 
 ## Development
 

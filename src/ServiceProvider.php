@@ -13,15 +13,7 @@ class ServiceProvider extends BaseServiceProvider
     private $source_config_path = __DIR__ . '/../config/elastic-apm-laravel.php';
 
     /**
-     * Bootstrap the application events.
-     */
-    public function boot(): void
-    {
-        $this->publishConfig();
-    }
-
-    /**
-     * Register the service provider.
+     * Register the package Facade and APM agent.
      */
     public function register(): void
     {
@@ -30,11 +22,25 @@ class ServiceProvider extends BaseServiceProvider
         // Always available, even when inactive
         $this->registerFacades();
 
-        if (false === config('elastic-apm-laravel.active')) {
+        if ($this->isAgentDisabled()) {
             return;
         }
 
         $this->registerAgent();
+    }
+
+    /**
+     * Add the global transaction middleware
+     * and default event collectors.
+     */
+    public function boot(): void
+    {
+        $this->publishConfig();
+
+        if ($this->isAgentDisabled()) {
+            return;
+        }
+
         $this->registerMiddleware();
         $this->registerCollectors();
     }
@@ -77,7 +83,7 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerCollectors(): void
     {
         $agent = $this->app->make(Agent::class);
-        $agent->registerCollectors($this->app);
+        $agent->registerCollectors();
     }
 
     /**
@@ -123,5 +129,11 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         return $config;
+    }
+
+    private function isAgentDisabled(): bool
+    {
+        return false === config('elastic-apm-laravel.active')
+            || ('cli' === php_sapi_name() && false === config('elastic-apm-laravel.cli.active'));
     }
 }

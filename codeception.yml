@@ -1,7 +1,6 @@
-namespace: AG\Tests
 suites:
     unit:
-        path: .
+        path: unit
 
 settings:
     shuffle: true

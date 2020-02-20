@@ -2,41 +2,24 @@
 
 namespace AG\ElasticApmLaravel\Collectors;
 
-use AG\ElasticApmLaravel\Collectors\Interfaces\DataCollectorInterface;
-use Illuminate\Foundation\Application;
+use AG\ElasticApmLaravel\Contracts\DataCollector;
 use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Routing\Events\RouteMatched;
 
 /**
  * Collects info about the http request process.
  */
-class HttpRequestCollector extends TimelineDataCollector implements DataCollectorInterface
+class HttpRequestCollector extends EventDataCollector implements DataCollector
 {
-    protected $app;
-
-    public function __construct(Application $app, float $request_start_time)
+    public function getName(): string
     {
-        parent::__construct($request_start_time);
-
-        $this->app = $app;
-        $this->registerEventListeners();
+        return 'request-collector';
     }
 
-    protected function registerEventListeners(): void
+    public function registerEventListeners(): void
     {
-        // Application and Laravel startup times
-        // LARAVEL_START is defined at the entry point of the application
-        // https://github.com/laravel/laravel/blob/master/public/index.php#L10
-        $this->startMeasure('app_boot', 'app', 'boot', 'App boot', LARAVEL_START);
-
-        $this->app->booting(function () {
-            $this->startMeasure('laravel_boot', 'laravel', 'boot', 'Laravel boot');
-            $this->stopMeasure('app_boot');
-        });
-
         $this->app->booted(function () {
             $this->startMeasure('route_matching', 'laravel', 'request', 'Route matching');
-            $this->stopMeasure('laravel_boot');
         });
 
         // Time between route resolution and request handled
@@ -46,7 +29,11 @@ class HttpRequestCollector extends TimelineDataCollector implements DataCollecto
         });
 
         $this->app->events->listen(RequestHandled::class, function () {
-            $this->stopMeasure('request_handled');
+            // Some middlewares might return a response
+            // before the RouteMatched has been dispatched
+            if ($this->hasStartedMeasure('request_handled')) {
+                $this->stopMeasure('request_handled');
+            }
         });
     }
 
