@@ -27,6 +27,7 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         $this->registerAgent();
+        $this->registerInitCollectors();
     }
 
     /**
@@ -84,6 +85,15 @@ class ServiceProvider extends BaseServiceProvider
     {
         $agent = $this->app->make(Agent::class);
         $agent->registerCollectors();
+    }
+
+    /**
+     * Register data collectors that require starting earlier - before boot.
+     */
+    protected function registerInitCollectors(): void
+    {
+        $agent = $this->app->make(Agent::class);
+        $agent->registerInitCollectors();
     }
 
     /**

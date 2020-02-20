@@ -37,15 +37,18 @@ class Agent extends PhilKraAgent
         $this->collectors = new Collection();
     }
 
+    public function registerInitCollectors(): void
+    {
+        // Laravel init collector
+        $this->addCollector(app(FrameworkCollector::class));
+    }
+
     public function registerCollectors(): void
     {
         if (false !== config('elastic-apm-laravel.spans.querylog.enabled')) {
             // DB Queries collector
             $this->addCollector(app(DBQueryCollector::class));
         }
-
-        // Laravel init collector
-        $this->addCollector(app(FrameworkCollector::class));
 
         // Http request collector
         if ('cli' !== php_sapi_name()) {
