@@ -3,9 +3,12 @@
 namespace AG\ElasticApmLaravel\Collectors;
 
 use AG\ElasticApmLaravel\Contracts\DataCollector;
+use Illuminate\Contracts\Queue\Job;
+use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Log;
 use PhilKra\Events\Transaction;
 use Throwable;
@@ -30,14 +33,22 @@ class JobCollector extends EventDataCollector implements DataCollector
 
         $this->app->events->listen(JobProcessed::class, function (JobProcessed $event) {
             $transaction_name = $this->getTransactionName($event);
-            $this->stopTransaction($transaction_name);
-            $this->setTransactionResult($transaction_name, 200);
+            $this->stopTransaction($transaction_name, 200);
+            $this->send($event->job);
         });
 
         $this->app->events->listen(JobFailed::class, function (JobFailed $event) {
             $transaction_name = $this->getTransactionName($event);
-            $this->stopTransaction($transaction_name);
-            $this->setTransactionResult($transaction_name, 500);
+            $this->agent->captureThrowable($event->exception, [], $this->agent->getTransaction($transaction_name));
+            $this->stopTransaction($transaction_name, 500);
+            $this->send($event->job);
+        });
+
+        $this->app->events->listen(JobExceptionOccurred::class, function (JobExceptionOccurred $event) {
+            $transaction_name = $this->getTransactionName($event);
+            $this->agent->captureThrowable($event->exception, [], $this->agent->getTransaction($transaction_name));
+            $this->stopTransaction($transaction_name, 500);
+            $this->send($event->job);
         });
     }
 
@@ -68,12 +79,23 @@ class JobCollector extends EventDataCollector implements DataCollector
         ]);
     }
 
-    protected function stopTransaction(string $transaction_name): void
+    protected function stopTransaction(string $transaction_name, int $result): void
+    {
+        // Stop the transaction and measure the time
+        $this->agent->stopTransaction($transaction_name);
+        $this->agent->collectEvents($transaction_name);
+
+        $this->setTransactionResult($transaction_name, $result);
+    }
+
+    protected function send(Job $job): void
     {
         try {
-            // Stop the transaction and measure the time
-            $this->agent->stopTransaction($transaction_name);
-            $this->agent->collectEvents($transaction_name);
+            if (! ($job instanceof SyncJob)) {
+                // When using a queued driver, send/flush transaction to make room for the next job in the queue
+                // Otherwise just send when the agent destructs
+                $this->agent->send();
+            }
         } catch (Throwable $t) {
             Log::error($t->getMessage());
         }
