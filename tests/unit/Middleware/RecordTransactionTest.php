@@ -81,7 +81,7 @@ class RecordTransactionTest extends Unit
             ->andReturn($this->transaction);
 
         $this->response->shouldReceive('getStatusCode')
-            ->once()
+            ->times(2)
             ->andReturn(200);
 
         $this->middleware->handle($this->request, function () {
@@ -99,7 +99,7 @@ class RecordTransactionTest extends Unit
             ->andReturn($this->transaction);
 
         $this->response->shouldReceive('getStatusCode')
-            ->once()
+            ->times(2)
             ->andReturn(200);
 
         $this->middleware->handle($this->request, function () {
@@ -124,6 +124,9 @@ class RecordTransactionTest extends Unit
 
     public function testTransactionTerminate()
     {
+        // Don't expect Config::get to be called
+        Config::mockery_teardown();
+
         $this->agent->shouldReceive('stopTransaction')
             ->once()
             ->with('GET /ping');
