@@ -19,11 +19,6 @@ class RecordTransactionTest extends Unit
     private $agent;
 
     /**
-     * @var Illuminate\Config\Repository
-     */
-    private $config;
-
-    /**
      * @var Illuminate\Http\Request
      */
     private $request;
@@ -49,11 +44,10 @@ class RecordTransactionTest extends Unit
         $this->response->headers = new ResponseHeaderBag();
 
         Config::shouldReceive('get')
-            ->once()
             ->with('elastic-apm-laravel.transactions.useRouteUri')
             ->andReturn(false);
 
-        $this->middleware = new RecordTransaction($this->agent, $this->config);
+        $this->middleware = new RecordTransaction($this->agent);
     }
 
     public function testStartTransaction()
