@@ -4,9 +4,9 @@ use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Middleware\RecordTransaction;
 use Codeception\Test\Unit;
 use DMS\PHPUnitExtensions\ArraySubset\Assert;
-use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use PhilKra\Events\Transaction;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -43,13 +43,12 @@ class RecordTransactionTest extends Unit
     protected function _before()
     {
         $this->agent = Mockery::mock(Agent::class);
-        $this->config = Mockery::mock(Config::class);
         $this->transaction = Mockery::mock(Transaction::class)->makePartial();
         $this->request = Request::create('/ping', 'GET');
         $this->response = Mockery::mock(Response::class)->makePartial();
         $this->response->headers = new ResponseHeaderBag();
 
-        $this->config->shouldReceive('get')
+        Config::shouldReceive('get')
             ->once()
             ->with('elastic-apm-laravel.transactions.useRouteUri')
             ->andReturn(false);

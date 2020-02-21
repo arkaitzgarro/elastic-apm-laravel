@@ -1,7 +1,3 @@
-suites:
-    unit:
-        path: unit
-
 settings:
     shuffle: true
     lint: true
