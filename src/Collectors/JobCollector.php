@@ -72,26 +72,17 @@ class JobCollector extends EventDataCollector implements DataCollector
      * Jobs don't have a response code like HTTP but we'll add the 200 success or 500 failure anyway
      * because it helps with filtering in Elastic.
      */
-    protected function setTransactionResult(string $transaction_name, int $result): void
-    {
-        $this->agent->getTransaction($transaction_name)->setMeta([
-            'result' => $result,
-        ]);
-    }
-
     protected function stopTransaction(string $transaction_name, int $result): void
     {
         // Stop the transaction and measure the time
-        $this->agent->stopTransaction($transaction_name);
+        $this->agent->stopTransaction($transaction_name, ['result' => $result]);
         $this->agent->collectEvents($transaction_name);
-
-        $this->setTransactionResult($transaction_name, $result);
     }
 
     protected function send(Job $job): void
     {
         try {
-            if (! ($job instanceof SyncJob)) {
+            if (!($job instanceof SyncJob)) {
                 // When using a queued driver, send/flush transaction to make room for the next job in the queue
                 // Otherwise just send when the agent destructs
                 $this->agent->send();
