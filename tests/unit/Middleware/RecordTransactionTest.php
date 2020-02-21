@@ -50,6 +50,7 @@ class RecordTransactionTest extends Unit
         $this->response->headers = new ResponseHeaderBag();
 
         $this->config->shouldReceive('get')
+            ->once()
             ->with('elastic-apm-laravel.transactions.useRouteUri')
             ->andReturn(false);
 
@@ -77,9 +78,11 @@ class RecordTransactionTest extends Unit
     public function testTransactionMetadata()
     {
         $this->agent->shouldReceive('startTransaction')
+            ->once()
             ->andReturn($this->transaction);
 
         $this->response->shouldReceive('getStatusCode')
+            ->once()
             ->andReturn(200);
 
         $this->middleware->handle($this->request, function () {
@@ -93,9 +96,11 @@ class RecordTransactionTest extends Unit
     public function testTransactionContext()
     {
         $this->agent->shouldReceive('startTransaction')
+            ->once()
             ->andReturn($this->transaction);
 
         $this->response->shouldReceive('getStatusCode')
+            ->once()
             ->andReturn(200);
 
         $this->middleware->handle($this->request, function () {
@@ -134,6 +139,7 @@ class RecordTransactionTest extends Unit
     public function testTransactionTerminateError()
     {
         $this->agent->shouldReceive('stopTransaction')
+            ->once()
             ->andThrow('exception', 'error message');
 
         Log::shouldReceive('error')
