@@ -8,6 +8,8 @@ use AG\ElasticApmLaravel\Events\StopMeasuring;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Foundation\Application;
+use PhilKra\Events\Transaction;
+use Throwable;
 
 class ApmCollectorService
 {
@@ -74,5 +76,14 @@ class ApmCollectorService
         $this->app->make(Agent::class)->addCollector(
             $this->app->make($collector_class)
         );
+    }
+
+    public function captureThrowable(Throwable $thrown, array $context = [], ?Transaction $parent = null)
+    {
+        if ($this->is_agent_disabled) {
+            return;
+        }
+
+        $this->app->make(Agent::class)->captureThrowable($thrown, $context, $parent);
     }
 }
