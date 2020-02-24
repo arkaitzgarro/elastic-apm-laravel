@@ -4,10 +4,10 @@ use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Middleware\RecordTransaction;
 use Codeception\Test\Unit;
 use DMS\PHPUnitExtensions\ArraySubset\Assert;
+use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Log\Logger;
 use PhilKra\Events\Transaction;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
@@ -28,6 +28,9 @@ class RecordTransactionTest extends Unit
      */
     private $response;
 
+    /**
+     * @var AG\ElasticApmLaravel\Middleware\RecordTransaction
+     */
     private $middleware;
 
     /**
@@ -38,20 +41,31 @@ class RecordTransactionTest extends Unit
     protected function _before()
     {
         $this->agent = Mockery::mock(Agent::class);
+        $this->log = Mockery::mock(Logger::class);
         $this->transaction = Mockery::mock(Transaction::class)->makePartial();
         $this->request = Request::create('/ping', 'GET');
         $this->response = Mockery::mock(Response::class)->makePartial();
         $this->response->headers = new ResponseHeaderBag();
+    }
 
-        Config::shouldReceive('get')
+    protected function createMiddlewareInstance(bool $use_route_uri): void
+    {
+        $this->config = Mockery::mock(Config::class);
+        $this->config->shouldReceive('get')
             ->with('elastic-apm-laravel.transactions.useRouteUri')
-            ->andReturn(false);
+            ->andReturn($use_route_uri);
 
-        $this->middleware = new RecordTransaction($this->agent);
+        $this->middleware = new RecordTransaction(
+            $this->agent,
+            $this->config,
+            $this->log
+        );
     }
 
     public function testStartTransaction()
     {
+        $this->createMiddlewareInstance(false);
+
         $this->agent->shouldReceive('startTransaction')
             ->once()
             ->withArgs(function ($transaction_name, $context, $request_time) {
@@ -70,6 +84,8 @@ class RecordTransactionTest extends Unit
 
     public function testTransactionMetadata()
     {
+        $this->createMiddlewareInstance(false);
+
         $this->agent->shouldReceive('startTransaction')
             ->once()
             ->andReturn($this->transaction);
@@ -88,6 +104,8 @@ class RecordTransactionTest extends Unit
 
     public function testTransactionContext()
     {
+        $this->createMiddlewareInstance(false);
+
         $this->agent->shouldReceive('startTransaction')
             ->once()
             ->andReturn($this->transaction);
@@ -116,10 +134,26 @@ class RecordTransactionTest extends Unit
         ], $context['user']);
     }
 
+    public function testUseRouteUri()
+    {
+        $this->createMiddlewareInstance(true);
+
+        $this->agent->shouldReceive('startTransaction')
+            ->once()
+            ->andReturn($this->transaction);
+
+        $this->transaction->shouldReceive('setTransactionName')
+            ->once()
+            ->with('GET /path/script.php');
+
+        $this->middleware->handle($this->request, function () {
+            return $this->response;
+        });
+    }
+
     public function testTransactionTerminate()
     {
-        // Don't expect Config::get to be called
-        Config::mockery_teardown();
+        $this->createMiddlewareInstance(false);
 
         $this->agent->shouldReceive('stopTransaction')
             ->once()
@@ -134,11 +168,13 @@ class RecordTransactionTest extends Unit
 
     public function testTransactionTerminateError()
     {
+        $this->createMiddlewareInstance(false);
+
         $this->agent->shouldReceive('stopTransaction')
             ->once()
             ->andThrow('exception', 'error message');
 
-        Log::shouldReceive('error')
+        $this->log->shouldReceive('error')
             ->once()
             ->with('error message');
 
