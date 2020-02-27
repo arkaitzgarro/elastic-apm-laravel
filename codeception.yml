@@ -1,6 +1,4 @@
-suites:
-    unit:
-        path: unit
+bootstrap: bootstrap.php
 
 settings:
     shuffle: true
