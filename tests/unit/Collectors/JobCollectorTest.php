@@ -37,10 +37,6 @@ class JobCollectorTest extends Unit
         parent::setUp();
 
         $this->jobMock = Mockery::mock(Job::class);
-        $this->jobMock
-            ->shouldReceive('resolveName')
-            ->once()
-            ->andReturn(self::JOB_NAME);
 
         $this->transactionMock = Mockery::mock(Transaction::class);
 
@@ -69,10 +65,10 @@ class JobCollectorTest extends Unit
 
     public function testJobProcessingListener()
     {
-        $this->transactionMock
-            ->shouldReceive('setMeta')
+        $this->jobMock
+            ->shouldReceive('resolveName')
             ->once()
-            ->with(['type' => 'job']);
+            ->andReturn(self::JOB_NAME);
         $this->agentMock
             ->shouldReceive('startTransaction')
             ->once()
@@ -89,6 +85,10 @@ class JobCollectorTest extends Unit
 
     public function testJobProcessedListener()
     {
+        $this->jobMock
+            ->shouldReceive('resolveName')
+            ->once()
+            ->andReturn(self::JOB_NAME);
         $this->agentMock
             ->shouldReceive('stopTransaction')
             ->once()
@@ -108,6 +108,10 @@ class JobCollectorTest extends Unit
     {
         $exception = new Exception('fail');
 
+        $this->jobMock
+            ->shouldReceive('resolveName')
+            ->once()
+            ->andReturn(self::JOB_NAME);
         $this->agentMock
             ->shouldReceive('getTransaction')
             ->once()
@@ -136,6 +140,10 @@ class JobCollectorTest extends Unit
     {
         $exception = new Exception('occurred');
 
+        $this->jobMock
+            ->shouldReceive('resolveName')
+            ->once()
+            ->andReturn(self::JOB_NAME);
         $this->agentMock
             ->shouldReceive('getTransaction')
             ->once()
@@ -162,6 +170,10 @@ class JobCollectorTest extends Unit
 
     public function testJobProcessedExceptionOnSend()
     {
+        $this->jobMock
+            ->shouldReceive('resolveName')
+            ->once()
+            ->andReturn(self::JOB_NAME);
         $this->agentMock
             ->shouldReceive('stopTransaction')
             ->once()
