@@ -6,8 +6,8 @@ use AG\ElasticApmLaravel\Agent;
 use Closure;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request;
-use Illuminate\Log\Logger;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\Log;
 use PhilKra\Events\Transaction;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -27,13 +27,11 @@ class RecordTransaction
 {
     protected $agent;
     protected $config;
-    protected $log;
 
-    public function __construct(Agent $agent, Config $config, Logger $log)
+    public function __construct(Agent $agent, Config $config)
     {
         $this->agent = $agent;
         $this->config = $config;
-        $this->log = $log;
     }
 
     /**
@@ -89,7 +87,7 @@ class RecordTransaction
             $this->agent->stopTransaction($transaction_name);
             $this->agent->collectEvents($transaction_name);
         } catch (Throwable $t) {
-            $this->log->error($t->getMessage());
+            Log::error($t->getMessage());
         }
     }
 
