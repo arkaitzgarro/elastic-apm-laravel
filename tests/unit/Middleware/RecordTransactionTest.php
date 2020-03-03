@@ -7,7 +7,7 @@ use DMS\PHPUnitExtensions\ArraySubset\Assert;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Log\Logger;
+use Illuminate\Support\Facades\Log;
 use PhilKra\Events\Transaction;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
@@ -41,7 +41,6 @@ class RecordTransactionTest extends Unit
     protected function _before()
     {
         $this->agent = Mockery::mock(Agent::class);
-        $this->log = Mockery::mock(Logger::class);
         $this->transaction = Mockery::mock(Transaction::class)->makePartial();
         $this->request = Request::create('/ping', 'GET');
         $this->response = Mockery::mock(Response::class)->makePartial();
@@ -58,7 +57,6 @@ class RecordTransactionTest extends Unit
         $this->middleware = new RecordTransaction(
             $this->agent,
             $this->config,
-            $this->log
         );
     }
 
@@ -174,7 +172,7 @@ class RecordTransactionTest extends Unit
             ->once()
             ->andThrow('exception', 'error message');
 
-        $this->log->shouldReceive('error')
+        Log::shouldReceive('error')
             ->once()
             ->with('error message');
 
