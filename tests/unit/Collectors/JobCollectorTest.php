@@ -72,7 +72,13 @@ class JobCollectorTest extends Unit
         $this->agentMock
             ->shouldReceive('startTransaction')
             ->once()
-            ->with(self::JOB_NAME, [], self::REQUEST_START_TIME)
+            ->withArgs(function ($job_name, $context, $start_time) {
+                $this->assertEquals(self::JOB_NAME, $job_name);
+                $this->assertEquals([], $context);
+                $this->assertNotNull($start_time);
+
+                return true;
+            })
             ->andReturn($this->transactionMock);
         $this->agentMock
             ->shouldReceive('getTransaction')
