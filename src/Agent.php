@@ -40,7 +40,11 @@ class Agent extends PhilKraAgent
     public function registerInitCollectors(): void
     {
         // Laravel init collector
-        $this->addCollector(app(FrameworkCollector::class));
+        if ('cli' !== php_sapi_name()) {
+            // For cli executions, like queue workers, the application
+            // only starts once. It doesn't really make sense to measure it.
+            $this->addCollector(app(FrameworkCollector::class));
+        }
     }
 
     public function registerCollectors(): void
