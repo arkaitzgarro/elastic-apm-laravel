@@ -13,6 +13,7 @@ use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Log;
 use PhilKra\Events\Transaction;
+use PhilKra\Exception\Transaction\UnknownTransactionException;
 
 class JobCollectorTest extends Unit
 {
@@ -142,6 +143,34 @@ class JobCollectorTest extends Unit
         $this->dispatcher->dispatch(new JobFailed('test', $this->jobMock, $exception));
     }
 
+    public function testJobFailedListenerWithMissingTransaction()
+    {
+        $exception = new Exception('fail');
+
+        $this->jobMock
+            ->shouldReceive('resolveName')
+            ->once()
+            ->andReturn(self::JOB_NAME);
+        $this->agentMock
+            ->shouldReceive('getTransaction')
+            ->once()
+            ->with(self::JOB_NAME)
+            ->andThrow(new UnknownTransactionException());
+        $this->agentMock
+            ->shouldReceive('captureThrowable')
+            ->once()
+            ->with($exception, [], null);
+        $this->agentMock
+            ->shouldNotReceive('stopTransaction');
+        $this->agentMock
+            ->shouldNotReceive('collectEvents');
+        $this->agentMock
+            ->shouldReceive('send')
+            ->once();
+
+        $this->dispatcher->dispatch(new JobFailed('test', $this->jobMock, $exception));
+    }
+
     public function testJobExceptionOccurredListener()
     {
         $exception = new Exception('occurred');
@@ -171,7 +200,35 @@ class JobCollectorTest extends Unit
             ->shouldReceive('send')
             ->once();
 
-        $this->dispatcher->dispatch(new JobFailed('test', $this->jobMock, $exception));
+        $this->dispatcher->dispatch(new JobExceptionOccurred('test', $this->jobMock, $exception));
+    }
+
+    public function testJobExceptionOccurredListenerWithMissingTransaction()
+    {
+        $exception = new Exception('occurred');
+
+        $this->jobMock
+            ->shouldReceive('resolveName')
+            ->once()
+            ->andReturn(self::JOB_NAME);
+        $this->agentMock
+            ->shouldReceive('getTransaction')
+            ->once()
+            ->with(self::JOB_NAME)
+            ->andThrow(new UnknownTransactionException());
+        $this->agentMock
+            ->shouldReceive('captureThrowable')
+            ->once()
+            ->with($exception, [], null);
+        $this->agentMock
+            ->shouldNotReceive('stopTransaction');
+        $this->agentMock
+            ->shouldNotReceive('collectEvents');
+        $this->agentMock
+            ->shouldReceive('send')
+            ->once();
+
+        $this->dispatcher->dispatch(new JobExceptionOccurred('test', $this->jobMock, $exception));
     }
 
     public function testJobProcessedExceptionOnSend()
