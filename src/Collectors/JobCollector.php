@@ -11,6 +11,7 @@ use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Log;
 use PhilKra\Events\Transaction;
+use PhilKra\Exception\Transaction\UnknownTransactionException;
 use Throwable;
 
 /**
@@ -39,17 +40,32 @@ class JobCollector extends EventDataCollector implements DataCollector
 
         $this->app->events->listen(JobFailed::class, function (JobFailed $event) {
             $transaction_name = $this->getTransactionName($event);
-            $this->agent->captureThrowable($event->exception, [], $this->agent->getTransaction($transaction_name));
-            $this->stopTransaction($transaction_name, 500);
+            $transaction = $this->getTransaction($transaction_name);
+            $this->agent->captureThrowable($event->exception, [], $transaction);
+            if ($transaction) {
+                $this->stopTransaction($transaction_name, 500);
+            }
             $this->send($event->job);
         });
 
         $this->app->events->listen(JobExceptionOccurred::class, function (JobExceptionOccurred $event) {
             $transaction_name = $this->getTransactionName($event);
-            $this->agent->captureThrowable($event->exception, [], $this->agent->getTransaction($transaction_name));
-            $this->stopTransaction($transaction_name, 500);
+            $transaction = $this->getTransaction($transaction_name);
+            $this->agent->captureThrowable($event->exception, [], $transaction);
+            if ($transaction) {
+                $this->stopTransaction($transaction_name, 500);
+            }
             $this->send($event->job);
         });
+    }
+
+    protected function getTransaction(string $transaction_name): ?Transaction
+    {
+        try {
+            return $this->agent->getTransaction($transaction_name);
+        } catch (UnknownTransactionException $e) {
+            return null;
+        }
     }
 
     protected function startTransaction(string $transaction_name): Transaction
