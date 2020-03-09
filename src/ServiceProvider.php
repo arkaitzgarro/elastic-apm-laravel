@@ -74,10 +74,8 @@ class ServiceProvider extends BaseServiceProvider
      */
     protected function registerMiddleware(): void
     {
-        if ('OPTIONS' !== $this->app['request']->method()) {
-            $kernel = $this->app->make(Kernel::class);
-            $kernel->prependMiddleware(RecordTransaction::class);
-        }
+        $kernel = $this->app->make(Kernel::class);
+        $kernel->prependMiddleware(RecordTransaction::class);
     }
 
     /**
