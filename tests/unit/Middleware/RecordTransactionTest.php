@@ -47,7 +47,7 @@ class RecordTransactionTest extends Unit
         $this->response->headers = new ResponseHeaderBag();
     }
 
-    protected function createMiddlewareInstance(bool $use_route_uri, ?string $ignore_patterns): void
+    protected function createMiddlewareInstance(bool $use_route_uri, string $ignore_patterns = ''): void
     {
         $this->config = Mockery::mock(Config::class);
         $this->config->shouldReceive('get')
@@ -55,6 +55,7 @@ class RecordTransactionTest extends Unit
             ->andReturn($use_route_uri);
         $this->config->shouldReceive('get')
             ->with('elastic-apm-laravel.transactions.ignorePatterns')
+            ->once()
             ->andReturn($ignore_patterns);
 
         $this->middleware = new RecordTransaction(
@@ -65,7 +66,7 @@ class RecordTransactionTest extends Unit
 
     public function testStartTransaction()
     {
-        $this->createMiddlewareInstance(false, null);
+        $this->createMiddlewareInstance(false);
 
         $this->agent->shouldReceive('startTransaction')
             ->once()
@@ -85,7 +86,7 @@ class RecordTransactionTest extends Unit
 
     public function testTransactionMetadata()
     {
-        $this->createMiddlewareInstance(false, null);
+        $this->createMiddlewareInstance(false);
 
         $this->agent->shouldReceive('startTransaction')
             ->once()
@@ -105,7 +106,7 @@ class RecordTransactionTest extends Unit
 
     public function testTransactionContext()
     {
-        $this->createMiddlewareInstance(false, null);
+        $this->createMiddlewareInstance(false);
 
         $this->agent->shouldReceive('startTransaction')
             ->once()
@@ -137,7 +138,7 @@ class RecordTransactionTest extends Unit
 
     public function testUseRouteUri()
     {
-        $this->createMiddlewareInstance(true, null);
+        $this->createMiddlewareInstance(true);
 
         $this->agent->shouldReceive('startTransaction')
             ->once()
@@ -169,18 +170,19 @@ class RecordTransactionTest extends Unit
 
     public function testTransactionTerminateIgnored()
     {
-        $this->createMiddlewareInstance(false, '/\/health-check|^OPTIONS /');
-
         $this->agent->shouldNotReceive('stopTransaction');
         $this->agent->shouldNotReceive('collectEvents');
 
+        $this->createMiddlewareInstance(false, '/\/health-check|^OPTIONS /');
         $this->middleware->terminate(Request::create('/posts', 'OPTIONS'));
+
+        $this->createMiddlewareInstance(false, '/\/health-check|^OPTIONS /'); // reset the mock ->once() count
         $this->middleware->terminate(Request::create('/health-check', 'GET'));
     }
 
     public function testTransactionTerminateError()
     {
-        $this->createMiddlewareInstance(false, null);
+        $this->createMiddlewareInstance(false);
 
         $this->agent->shouldReceive('stopTransaction')
             ->once()
