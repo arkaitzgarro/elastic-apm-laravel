@@ -3,6 +3,7 @@
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Collectors\JobCollector;
 use Codeception\Test\Unit;
+use Illuminate\Config\Repository as Config;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Foundation\Application;
@@ -18,6 +19,8 @@ use PhilKra\Exception\Transaction\UnknownTransactionException;
 class JobCollectorTest extends Unit
 {
     private const JOB_NAME = 'This\Is\A\Test\Job';
+    // Use 4 backslashes to match a single backslash: https://stackoverflow.com/a/15369828
+    private const JOB_IGNORE_PATTERN = "/\/health-check|This\\\\Is\\\\A\\\\Test\\\\Job/";
     private const REQUEST_START_TIME = 1000.0;
 
     /**
@@ -47,7 +50,9 @@ class JobCollectorTest extends Unit
             ->once()
             ->andReturn(self::REQUEST_START_TIME);
 
-        $this->collector = new JobCollector($this->app, $this->agentMock);
+        $this->configMock = Mockery::mock(Config::class);
+
+        $this->collector = new JobCollector($this->app, $this->agentMock, $this->configMock);
     }
 
     protected function tearDown(): void
@@ -59,13 +64,66 @@ class JobCollectorTest extends Unit
         $this->dispatcher->forget(JobExceptionOccurred::class);
     }
 
+    protected function patternConfigReturn($configIgnore = null): void
+    {
+        $this->configMock->shouldReceive('get')
+            ->once()
+            ->with('elastic-apm-laravel.transactions.ignorePatterns')
+            ->andReturn($configIgnore);
+    }
+
     public function testCollectorName()
     {
         $this->assertEquals('job-collector', $this->collector->getName());
     }
 
+    public function testJobProcessingListenerIgnored()
+    {
+        $this->patternConfigReturn(self::JOB_IGNORE_PATTERN);
+        $this->jobMock->shouldReceive('resolveName')->once()->andReturn(self::JOB_NAME);
+        $this->agentMock->shouldNotReceive('startTransaction');
+        $this->agentMock->shouldNotReceive('getTransaction');
+
+        $this->dispatcher->dispatch(new JobProcessing('test', $this->jobMock));
+    }
+
+    public function testJobProcessedListenerIgnored()
+    {
+        $this->patternConfigReturn(self::JOB_IGNORE_PATTERN);
+        $this->jobMock->shouldReceive('resolveName')->once()->andReturn(self::JOB_NAME);
+        $this->agentMock->shouldNotReceive('stopTransaction');
+        $this->agentMock->shouldNotReceive('collectEvents');
+        $this->agentMock->shouldNotReceive('send');
+
+        $this->dispatcher->dispatch(new JobProcessed('test', $this->jobMock));
+    }
+
+    public function testJobFailedListenerIgnored()
+    {
+        $this->patternConfigReturn(self::JOB_IGNORE_PATTERN);
+        $this->jobMock->shouldReceive('resolveName')->once()->andReturn(self::JOB_NAME);
+        $this->agentMock->shouldNotReceive('getTransaction');
+        $this->agentMock->shouldNotReceive('captureThrowable');
+        $this->agentMock->shouldNotReceive('stopTransaction');
+
+        $this->dispatcher->dispatch(new JobFailed('test', $this->jobMock, new Exception()));
+    }
+
+    public function testJobExceptionOccurredListenerIgnored()
+    {
+        $this->patternConfigReturn(self::JOB_IGNORE_PATTERN);
+        $this->jobMock->shouldReceive('resolveName')->once()->andReturn(self::JOB_NAME);
+        $this->agentMock->shouldNotReceive('getTransaction');
+        $this->agentMock->shouldNotReceive('captureThrowable');
+        $this->agentMock->shouldNotReceive('stopTransaction');
+
+        $this->dispatcher->dispatch(new JobExceptionOccurred('test', $this->jobMock, new Exception()));
+    }
+
     public function testJobProcessingListener()
     {
+        $this->patternConfigReturn();
+
         $this->jobMock
             ->shouldReceive('resolveName')
             ->once()
@@ -92,6 +150,8 @@ class JobCollectorTest extends Unit
 
     public function testJobProcessedListener()
     {
+        $this->patternConfigReturn();
+
         $this->jobMock
             ->shouldReceive('resolveName')
             ->once()
@@ -113,6 +173,8 @@ class JobCollectorTest extends Unit
 
     public function testJobFailedListener()
     {
+        $this->patternConfigReturn();
+
         $exception = new Exception('fail');
 
         $this->jobMock
@@ -145,6 +207,8 @@ class JobCollectorTest extends Unit
 
     public function testJobFailedListenerWithMissingTransaction()
     {
+        $this->patternConfigReturn();
+
         $exception = new Exception('fail');
 
         $this->jobMock
@@ -173,6 +237,8 @@ class JobCollectorTest extends Unit
 
     public function testJobExceptionOccurredListener()
     {
+        $this->patternConfigReturn();
+
         $exception = new Exception('occurred');
 
         $this->jobMock
@@ -205,6 +271,8 @@ class JobCollectorTest extends Unit
 
     public function testJobExceptionOccurredListenerWithMissingTransaction()
     {
+        $this->patternConfigReturn();
+
         $exception = new Exception('occurred');
 
         $this->jobMock
@@ -233,6 +301,8 @@ class JobCollectorTest extends Unit
 
     public function testJobProcessedExceptionOnSend()
     {
+        $this->patternConfigReturn();
+
         $this->jobMock
             ->shouldReceive('resolveName')
             ->once()
@@ -259,6 +329,8 @@ class JobCollectorTest extends Unit
 
     public function testJobProcessedSyncDriver()
     {
+        $this->patternConfigReturn();
+
         $this->agentMock
             ->shouldReceive('stopTransaction')
             ->once()
