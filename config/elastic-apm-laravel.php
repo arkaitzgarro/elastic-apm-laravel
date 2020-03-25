@@ -40,8 +40,10 @@ return [
     ],
 
     'transactions' => [
-        //This option will bundle transaction on the route name without variables
+        // This option will bundle transaction on the route name without variables.
         'useRouteUri' => env('APM_USEROUTEURI', true),
+        // This is a regular expression to match and filter out transactions by name. Use | in regex for multiple patterns.
+        'ignorePatterns' => env('APM_IGNORE_PATTERNS', null),
     ],
 
     'spans' => [

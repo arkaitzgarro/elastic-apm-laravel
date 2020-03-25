@@ -28,34 +28,42 @@ class JobCollector extends EventDataCollector implements DataCollector
     {
         $this->app->events->listen(JobProcessing::class, function (JobProcessing $event) {
             $transaction_name = $this->getTransactionName($event);
-            $this->startTransaction($transaction_name);
-            $this->setTransactionType($transaction_name);
+            if ($transaction_name) {
+                $this->startTransaction($transaction_name);
+                $this->setTransactionType($transaction_name);
+            }
         });
 
         $this->app->events->listen(JobProcessed::class, function (JobProcessed $event) {
             $transaction_name = $this->getTransactionName($event);
-            $this->stopTransaction($transaction_name, 200);
-            $this->send($event->job);
+            if ($transaction_name) {
+                $this->stopTransaction($transaction_name, 200);
+                $this->send($event->job);
+            }
         });
 
         $this->app->events->listen(JobFailed::class, function (JobFailed $event) {
             $transaction_name = $this->getTransactionName($event);
-            $transaction = $this->getTransaction($transaction_name);
-            $this->agent->captureThrowable($event->exception, [], $transaction);
-            if ($transaction) {
-                $this->stopTransaction($transaction_name, 500);
+            if ($transaction_name) {
+                $transaction = $this->getTransaction($transaction_name);
+                $this->agent->captureThrowable($event->exception, [], $transaction);
+                if ($transaction) {
+                    $this->stopTransaction($transaction_name, 500);
+                }
+                $this->send($event->job);
             }
-            $this->send($event->job);
         });
 
         $this->app->events->listen(JobExceptionOccurred::class, function (JobExceptionOccurred $event) {
             $transaction_name = $this->getTransactionName($event);
-            $transaction = $this->getTransaction($transaction_name);
-            $this->agent->captureThrowable($event->exception, [], $transaction);
-            if ($transaction) {
-                $this->stopTransaction($transaction_name, 500);
+            if ($transaction_name) {
+                $transaction = $this->getTransaction($transaction_name);
+                $this->agent->captureThrowable($event->exception, [], $transaction);
+                if ($transaction) {
+                    $this->stopTransaction($transaction_name, 500);
+                }
+                $this->send($event->job);
             }
-            $this->send($event->job);
         });
     }
 
@@ -110,8 +118,20 @@ class JobCollector extends EventDataCollector implements DataCollector
         }
     }
 
+    /**
+     * Return no name if we shouldn't record this transaction.
+     */
     protected function getTransactionName($event): string
     {
-        return $event->job->resolveName();
+        $transaction_name = $event->job->resolveName();
+
+        return $this->shouldIgnoreTransaction($transaction_name) ? '' : $transaction_name;
+    }
+
+    protected function shouldIgnoreTransaction(string $transaction_name): bool
+    {
+        $pattern = $this->config->get('elastic-apm-laravel.transactions.ignorePatterns');
+
+        return $pattern && preg_match($pattern, $transaction_name);
     }
 }

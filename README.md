@@ -118,6 +118,7 @@ The following environment variables are supported in the default configuration:
 |APM_SERVERURL      | URL to the APM intake service. |
 |APM_SECRETTOKEN    | Secret token, if required. |
 |APM_USEROUTEURI    | `true` or `false` defaults to `true`. The default behavior is to record the URL as defined in your routes configuration. Set to `false` to record the requested URL, but keep in mind that this can result in excessive unique entries in APM. |
+|APM_IGNORE_PATTERNS| Ignore specific routes or jobs by transaction name. Should be a regular expression, and will match multiple patterns via pipe `\|` in the regex. Note that 4 backslashes should be used to match a single backslash. Example: `"/\/health-check\|^OPTIONS \|Foo\\\\Bar\\\\Job/"` |
 |APM_QUERYLOG       | `true` or `false` defaults to 'true'. Set to `false` to completely disable query logging, or to `auto` if you would like to use the threshold feature. |
 |APM_THRESHOLD      | Query threshold in milliseconds, defaults to `200`. If a query takes longer then 200ms, we enable the query log. Make sure you set `APM_QUERYLOG=auto`. |
 |APM_BACKTRACEDEPTH | Defaults to `25`. Depth of backtrace in query span. |
