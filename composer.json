@@ -15,10 +15,10 @@
     ],
     "require": {
         "php": ">=7.3",
-        "illuminate/database": "^5.5|^6",
-        "illuminate/http": "^5.5|^6",
-        "illuminate/routing": "^5.5|^6",
-        "illuminate/support": "^5.5|^6",
+        "illuminate/database": "^5.5|^6|^7",
+        "illuminate/http": "^5.5|^6|^7",
+        "illuminate/routing": "^5.5|^6|^7",
+        "illuminate/support": "^5.5|^6|^7",
         "philkra/elastic-apm-php-agent": "dev-master",
         "jasny/dbquery-mysql": "^2.0"
     },
