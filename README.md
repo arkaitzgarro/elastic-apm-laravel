@@ -112,7 +112,7 @@ class MailMessageCollector extends EventDataCollector implements DataCollector
             );
         });
 
-        $this->app->events->listen(StopMeasuring::class, function (\Swift_Message $message) {
+        $this->app->events->listen(MessageSent::class, function (\Swift_Message $message) {
             $this->stopMeasure('mail #' . $message->getId());
         });
     }
