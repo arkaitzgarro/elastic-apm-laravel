@@ -6,7 +6,7 @@ use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Events\StartMeasuring;
 use AG\ElasticApmLaravel\Events\StopMeasuring;
 use Illuminate\Config\Repository as Config;
-use Illuminate\Events\Dispatcher;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Foundation\Application;
 use PhilKra\Events\Transaction;
 use Throwable;
