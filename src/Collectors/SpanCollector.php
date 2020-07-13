@@ -24,7 +24,7 @@ class SpanCollector extends EventDataCollector implements DataCollector
                 $event->type,
                 $event->action,
                 $event->label,
-                $event->start_time,
+                $event->start_time
             );
         });
 
