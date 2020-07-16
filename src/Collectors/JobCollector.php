@@ -115,7 +115,7 @@ class JobCollector extends EventDataCollector implements DataCollector
                 $this->agent->send();
             }
         } catch (ClientException $exception) {
-            Log::error($exception, ['api_response' => (string)$exception->getResponse()->getBody()]);
+            Log::error($exception, ['api_response' => (string) $exception->getResponse()->getBody()]);
         } catch (Throwable $t) {
             Log::error($t->getMessage());
         }
