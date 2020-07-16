@@ -3,6 +3,7 @@
 namespace AG\ElasticApmLaravel\Collectors;
 
 use AG\ElasticApmLaravel\Contracts\DataCollector;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobFailed;
@@ -113,6 +114,8 @@ class JobCollector extends EventDataCollector implements DataCollector
                 // Otherwise just send when the agent destructs
                 $this->agent->send();
             }
+        } catch (ClientException $exception) {
+            Log::error($exception, ['api_response' => (string) $exception->getResponse()->getBody()]);
         } catch (Throwable $t) {
             Log::error($t->getMessage());
         }
