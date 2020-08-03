@@ -47,11 +47,11 @@ class JobCollector extends EventDataCollector implements DataCollector
             $transaction_name = $this->getTransactionName($event);
             if ($transaction_name) {
                 $transaction = $this->getTransaction($transaction_name);
-                $this->agent->captureThrowable($event->exception, [], $transaction);
                 if ($transaction) {
+                    $this->agent->captureThrowable($event->exception, [], $transaction);
                     $this->stopTransaction($transaction_name, 500);
+                    $this->send($event->job);
                 }
-                $this->send($event->job);
             }
         });
 
@@ -59,11 +59,11 @@ class JobCollector extends EventDataCollector implements DataCollector
             $transaction_name = $this->getTransactionName($event);
             if ($transaction_name) {
                 $transaction = $this->getTransaction($transaction_name);
-                $this->agent->captureThrowable($event->exception, [], $transaction);
                 if ($transaction) {
+                    $this->agent->captureThrowable($event->exception, [], $transaction);
                     $this->stopTransaction($transaction_name, 500);
+                    $this->send($event->job);
                 }
-                $this->send($event->job);
             }
         });
     }

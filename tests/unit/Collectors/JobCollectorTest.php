@@ -221,16 +221,13 @@ class JobCollectorTest extends Unit
             ->with(self::JOB_NAME)
             ->andThrow(new UnknownTransactionException());
         $this->agentMock
-            ->shouldReceive('captureThrowable')
-            ->once()
-            ->with($exception, [], null);
+            ->shouldNotReceive('captureThrowable');
         $this->agentMock
             ->shouldNotReceive('stopTransaction');
         $this->agentMock
             ->shouldNotReceive('collectEvents');
         $this->agentMock
-            ->shouldReceive('send')
-            ->once();
+            ->shouldNotReceive('send');
 
         $this->dispatcher->dispatch(new JobFailed('test', $this->jobMock, $exception));
     }
@@ -285,16 +282,13 @@ class JobCollectorTest extends Unit
             ->with(self::JOB_NAME)
             ->andThrow(new UnknownTransactionException());
         $this->agentMock
-            ->shouldReceive('captureThrowable')
-            ->once()
-            ->with($exception, [], null);
+            ->shouldNotReceive('captureThrowable');
         $this->agentMock
             ->shouldNotReceive('stopTransaction');
         $this->agentMock
             ->shouldNotReceive('collectEvents');
         $this->agentMock
-            ->shouldReceive('send')
-            ->once();
+            ->shouldNotReceive('send');
 
         $this->dispatcher->dispatch(new JobExceptionOccurred('test', $this->jobMock, $exception));
     }
