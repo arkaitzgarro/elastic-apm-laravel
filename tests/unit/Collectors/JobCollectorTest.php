@@ -109,17 +109,6 @@ class JobCollectorTest extends Unit
         $this->dispatcher->dispatch(new JobFailed('test', $this->jobMock, new Exception()));
     }
 
-    public function testJobExceptionOccurredListenerIgnored()
-    {
-        $this->patternConfigReturn(self::JOB_IGNORE_PATTERN);
-        $this->jobMock->shouldReceive('resolveName')->once()->andReturn(self::JOB_NAME);
-        $this->agentMock->shouldNotReceive('getTransaction');
-        $this->agentMock->shouldNotReceive('captureThrowable');
-        $this->agentMock->shouldNotReceive('stopTransaction');
-
-        $this->dispatcher->dispatch(new JobExceptionOccurred('test', $this->jobMock, new Exception()));
-    }
-
     public function testJobProcessingListener()
     {
         $this->patternConfigReturn();
@@ -230,67 +219,6 @@ class JobCollectorTest extends Unit
             ->shouldNotReceive('send');
 
         $this->dispatcher->dispatch(new JobFailed('test', $this->jobMock, $exception));
-    }
-
-    public function testJobExceptionOccurredListener()
-    {
-        $this->patternConfigReturn();
-
-        $exception = new Exception('occurred');
-
-        $this->jobMock
-            ->shouldReceive('resolveName')
-            ->once()
-            ->andReturn(self::JOB_NAME);
-        $this->agentMock
-            ->shouldReceive('getTransaction')
-            ->once()
-            ->with(self::JOB_NAME)
-            ->andReturn($this->transactionMock);
-        $this->agentMock
-            ->shouldReceive('captureThrowable')
-            ->once()
-            ->with($exception, [], $this->transactionMock);
-        $this->agentMock
-            ->shouldReceive('stopTransaction')
-            ->once()
-            ->with(self::JOB_NAME, ['result' => 500]);
-        $this->agentMock
-            ->shouldReceive('collectEvents')
-            ->once()
-            ->with(self::JOB_NAME);
-        $this->agentMock
-            ->shouldReceive('send')
-            ->once();
-
-        $this->dispatcher->dispatch(new JobExceptionOccurred('test', $this->jobMock, $exception));
-    }
-
-    public function testJobExceptionOccurredListenerWithMissingTransaction()
-    {
-        $this->patternConfigReturn();
-
-        $exception = new Exception('occurred');
-
-        $this->jobMock
-            ->shouldReceive('resolveName')
-            ->once()
-            ->andReturn(self::JOB_NAME);
-        $this->agentMock
-            ->shouldReceive('getTransaction')
-            ->once()
-            ->with(self::JOB_NAME)
-            ->andThrow(new UnknownTransactionException());
-        $this->agentMock
-            ->shouldNotReceive('captureThrowable');
-        $this->agentMock
-            ->shouldNotReceive('stopTransaction');
-        $this->agentMock
-            ->shouldNotReceive('collectEvents');
-        $this->agentMock
-            ->shouldNotReceive('send');
-
-        $this->dispatcher->dispatch(new JobExceptionOccurred('test', $this->jobMock, $exception));
     }
 
     public function testJobProcessedExceptionOnSend()

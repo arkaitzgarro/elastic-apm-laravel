@@ -5,7 +5,6 @@ namespace AG\ElasticApmLaravel\Collectors;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Contracts\Queue\Job;
-use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
@@ -44,18 +43,6 @@ class JobCollector extends EventDataCollector implements DataCollector
         });
 
         $this->app->events->listen(JobFailed::class, function (JobFailed $event) {
-            $transaction_name = $this->getTransactionName($event);
-            if ($transaction_name) {
-                $transaction = $this->getTransaction($transaction_name);
-                if ($transaction) {
-                    $this->agent->captureThrowable($event->exception, [], $transaction);
-                    $this->stopTransaction($transaction_name, 500);
-                    $this->send($event->job);
-                }
-            }
-        });
-
-        $this->app->events->listen(JobExceptionOccurred::class, function (JobExceptionOccurred $event) {
             $transaction_name = $this->getTransactionName($event);
             if ($transaction_name) {
                 $transaction = $this->getTransaction($transaction_name);
