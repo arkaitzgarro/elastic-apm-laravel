@@ -2,8 +2,8 @@
 
 namespace AG\ElasticApmLaravel\Middleware;
 
-use Closure;
 use AG\ElasticApmLaravel\Agent;
+use Closure;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
