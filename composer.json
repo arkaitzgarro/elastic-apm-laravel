@@ -30,12 +30,6 @@
         "dms/phpunit-arraysubset-asserts": "^0.1.0",
         "codeception/mockery-module": "^0.4.0"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/Nipwaayoni/elastic-apm-php-agent"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "AG\\ElasticApmLaravel\\": "src/"
