@@ -5,7 +5,6 @@ namespace AG\ElasticApmLaravel\Collectors;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Contracts\Queue\Job;
-use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
