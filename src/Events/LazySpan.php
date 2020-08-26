@@ -3,10 +3,10 @@
 namespace AG\ElasticApmLaravel\Events;
 
 use JsonSerializable;
-use PhilKra\Events\EventBean;
-use PhilKra\Events\TraceableEvent;
-use PhilKra\Helper\Encoding;
-use PhilKra\Traits\Events\Stacktrace;
+use Nipwaayoni\Events\EventBean;
+use Nipwaayoni\Events\TraceableEvent;
+use Nipwaayoni\Helper\Encoding;
+use Nipwaayoni\Traits\Events\Stacktrace;
 
 /**
  * Spans.
@@ -91,7 +91,7 @@ class LazySpan extends TraceableEvent implements JsonSerializable
     public function setStartTime(float $start_time): void
     {
         $this->start_time = $start_time;
-        $this->timestamp = $this->timestamp + $this->start_time * 1000;
+        $this->timestamp = $this->timestamp->asMicroSeconds() + $this->start_time * 1000;
     }
 
     /**

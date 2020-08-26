@@ -10,8 +10,8 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Log;
-use PhilKra\Events\Transaction;
-use PhilKra\Exception\Transaction\UnknownTransactionException;
+use Nipwaayoni\Events\Transaction;
+use Nipwaayoni\Exception\Transaction\UnknownTransactionException;
 use Throwable;
 
 /**

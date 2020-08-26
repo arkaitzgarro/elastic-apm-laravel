@@ -8,7 +8,7 @@ use AG\ElasticApmLaravel\Events\StopMeasuring;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Foundation\Application;
-use PhilKra\Events\Transaction;
+use Nipwaayoni\Events\Transaction;
 use Throwable;
 
 class ApmCollectorService
