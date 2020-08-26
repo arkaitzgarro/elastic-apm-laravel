@@ -2,14 +2,14 @@
 
 use AG\ElasticApmLaravel\Events\LazySpan;
 use Codeception\Test\Unit;
-use PhilKra\Events\EventBean;
+use Nipwaayoni\Events\EventBean;
 
 class LazySpanTest extends Unit
 {
     /**
      * Parent transaction for LazySpan.
      *
-     * @var \PhilKra\Events\EventBean
+     * @var \Nipwaayoni\Events\EventBean
      */
     private $parent;
 

@@ -7,7 +7,7 @@ use Codeception\Test\Unit;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Foundation\Application;
-use PhilKra\Events\Transaction;
+use Nipwaayoni\Events\Transaction;
 
 class ApmCollectorServiceTest extends Unit
 {

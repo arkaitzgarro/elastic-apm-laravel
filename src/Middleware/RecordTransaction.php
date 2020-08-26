@@ -2,13 +2,13 @@
 
 namespace AG\ElasticApmLaravel\Middleware;
 
-use AG\ElasticApmLaravel\Agent;
 use Closure;
+use AG\ElasticApmLaravel\Agent;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Log;
-use PhilKra\Events\Transaction;
+use Nipwaayoni\Events\Transaction;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
