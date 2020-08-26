@@ -54,18 +54,6 @@ class JobCollector extends EventDataCollector implements DataCollector
                 }
             }
         });
-
-        $this->app->events->listen(JobExceptionOccurred::class, function (JobExceptionOccurred $event) {
-            $transaction_name = $this->getTransactionName($event);
-            if ($transaction_name) {
-                $transaction = $this->getTransaction($transaction_name);
-                if ($transaction) {
-                    $this->agent->captureThrowable($event->exception, [], $transaction);
-                    $this->stopTransaction($transaction_name, 500);
-                    $this->send($event->job);
-                }
-            }
-        });
     }
 
     protected function getTransaction(string $transaction_name): ?Transaction
