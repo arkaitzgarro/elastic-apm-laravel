@@ -11,8 +11,8 @@ use AG\ElasticApmLaravel\Collectors\SpanCollector;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use AG\ElasticApmLaravel\Events\LazySpan;
 use Illuminate\Support\Collection;
-use PhilKra\Agent as PhilKraAgent;
 use PhilKra\Events\Metadata;
+use PhilKra\Agent as NipwaayoniAgent;
 
 /**
  * The Elastic APM agent sends performance metrics and error logs to the APM Server.
@@ -26,7 +26,7 @@ use PhilKra\Events\Metadata;
  * and sends them to an Elasticsearch cluster. You can then use the APM app
  * in Kibana to gain insight into latency issues and error culprits within your application.
  */
-class Agent extends PhilKraAgent
+class Agent extends NipwaayoniAgent
 {
     protected $collectors;
     protected $request_start_time;
@@ -120,7 +120,7 @@ class Agent extends PhilKraAgent
          * worker processes. A future release of the Agent package should handle event
          * collection better and remove the need for this.
          */
-        $this->putEvent(new Metadata([], $this->getConfig()));
+        $this->putEvent(new Metadata([], $this->getConfig(), $this->agentMetadata()));
 
         return $sent;
     }
