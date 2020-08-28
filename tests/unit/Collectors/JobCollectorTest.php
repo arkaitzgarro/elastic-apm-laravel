@@ -130,9 +130,9 @@ class JobCollectorTest extends Unit
             ->andReturn($this->transactionMock);
         $this->agentMock
             ->shouldReceive('getTransaction')
-            ->once()
+            ->twice()
             ->with(self::JOB_NAME)
-            ->andReturn($this->transactionMock);
+            ->andReturn(null, $this->transactionMock);
 
         $this->dispatcher->dispatch(new JobProcessing('test', $this->jobMock));
     }
@@ -145,6 +145,11 @@ class JobCollectorTest extends Unit
             ->shouldReceive('resolveName')
             ->once()
             ->andReturn(self::JOB_NAME);
+        $this->agentMock
+            ->shouldReceive('getTransaction')
+            ->once()
+            ->with(self::JOB_NAME)
+            ->andReturn($this->transactionMock);
         $this->agentMock
             ->shouldReceive('stopTransaction')
             ->once()
@@ -230,6 +235,11 @@ class JobCollectorTest extends Unit
             ->once()
             ->andReturn(self::JOB_NAME);
         $this->agentMock
+            ->shouldReceive('getTransaction')
+            ->once()
+            ->with(self::JOB_NAME)
+            ->andReturn($this->transactionMock);
+        $this->agentMock
             ->shouldReceive('stopTransaction')
             ->once()
             ->with(self::JOB_NAME, ['result' => 200]);
@@ -253,6 +263,11 @@ class JobCollectorTest extends Unit
     {
         $this->patternConfigReturn();
 
+        $this->agentMock
+            ->shouldReceive('getTransaction')
+            ->once()
+            ->with(self::JOB_NAME)
+            ->andReturn($this->transactionMock);
         $this->agentMock
             ->shouldReceive('stopTransaction')
             ->once()
