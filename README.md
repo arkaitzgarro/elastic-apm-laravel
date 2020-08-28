@@ -161,3 +161,23 @@ Please adhere to [PSR-2](https://github.com/php-fig/fig-standards/blob/master/ac
 ```bash
 php ./vendor/bin/php-cs-fixer fix --config .php_cs
 ```
+
+### Integrate with a running application
+
+To be able to test your changes with a locally running application, use Composer's functionality to require packages from local paths. On your project, add a local repository, just make sure the path to `elastic-apm-laravel` folder is correct:
+
+```bash
+composer config repositories.local '{"type": "path", "url": "../elastic-apm-laravel"}' --file composer.json
+```
+
+Then install the package from the source:
+
+```bash
+composer require arkaitzgarro/elastic-apm-laravel:@dev --prefer-source
+```
+
+You should see a message indicating that the package has been installed as symlink:
+
+```bash
+- Installing arkaitzgarro/elastic-apm-laravel (dev-chore/branch-name): Symlinking from ../elastic-apm-laravel
+```
