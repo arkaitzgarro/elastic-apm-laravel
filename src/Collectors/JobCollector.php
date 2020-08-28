@@ -41,6 +41,7 @@ class JobCollector extends EventDataCollector implements DataCollector
 
             $this->startTransaction($transaction_name);
             $this->setTransactionType($transaction_name);
+            $this->addMetadata($transaction_name, $event->job);
         });
 
         $this->app->events->listen(JobProcessed::class, function (JobProcessed $event) {
@@ -103,6 +104,17 @@ class JobCollector extends EventDataCollector implements DataCollector
         // Stop the transaction and measure the time
         $this->agent->stopTransaction($transaction_name, ['result' => $result]);
         $this->agent->collectEvents($transaction_name);
+    }
+
+    protected function addMetadata(string $transaction_name, Job $job): void
+    {
+        $this->agent->getTransaction($transaction_name)->setCustomContext([
+            'job_id' => $job->getJobId(),
+            'max_tries' => $job->maxTries(),
+            'attempts' => $job->attempts(),
+            'connection_name' => $job->getConnectionName(),
+            'queue_name' => $job->getQueue(),
+        ]);
     }
 
     protected function send(Job $job): void
