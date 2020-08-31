@@ -117,6 +117,26 @@ class JobCollectorTest extends Unit
             ->shouldReceive('resolveName')
             ->once()
             ->andReturn(self::JOB_NAME);
+        $this->jobMock
+            ->shouldReceive('getJobId')
+            ->once()
+            ->andReturn('job_id');
+        $this->jobMock
+            ->shouldReceive('maxTries')
+            ->once()
+            ->andReturn(3);
+        $this->jobMock
+            ->shouldReceive('attempts')
+            ->once()
+            ->andReturn(1);
+        $this->jobMock
+            ->shouldReceive('getConnectionName')
+            ->once()
+            ->andReturn('sync');
+        $this->jobMock
+            ->shouldReceive('getQueue')
+            ->once()
+            ->andReturn('queue');
         $this->agentMock
             ->shouldReceive('startTransaction')
             ->once()
@@ -130,9 +150,9 @@ class JobCollectorTest extends Unit
             ->andReturn($this->transactionMock);
         $this->agentMock
             ->shouldReceive('getTransaction')
-            ->twice()
+            ->times(3)
             ->with(self::JOB_NAME)
-            ->andReturn(null, $this->transactionMock);
+            ->andReturn(null, $this->transactionMock, $this->transactionMock);
 
         $this->dispatcher->dispatch(new JobProcessing('test', $this->jobMock));
     }
