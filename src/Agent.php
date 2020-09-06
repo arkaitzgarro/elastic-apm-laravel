@@ -29,11 +29,12 @@ class Agent extends NipwaayoniAgent
     protected $collectors;
     protected $request_start_time;
 
-    public function __construct(array $config, float $request_start_time)
+    /*
+     * This method will be called by the parent's final constructor
+     */
+    protected function initialize(): void
     {
-        parent::__construct($config);
-
-        $this->request_start_time = $request_start_time;
+        $this->request_start_time = microtime(true);
         $this->collectors = new Collection();
     }
 
@@ -96,6 +97,11 @@ class Agent extends NipwaayoniAgent
                 $this->putEvent($event);
             });
         });
+    }
+
+    public function setRequestStartTime(float $startTime): void
+    {
+        $this->request_start_time = $startTime;
     }
 
     public function getRequestStartTime(): float
