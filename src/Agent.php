@@ -2,11 +2,6 @@
 
 namespace AG\ElasticApmLaravel;
 
-use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
-use AG\ElasticApmLaravel\Collectors\FrameworkCollector;
-use AG\ElasticApmLaravel\Collectors\HttpRequestCollector;
-use AG\ElasticApmLaravel\Collectors\JobCollector;
-use AG\ElasticApmLaravel\Collectors\SpanCollector;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use AG\ElasticApmLaravel\Events\LazySpan;
 use Illuminate\Support\Collection;
@@ -38,37 +33,10 @@ class Agent extends NipwaayoniAgent
         $this->collectors = new Collection();
     }
 
-    public function registerInitCollectors(): void
-    {
-        // Laravel init collector
-        if ('cli' !== php_sapi_name()) {
-            // For cli executions, like queue workers, the application
-            // only starts once. It doesn't really make sense to measure it.
-            $this->addCollector(app(FrameworkCollector::class));
-        }
-    }
-
-    public function registerCollectors(): void
-    {
-        if (false !== config('elastic-apm-laravel.spans.querylog.enabled')) {
-            // DB Queries collector
-            $this->addCollector(app(DBQueryCollector::class));
-        }
-
-        // Http request collector
-        if ('cli' !== php_sapi_name()) {
-            $this->addCollector(app(HttpRequestCollector::class));
-        }
-
-        // Job collector
-        $this->addCollector(app(JobCollector::class));
-
-        // Collector for manual measurements throughout the app
-        $this->addCollector(app(SpanCollector::class));
-    }
-
     public function addCollector(DataCollector $collector): void
     {
+        $collector->useAgent($this);
+
         $this->collectors->put(
             $collector->getName(),
             $collector
