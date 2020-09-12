@@ -6,7 +6,11 @@ use AG\ElasticApmLaravel\Contracts\VersionResolver;
 use AG\ElasticApmLaravel\Middleware\RecordTransaction;
 use AG\ElasticApmLaravel\Services\ApmCollectorService;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Nipwaayoni\AgentBuilder;
+use Nipwaayoni\Config;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -64,7 +68,28 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->singleton(Agent::class, function () {
             $start_time = $this->app['request']->server('REQUEST_TIME_FLOAT') ?? microtime(true);
 
-            return new Agent($this->getAgentConfig(), $start_time);
+            /** @var AgentBuilder $builder */
+            $builder = $this->app->make(AgentBuilder::class);
+
+            $builder->withAgentClass(Agent::class);
+            $builder->withConfig(new Config($this->getAgentConfig()));
+
+            $builder->withEnvData(config('elastic-apm-laravel.env.env'));
+
+            /** @var Agent $agent */
+            $agent = $builder->build();
+
+            $agent->setRequestStartTime($start_time);
+
+            return $agent;
+        });
+
+        // Register a callback on terminating to send the events
+        $this->app->terminating(function (Request $request, Response $response) {
+            /** @var Agent $agent */
+            $agent = $this->app->make(Agent::class);
+
+            $agent->send();
         });
     }
 
@@ -120,13 +145,10 @@ class ServiceProvider extends BaseServiceProvider
             [
                 'framework' => 'Laravel',
                 'frameworkVersion' => app()->version(),
-            ],
-            [
                 'active' => config('elastic-apm-laravel.active'),
-                'httpClient' => config('elastic-apm-laravel.httpClient'),
+                'environment' => config('elastic-apm-laravel.env.environment'),
             ],
             $this->getAppConfig(),
-            config('elastic-apm-laravel.env'),
             config('elastic-apm-laravel.server')
         );
     }
