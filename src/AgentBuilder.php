@@ -1,8 +1,6 @@
 <?php
 
-
 namespace AG\ElasticApmLaravel;
-
 
 use AG\ElasticApmLaravel\Collectors\EventDataCollector;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
@@ -33,6 +31,7 @@ class AgentBuilder extends NipwaayoniAgentBuilder
     public function withEventCollectors(Collection $collectors): self
     {
         $this->collectors = $collectors;
+
         return $this;
     }
 

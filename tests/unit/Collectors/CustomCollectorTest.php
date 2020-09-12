@@ -1,6 +1,5 @@
 <?php
 
-use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Collectors\EventDataCollector;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use Codeception\Test\Unit;

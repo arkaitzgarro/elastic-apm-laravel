@@ -1,8 +1,6 @@
 <?php
 
-
 namespace AG\ElasticApmLaravel\Collectors;
-
 
 class RequestStartTime
 {

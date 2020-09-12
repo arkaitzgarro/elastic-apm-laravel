@@ -34,7 +34,7 @@ class JobCollectorTest extends Unit
      */
     private $collector;
 
-    /** @var Agent|\Mockery\LegacyMockInterface|\Mockery\MockInterface  */
+    /** @var Agent|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
     private $agentMock;
 
     protected function _before()

@@ -37,8 +37,7 @@ class Agent extends NipwaayoniAgent
         EventFactoryInterface $eventFactory,
         TransactionsStore $transactionsStore,
         RequestStartTime $startTime
-    )
-    {
+    ) {
         parent::__construct($config, $sharedContext, $connector, $eventFactory, $transactionsStore);
 
         $this->request_start_time = $startTime->microseconds();
