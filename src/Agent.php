@@ -79,11 +79,6 @@ class Agent extends NipwaayoniAgent
         });
     }
 
-    public function setRequestStartTime(float $startTime): void
-    {
-        $this->request_start_time = $startTime;
-    }
-
     public function getRequestStartTime(): float
     {
         return $this->request_start_time;
