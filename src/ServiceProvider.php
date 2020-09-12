@@ -123,7 +123,7 @@ class ServiceProvider extends BaseServiceProvider
      */
     protected function registerCollectors(): void
     {
-        if ($this->includeFrameworkEvents()) {
+        if ($this->collectFrameworkEvents()) {
             // Force the FrameworkCollector instance to be created and used. While this appears odd,
             // the collector instance registers itself to listen for booting events, so that instance
             // must be made available for collection later.
@@ -138,7 +138,7 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         // Http request collector
-        if ('cli' !== php_sapi_name()) {
+        if ($this->collectHttpEvents()) {
             $this->app->tag(HttpRequestCollector::class, self::COLLECTOR_TAG);
         }
 
@@ -149,10 +149,18 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->tag(SpanCollector::class, self::COLLECTOR_TAG);
     }
 
-    private function includeFrameworkEvents(): bool
+    private function collectFrameworkEvents(): bool
     {
         // For cli executions, like queue workers, the application
         // only starts once. It doesn't really make sense to measure it.
+        // Right now, the only condition that determines the inclusion
+        // of framework events is being an http request. That may change
+        // in the future, so we will use a specific method.
+        return $this->collectHttpEvents();
+    }
+
+    private function collectHttpEvents(): bool
+    {
         return 'cli' !== php_sapi_name();
     }
 
