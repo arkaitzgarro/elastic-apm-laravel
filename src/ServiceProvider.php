@@ -15,7 +15,6 @@ use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
-use Nipwaayoni\AgentBuilder;
 use Nipwaayoni\Config;
 
 class ServiceProvider extends BaseServiceProvider
@@ -85,20 +84,12 @@ class ServiceProvider extends BaseServiceProvider
             /** @var AgentBuilder $builder */
             $builder = $this->app->make(AgentBuilder::class);
 
-            $builder->withAgentClass(Agent::class);
-            $builder->withConfig(new Config($this->getAgentConfig()));
-
-            $builder->withEnvData(config('elastic-apm-laravel.env.env'));
-
-            /** @var Agent $agent */
-            $agent = $builder->build();
-
-            $agent->setRequestStartTime($start_time->microseconds());
-            foreach ($this->app->tagged(self::COLLECTOR_TAG) as $collector) {
-                $agent->addCollector($collector);
-            }
-
-            return $agent;
+            return $builder
+                ->withConfig(new Config($this->getAgentConfig()))
+                ->withEnvData(config('elastic-apm-laravel.env.env'))
+                ->withRequestStartTime($start_time)
+                ->withEventCollectors(collect($this->app->tagged(self::COLLECTOR_TAG)))
+                ->build();
         });
 
         // Register a callback on terminating to send the events

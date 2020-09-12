@@ -2,10 +2,16 @@
 
 namespace AG\ElasticApmLaravel;
 
+use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use AG\ElasticApmLaravel\Events\LazySpan;
 use Illuminate\Support\Collection;
 use Nipwaayoni\Agent as NipwaayoniAgent;
+use Nipwaayoni\Config;
+use Nipwaayoni\Contexts\ContextCollection;
+use Nipwaayoni\Events\EventFactoryInterface;
+use Nipwaayoni\Middleware\Connector;
+use Nipwaayoni\Stores\TransactionsStore;
 
 /**
  * The Elastic APM agent sends performance metrics and error logs to the APM Server.
@@ -24,12 +30,18 @@ class Agent extends NipwaayoniAgent
     protected $collectors;
     protected $request_start_time;
 
-    /*
-     * This method will be called by the parent's final constructor
-     */
-    protected function initialize(): void
+    public function __construct(
+        Config $config,
+        ContextCollection $sharedContext,
+        Connector $connector,
+        EventFactoryInterface $eventFactory,
+        TransactionsStore $transactionsStore,
+        RequestStartTime $startTime
+    )
     {
-        $this->request_start_time = microtime(true);
+        parent::__construct($config, $sharedContext, $connector, $eventFactory, $transactionsStore);
+
+        $this->request_start_time = $startTime->microseconds();
         $this->collectors = new Collection();
     }
 
