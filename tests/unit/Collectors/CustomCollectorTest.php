@@ -4,6 +4,7 @@ use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Collectors\EventDataCollector;
 use Codeception\Test\Unit;
 use DMS\PHPUnitExtensions\ArraySubset\Assert;
+use Illuminate\Config\Repository as Config;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Log;
 
@@ -35,6 +36,7 @@ class CustomCollectorTest extends Unit
     {
         $appMock = Mockery::mock(Application::class);
         $agentMock = Mockery::mock(Agent::class);
+        $configMock = Mockery::mock(Config::class);
 
         $agentMock->shouldReceive('getRequestStartTime')
             ->once()
@@ -44,7 +46,7 @@ class CustomCollectorTest extends Unit
             ->once()
             ->with('registerEventListeners method has been called.');
 
-        $this->collector = new CustomCollector($appMock, $agentMock);
+        $this->collector = new CustomCollector($appMock, $agentMock, $configMock);
     }
 
     public function testEmptyMeasures()

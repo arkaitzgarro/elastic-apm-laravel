@@ -47,12 +47,16 @@ class RecordTransactionTest extends Unit
         $this->response->headers = new ResponseHeaderBag();
     }
 
-    protected function createMiddlewareInstance(bool $use_route_uri): void
+    protected function createMiddlewareInstance(bool $use_route_uri, string $ignore_patterns = ''): void
     {
         $this->config = Mockery::mock(ApmConfigService::class);
         $this->config->shouldReceive('get')
             ->with('elastic-apm-laravel.transactions.useRouteUri')
             ->andReturn($use_route_uri);
+        $this->config->shouldReceive('get')
+            ->with('elastic-apm-laravel.transactions.ignorePatterns')
+            ->once()
+            ->andReturn($ignore_patterns);
 
         $this->middleware = new RecordTransaction(
             $this->agent,
@@ -151,7 +155,7 @@ class RecordTransactionTest extends Unit
 
     public function testTransactionTerminate()
     {
-        $this->createMiddlewareInstance(false);
+        $this->createMiddlewareInstance(false, '/\/health-check|^OPTIONS /');
 
         $this->agent->shouldReceive('stopTransaction')
             ->once()
@@ -162,6 +166,18 @@ class RecordTransactionTest extends Unit
             ->with('GET /ping');
 
         $this->middleware->terminate($this->request);
+    }
+
+    public function testTransactionTerminateIgnored()
+    {
+        $this->agent->shouldNotReceive('stopTransaction');
+        $this->agent->shouldNotReceive('collectEvents');
+
+        $this->createMiddlewareInstance(false, '/\/health-check|^OPTIONS /');
+        $this->middleware->terminate(Request::create('/posts', 'OPTIONS'));
+
+        $this->createMiddlewareInstance(false, '/\/health-check|^OPTIONS /'); // reset the mock ->once() count
+        $this->middleware->terminate(Request::create('/health-check', 'GET'));
     }
 
     public function testTransactionTerminateError()

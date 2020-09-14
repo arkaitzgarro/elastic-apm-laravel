@@ -3,6 +3,7 @@
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Collectors\JobCollector;
 use Codeception\Test\Unit;
+use Illuminate\Config\Repository as Config;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Foundation\Application;
@@ -13,10 +14,13 @@ use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Log;
 use PhilKra\Events\Transaction;
+use PhilKra\Exception\Transaction\UnknownTransactionException;
 
 class JobCollectorTest extends Unit
 {
     private const JOB_NAME = 'This\Is\A\Test\Job';
+    // Use 4 backslashes to match a single backslash: https://stackoverflow.com/a/15369828
+    private const JOB_IGNORE_PATTERN = "/\/health-check|This\\\\Is\\\\A\\\\Test\\\\Job/";
     private const REQUEST_START_TIME = 1000.0;
 
     /**
@@ -46,7 +50,9 @@ class JobCollectorTest extends Unit
             ->once()
             ->andReturn(self::REQUEST_START_TIME);
 
-        $this->collector = new JobCollector($this->app, $this->agentMock);
+        $this->configMock = Mockery::mock(Config::class);
+
+        $this->collector = new JobCollector($this->app, $this->agentMock, $this->configMock);
     }
 
     protected function tearDown(): void
@@ -58,17 +64,79 @@ class JobCollectorTest extends Unit
         $this->dispatcher->forget(JobExceptionOccurred::class);
     }
 
+    protected function patternConfigReturn($configIgnore = null): void
+    {
+        $this->configMock->shouldReceive('get')
+            ->once()
+            ->with('elastic-apm-laravel.transactions.ignorePatterns')
+            ->andReturn($configIgnore);
+    }
+
     public function testCollectorName()
     {
         $this->assertEquals('job-collector', $this->collector->getName());
     }
 
+    public function testJobProcessingListenerIgnored()
+    {
+        $this->patternConfigReturn(self::JOB_IGNORE_PATTERN);
+        $this->jobMock->shouldReceive('resolveName')->once()->andReturn(self::JOB_NAME);
+        $this->agentMock->shouldNotReceive('startTransaction');
+        $this->agentMock->shouldNotReceive('getTransaction');
+
+        $this->dispatcher->dispatch(new JobProcessing('test', $this->jobMock));
+    }
+
+    public function testJobProcessedListenerIgnored()
+    {
+        $this->patternConfigReturn(self::JOB_IGNORE_PATTERN);
+        $this->jobMock->shouldReceive('resolveName')->once()->andReturn(self::JOB_NAME);
+        $this->agentMock->shouldNotReceive('stopTransaction');
+        $this->agentMock->shouldNotReceive('collectEvents');
+        $this->agentMock->shouldNotReceive('send');
+
+        $this->dispatcher->dispatch(new JobProcessed('test', $this->jobMock));
+    }
+
+    public function testJobFailedListenerIgnored()
+    {
+        $this->patternConfigReturn(self::JOB_IGNORE_PATTERN);
+        $this->jobMock->shouldReceive('resolveName')->once()->andReturn(self::JOB_NAME);
+        $this->agentMock->shouldNotReceive('getTransaction');
+        $this->agentMock->shouldNotReceive('captureThrowable');
+        $this->agentMock->shouldNotReceive('stopTransaction');
+
+        $this->dispatcher->dispatch(new JobFailed('test', $this->jobMock, new Exception()));
+    }
+
     public function testJobProcessingListener()
     {
+        $this->patternConfigReturn();
+
         $this->jobMock
             ->shouldReceive('resolveName')
             ->once()
             ->andReturn(self::JOB_NAME);
+        $this->jobMock
+            ->shouldReceive('getJobId')
+            ->once()
+            ->andReturn('job_id');
+        $this->jobMock
+            ->shouldReceive('maxTries')
+            ->once()
+            ->andReturn(3);
+        $this->jobMock
+            ->shouldReceive('attempts')
+            ->once()
+            ->andReturn(1);
+        $this->jobMock
+            ->shouldReceive('getConnectionName')
+            ->once()
+            ->andReturn('sync');
+        $this->jobMock
+            ->shouldReceive('getQueue')
+            ->once()
+            ->andReturn('queue');
         $this->agentMock
             ->shouldReceive('startTransaction')
             ->once()
@@ -82,19 +150,26 @@ class JobCollectorTest extends Unit
             ->andReturn($this->transactionMock);
         $this->agentMock
             ->shouldReceive('getTransaction')
-            ->once()
+            ->times(3)
             ->with(self::JOB_NAME)
-            ->andReturn($this->transactionMock);
+            ->andReturn(null, $this->transactionMock, $this->transactionMock);
 
         $this->dispatcher->dispatch(new JobProcessing('test', $this->jobMock));
     }
 
     public function testJobProcessedListener()
     {
+        $this->patternConfigReturn();
+
         $this->jobMock
             ->shouldReceive('resolveName')
             ->once()
             ->andReturn(self::JOB_NAME);
+        $this->agentMock
+            ->shouldReceive('getTransaction')
+            ->once()
+            ->with(self::JOB_NAME)
+            ->andReturn($this->transactionMock);
         $this->agentMock
             ->shouldReceive('stopTransaction')
             ->once()
@@ -112,6 +187,8 @@ class JobCollectorTest extends Unit
 
     public function testJobFailedListener()
     {
+        $this->patternConfigReturn();
+
         $exception = new Exception('fail');
 
         $this->jobMock
@@ -142,9 +219,36 @@ class JobCollectorTest extends Unit
         $this->dispatcher->dispatch(new JobFailed('test', $this->jobMock, $exception));
     }
 
-    public function testJobExceptionOccurredListener()
+    public function testJobFailedListenerWithMissingTransaction()
     {
-        $exception = new Exception('occurred');
+        $this->patternConfigReturn();
+
+        $exception = new Exception('fail');
+
+        $this->jobMock
+            ->shouldReceive('resolveName')
+            ->once()
+            ->andReturn(self::JOB_NAME);
+        $this->agentMock
+            ->shouldReceive('getTransaction')
+            ->once()
+            ->with(self::JOB_NAME)
+            ->andThrow(new UnknownTransactionException());
+        $this->agentMock
+            ->shouldNotReceive('captureThrowable');
+        $this->agentMock
+            ->shouldNotReceive('stopTransaction');
+        $this->agentMock
+            ->shouldNotReceive('collectEvents');
+        $this->agentMock
+            ->shouldNotReceive('send');
+
+        $this->dispatcher->dispatch(new JobFailed('test', $this->jobMock, $exception));
+    }
+
+    public function testJobProcessedExceptionOnSend()
+    {
+        $this->patternConfigReturn();
 
         $this->jobMock
             ->shouldReceive('resolveName')
@@ -155,31 +259,6 @@ class JobCollectorTest extends Unit
             ->once()
             ->with(self::JOB_NAME)
             ->andReturn($this->transactionMock);
-        $this->agentMock
-            ->shouldReceive('captureThrowable')
-            ->once()
-            ->with($exception, [], $this->transactionMock);
-        $this->agentMock
-            ->shouldReceive('stopTransaction')
-            ->once()
-            ->with(self::JOB_NAME, ['result' => 500]);
-        $this->agentMock
-            ->shouldReceive('collectEvents')
-            ->once()
-            ->with(self::JOB_NAME);
-        $this->agentMock
-            ->shouldReceive('send')
-            ->once();
-
-        $this->dispatcher->dispatch(new JobFailed('test', $this->jobMock, $exception));
-    }
-
-    public function testJobProcessedExceptionOnSend()
-    {
-        $this->jobMock
-            ->shouldReceive('resolveName')
-            ->once()
-            ->andReturn(self::JOB_NAME);
         $this->agentMock
             ->shouldReceive('stopTransaction')
             ->once()
@@ -202,6 +281,13 @@ class JobCollectorTest extends Unit
 
     public function testJobProcessedSyncDriver()
     {
+        $this->patternConfigReturn();
+
+        $this->agentMock
+            ->shouldReceive('getTransaction')
+            ->once()
+            ->with(self::JOB_NAME)
+            ->andReturn($this->transactionMock);
         $this->agentMock
             ->shouldReceive('stopTransaction')
             ->once()

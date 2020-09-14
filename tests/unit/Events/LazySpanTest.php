@@ -111,7 +111,7 @@ class LazySpanTest extends Unit
         $this->assertEquals(0, $lazy_span_decoded->duration);
         $this->assertEquals('lazy span', $lazy_span_decoded->name);
         $this->assertEquals([], $lazy_span_decoded->stacktrace);
-        $this->assertFalse($lazy_span_decoded->sync);
+        $this->assertTrue($lazy_span_decoded->sync);
         $this->assertIsNumeric($lazy_span_decoded->timestamp);
     }
 }

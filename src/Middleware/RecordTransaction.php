@@ -41,8 +41,15 @@ class RecordTransaction
      */
     public function handle(Request $request, Closure $next)
     {
+        $transaction_name = $this->getTransactionName($request);
+
+        if ($this->shouldIgnoreTransaction($transaction_name)) {
+            // Skip this middleware
+            return $next($request);
+        }
+
         // Start a new transaction
-        $transaction = $this->startTransaction($this->getTransactionName($request));
+        $transaction = $this->startTransaction($transaction_name);
 
         // Execute the application logic
         $response = $next($request);
@@ -80,15 +87,26 @@ class RecordTransaction
 
     public function terminate(Request $request): void
     {
-        try {
-            $transaction_name = $this->getTransactionName($request);
+        $transaction_name = $this->getTransactionName($request);
 
+        if ($this->shouldIgnoreTransaction($transaction_name)) {
+            return;
+        }
+
+        try {
             // Stop the transaction and measure the time
             $this->agent->stopTransaction($transaction_name);
             $this->agent->collectEvents($transaction_name);
         } catch (Throwable $t) {
             Log::error($t->getMessage());
         }
+    }
+
+    protected function shouldIgnoreTransaction(string $transaction_name): bool
+    {
+        $pattern = $this->config->get('elastic-apm-laravel.transactions.ignorePatterns');
+
+        return $pattern && preg_match($pattern, $transaction_name);
     }
 
     /**

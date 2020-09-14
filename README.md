@@ -6,6 +6,10 @@
 
 Elastic APM agent for v2 intake API. Compatible with Laravel 5.5+.
 
+| Transactions list                             | Transaction detail                              |
+| --------------------------------------------- | ----------------------------------------------- |
+| <img src="public/apm-transaction-list.png" /> | <img src="public/apm-transaction-detail.png" /> |
+
 ## Installation
 
 Require this package with composer:
@@ -22,6 +26,33 @@ Add the ServiceProvider class to the providers array in `config/app.php`:
 ```
 
 From here, we will take care of everything based on your configuration. The agent and the middleware will be registered, and transactions will be sent to Elastic.
+
+## Agent configuration
+
+The following environment variables are supported in the default configuration:
+
+| Variable          | Description |
+|-------------------|-------------|
+|APM_ACTIVE         | `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data; span collection will also be disabled. |
+|APM_ACTIVE_CLI     | `true` or `false` defaults to `true`. If `false`, the agent will not collect or send transaction or span data for non-HTTP requests but HTTP requests will still follow APM_ACTIVE. When APM_ACTIVE is `false`, this will have no effect. |
+|APM_APPNAME        | Name of the app as it will appear in APM. Invalid special characters will be replaced with a hyphen. |
+|APM_APPVERSION     | Version of the app as it will appear in APM. |
+|APM_SERVERURL      | URL to the APM intake service. |
+|APM_SECRETTOKEN    | Secret token, if required. |
+|APM_USEROUTEURI    | `true` or `false` defaults to `true`. The default behavior is to record the URL as defined in your routes configuration. Set to `false` to record the requested URL, but keep in mind that this can result in excessive unique entries in APM. |
+|APM_IGNORE_PATTERNS| Ignore specific routes or jobs by transaction name. Should be a regular expression, and will match multiple patterns via pipe `\|` in the regex. Note that 4 backslashes should be used to match a single backslash. Example: `"/\/health-check\|^OPTIONS \|Foo\\\\Bar\\\\Job/"` |
+|APM_QUERYLOG       | `true` or `false` defaults to 'true'. Set to `false` to completely disable query logging, or to `auto` if you would like to use the threshold feature. |
+|APM_THRESHOLD      | Query threshold in milliseconds, defaults to `200`. If a query takes longer then 200ms, we enable the query log. Make sure you set `APM_QUERYLOG=auto`. |
+|APM_BACKTRACEDEPTH | Defaults to `25`. Depth of backtrace in query span. |
+|APM_MAXTRACEITEMS  | Defaults to `1000`. Max number of child items displayed when viewing trace details. |
+
+You may also publish the `elastic-apm-laravel.php` configuration file to change additional settings:
+
+```bash
+php artisan vendor:publish --tag=config
+```
+
+Once published, open the `config/elastic-apm-laravel.php` file and review the various settings.
 
 ## Collectors
 
@@ -81,7 +112,7 @@ class MailMessageCollector extends EventDataCollector implements DataCollector
             );
         });
 
-        $this->app->events->listen(StopMeasuring::class, function (\Swift_Message $message) {
+        $this->app->events->listen(MessageSent::class, function (\Swift_Message $message) {
             $this->stopMeasure('mail #' . $message->getId());
         });
     }
@@ -104,32 +135,6 @@ public function boot()
     ApmCollector::addCollector(MailMessageCollector::class);
 }
 ```
-
-## Agent configuration
-
-The following environment variables are supported in the default configuration:
-
-| Variable          | Description |
-|-------------------|-------------|
-|APM_ACTIVE         | `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data; span collection will also be disabled. |
-|APM_ACTIVE_CLI     | `true` or `false` defaults to `true`. If `false`, the agent will not collect or send transaction or span data for non-HTTP requests but HTTP requests will still follow APM_ACTIVE. When APM_ACTIVE is `false`, this will have no effect. |
-|APM_APPNAME        | Name of the app as it will appear in APM. Invalid special characters will be replaced with a hyphen. |
-|APM_APPVERSION     | Version of the app as it will appear in APM. |
-|APM_SERVERURL      | URL to the APM intake service. |
-|APM_SECRETTOKEN    | Secret token, if required. |
-|APM_USEROUTEURI    | `true` or `false` defaults to `true`. The default behavior is to record the URL as defined in your routes configuration. Set to `false` to record the requested URL, but keep in mind that this can result in excessive unique entries in APM. |
-|APM_QUERYLOG       | `true` or `false` defaults to 'true'. Set to `false` to completely disable query logging, or to `auto` if you would like to use the threshold feature. |
-|APM_THRESHOLD      | Query threshold in milliseconds, defaults to `200`. If a query takes longer then 200ms, we enable the query log. Make sure you set `APM_QUERYLOG=auto`. |
-|APM_BACKTRACEDEPTH | Defaults to `25`. Depth of backtrace in query span. |
-|APM_MAXTRACEITEMS  | Defaults to `1000`. Max number of child items displayed when viewing trace details. |
-
-You may also publish the `elastic-apm-laravel.php` configuration file to change additional settings:
-
-```bash
-php artisan vendor:publish --tag=config
-```
-
-Once published, open the `config/elastic-apm-laravel.php` file and review the various settings.
 
 ## Development
 
@@ -155,4 +160,24 @@ Please adhere to [PSR-2](https://github.com/php-fig/fig-standards/blob/master/ac
 
 ```bash
 php ./vendor/bin/php-cs-fixer fix --config .php_cs
+```
+
+### Integrate with a running application
+
+To be able to test your changes with a locally running application, use Composer's functionality to require packages from local paths. On your project, add a local repository, just make sure the path to `elastic-apm-laravel` folder is correct:
+
+```bash
+composer config repositories.local '{"type": "path", "url": "../elastic-apm-laravel"}' --file composer.json
+```
+
+Then install the package from the source:
+
+```bash
+composer require arkaitzgarro/elastic-apm-laravel:@dev --prefer-source
+```
+
+You should see a message indicating that the package has been installed as symlink:
+
+```bash
+- Installing arkaitzgarro/elastic-apm-laravel (dev-chore/branch-name): Symlinking from ../elastic-apm-laravel
 ```

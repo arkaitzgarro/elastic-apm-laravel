@@ -4,6 +4,7 @@ namespace AG\ElasticApmLaravel\Collectors;
 
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
+use Illuminate\Config\Repository as Config;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -26,13 +27,17 @@ abstract class EventDataCollector implements DataCollector
     /** @var Collection */
     protected $measures;
 
+    /** @var Config */
+    protected $config;
+
     /** @var float */
     protected $request_start_time;
 
-    public function __construct(Application $app, Agent $agent)
+    public function __construct(Application $app, Agent $agent, Config $config)
     {
         $this->app = $app;
         $this->agent = $agent;
+        $this->config = $config;
         $this->started_measures = new Collection();
         $this->measures = new Collection();
 

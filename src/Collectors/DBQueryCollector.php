@@ -26,8 +26,8 @@ class DBQueryCollector extends EventDataCollector implements DataCollector
 
     private function onQueryExecutedEvent(QueryExecuted $query): void
     {
-        if ('auto' === config('elastic-apm-laravel.spans.querylog.enabled')) {
-            if ($query->time < config('elastic-apm-laravel.spans.querylog.threshold')) {
+        if ('auto' === $this->config->get('elastic-apm-laravel.spans.querylog.enabled')) {
+            if ($query->time < $this->config->get('elastic-apm-laravel.spans.querylog.threshold')) {
                 return;
             }
         }
