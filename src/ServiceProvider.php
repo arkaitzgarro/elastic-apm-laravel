@@ -2,14 +2,15 @@
 
 namespace AG\ElasticApmLaravel;
 
-use AG\ElasticApmLaravel\Contracts\VersionResolver;
 use AG\ElasticApmLaravel\Middleware\RecordTransaction;
 use AG\ElasticApmLaravel\Services\ApmCollectorService;
+use AG\ElasticApmLaravel\Services\ApmConfigService;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider
 {
+    private $config;
     private $source_config_path = __DIR__ . '/../config/elastic-apm-laravel.php';
 
     /**
@@ -20,9 +21,10 @@ class ServiceProvider extends BaseServiceProvider
         $this->mergeConfigFrom($this->source_config_path, 'elastic-apm-laravel');
 
         // Always available, even when inactive
+        $this->registerConfigService();
         $this->registerFacades();
 
-        if ($this->isAgentDisabled()) {
+        if ($this->config->isAgentDisabled()) {
             return;
         }
 
@@ -38,7 +40,7 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->publishConfig();
 
-        if ($this->isAgentDisabled()) {
+        if ($this->config->isAgentDisabled()) {
             return;
         }
 
@@ -57,6 +59,15 @@ class ServiceProvider extends BaseServiceProvider
     }
 
     /**
+     * Register the Config Service into the Service Container.
+     */
+    protected function registerConfigService(): void
+    {
+        $this->config = $this->app->make(ApmConfigService::class);
+        $this->app->instance(ApmConfigService::class, $this->config);
+    }
+
+    /**
      * Register the APM Agent into the Service Container.
      */
     protected function registerAgent(): void
@@ -64,7 +75,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->singleton(Agent::class, function () {
             $start_time = $this->app['request']->server('REQUEST_TIME_FLOAT') ?? microtime(true);
 
-            return new Agent($this->getAgentConfig(), $start_time);
+            return new Agent($this->config->getAgentConfig(), $start_time);
         });
     }
 
@@ -112,38 +123,5 @@ class ServiceProvider extends BaseServiceProvider
     protected function getConfigPath(): string
     {
         return config_path('elastic-apm-laravel.php');
-    }
-
-    protected function getAgentConfig(): array
-    {
-        return array_merge(
-            [
-                'framework' => 'Laravel',
-                'frameworkVersion' => app()->version(),
-            ],
-            [
-                'active' => config('elastic-apm-laravel.active'),
-                'httpClient' => config('elastic-apm-laravel.httpClient'),
-            ],
-            $this->getAppConfig(),
-            config('elastic-apm-laravel.env'),
-            config('elastic-apm-laravel.server')
-        );
-    }
-
-    protected function getAppConfig(): array
-    {
-        $config = config('elastic-apm-laravel.app');
-        if ($this->app->bound(VersionResolver::class)) {
-            $config['appVersion'] = $this->app->make(VersionResolver::class)->getVersion();
-        }
-
-        return $config;
-    }
-
-    private function isAgentDisabled(): bool
-    {
-        return false === config('elastic-apm-laravel.active')
-            || ('cli' === php_sapi_name() && false === config('elastic-apm-laravel.cli.active'));
     }
 }

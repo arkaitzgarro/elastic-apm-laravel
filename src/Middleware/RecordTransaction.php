@@ -3,8 +3,8 @@
 namespace AG\ElasticApmLaravel\Middleware;
 
 use AG\ElasticApmLaravel\Agent;
+use AG\ElasticApmLaravel\Services\ApmConfigService;
 use Closure;
-use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +28,7 @@ class RecordTransaction
     protected $agent;
     protected $config;
 
-    public function __construct(Agent $agent, Config $config)
+    public function __construct(Agent $agent, ApmConfigService $config)
     {
         $this->agent = $agent;
         $this->config = $config;

@@ -2,9 +2,9 @@
 
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Middleware\RecordTransaction;
+use AG\ElasticApmLaravel\Services\ApmConfigService;
 use Codeception\Test\Unit;
 use DMS\PHPUnitExtensions\ArraySubset\Assert;
-use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -49,7 +49,7 @@ class RecordTransactionTest extends Unit
 
     protected function createMiddlewareInstance(bool $use_route_uri): void
     {
-        $this->config = Mockery::mock(Config::class);
+        $this->config = Mockery::mock(ApmConfigService::class);
         $this->config->shouldReceive('get')
             ->with('elastic-apm-laravel.transactions.useRouteUri')
             ->andReturn($use_route_uri);

@@ -5,7 +5,6 @@ namespace AG\ElasticApmLaravel\Services;
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Events\StartMeasuring;
 use AG\ElasticApmLaravel\Events\StopMeasuring;
-use Illuminate\Config\Repository as Config;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Foundation\Application;
 use PhilKra\Events\Transaction;
@@ -28,13 +27,12 @@ class ApmCollectorService
      */
     private $is_agent_disabled;
 
-    public function __construct(Application $app, Dispatcher $events, Config $config)
+    public function __construct(Application $app, Dispatcher $events, ApmConfigService $config)
     {
         $this->app = $app;
         $this->events = $events;
 
-        $this->is_agent_disabled = false === $config->get('elastic-apm-laravel.active')
-            || ('cli' === php_sapi_name() && false === $config->get('elastic-apm-laravel.cli.active'));
+        $this->is_agent_disabled = $config->isAgentDisabled();
     }
 
     public function startMeasure(

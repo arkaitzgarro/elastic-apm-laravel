@@ -3,9 +3,17 @@
 namespace AG\ElasticApmLaravel\Jobs\Middleware;
 
 use AG\ElasticApmLaravel\Facades\ApmCollector;
+use AG\ElasticApmLaravel\Services\ApmConfigService;
 
 class RecordTransaction
 {
+    private $config;
+
+    public function __construct(ApmConfigService $config)
+    {
+        $this->config = $config;
+    }
+
     /**
      * Wrap the job processing in an APM transaction.
      *
@@ -16,7 +24,7 @@ class RecordTransaction
      */
     public function handle($job, $next)
     {
-        if (false === config('elastic-apm-laravel.active') || false === config('elastic-apm-laravel.cli.active')) {
+        if ($this->config->isAgentDisabled()) {
             return $next($job);
         }
 
