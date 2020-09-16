@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a749594ca9021d523316c5b4d74e8a63",
+    "content-hash": "7f1dd6ac473eaede48231df321d1fcc7",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -736,16 +736,16 @@
         },
         {
             "name": "nipwaayoni/elastic-apm-php-agent",
-            "version": "v7.3.0",
+            "version": "v7.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nipwaayoni/elastic-apm-php-agent.git",
-                "reference": "4707a43e7f80f846990721a5a704a3da85425901"
+                "reference": "2361c60d1149f591e0599335a2cb9eeb1f992070"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nipwaayoni/elastic-apm-php-agent/zipball/4707a43e7f80f846990721a5a704a3da85425901",
-                "reference": "4707a43e7f80f846990721a5a704a3da85425901",
+                "url": "https://api.github.com/repos/nipwaayoni/elastic-apm-php-agent/zipball/2361c60d1149f591e0599335a2cb9eeb1f992070",
+                "reference": "2361c60d1149f591e0599335a2cb9eeb1f992070",
                 "shasum": ""
             },
             "require": {
@@ -785,7 +785,7 @@
                 }
             ],
             "description": "A php agent for Elastic APM v2 Intake API",
-            "time": "2020-09-06T17:38:05+00:00"
+            "time": "2020-09-12T10:58:04+00:00"
         },
         {
             "name": "paragonie/random_compat",

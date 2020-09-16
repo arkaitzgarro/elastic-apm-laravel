@@ -11,15 +11,12 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Abstract class that provides base functionality to measure
- * events dispatched by the framnewrok or your application code.
+ * events dispatched by the framework or your application code.
  */
 abstract class EventDataCollector implements DataCollector
 {
     /** @var Application */
     protected $app;
-
-    /** @var Agent */
-    protected $agent;
 
     /** @var Collection */
     protected $started_measures;
@@ -33,17 +30,24 @@ abstract class EventDataCollector implements DataCollector
     /** @var float */
     protected $request_start_time;
 
-    public function __construct(Application $app, Agent $agent, Config $config)
+    /** @var Agent */
+    protected $agent;
+
+    final public function __construct(Application $app, Config $config, RequestStartTime $startTime)
     {
         $this->app = $app;
-        $this->agent = $agent;
         $this->config = $config;
         $this->started_measures = new Collection();
         $this->measures = new Collection();
 
-        $this->request_start_time = $agent->getRequestStartTime();
+        $this->request_start_time = $startTime->microseconds();
 
         $this->registerEventListeners();
+    }
+
+    public function useAgent(Agent $agent): void
+    {
+        $this->agent = $agent;
     }
 
     /**
