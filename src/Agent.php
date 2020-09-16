@@ -2,17 +2,18 @@
 
 namespace AG\ElasticApmLaravel;
 
-use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
+use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use AG\ElasticApmLaravel\Collectors\EventDataCollector;
-use AG\ElasticApmLaravel\Collectors\FrameworkCollector;
-use AG\ElasticApmLaravel\Collectors\HttpRequestCollector;
-use AG\ElasticApmLaravel\Collectors\JobCollector;
-use AG\ElasticApmLaravel\Collectors\SpanCollector;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use AG\ElasticApmLaravel\Events\LazySpan;
 use Illuminate\Support\Collection;
-use PhilKra\Events\Metadata;
-use PhilKra\Agent as NipwaayoniAgent;
+use Nipwaayoni\Agent as NipwaayoniAgent;
+use Nipwaayoni\Config;
+use Nipwaayoni\Contexts\ContextCollection;
+use Nipwaayoni\Events\EventFactoryInterface;
+use Nipwaayoni\Events\Metadata;
+use Nipwaayoni\Middleware\Connector;
+use Nipwaayoni\Stores\TransactionsStore;
 
 /**
  * The Elastic APM agent sends performance metrics and error logs to the APM Server.
@@ -31,46 +32,24 @@ class Agent extends NipwaayoniAgent
     protected $collectors;
     protected $request_start_time;
 
-    /*
-     * This method will be called by the parent's final constructor
-     */
-    protected function initialize(): void
-    {
-        $this->request_start_time = microtime(true);
+    public function __construct(
+        Config $config,
+        ContextCollection $sharedContext,
+        Connector $connector,
+        EventFactoryInterface $eventFactory,
+        TransactionsStore $transactionsStore,
+        RequestStartTime $startTime
+    ) {
+        parent::__construct($config, $sharedContext, $connector, $eventFactory, $transactionsStore);
+
+        $this->request_start_time = $startTime->microseconds();
         $this->collectors = new Collection();
-    }
-
-    public function registerInitCollectors(): void
-    {
-        // Laravel init collector
-        if ('cli' !== php_sapi_name()) {
-            // For cli executions, like queue workers, the application
-            // only starts once. It doesn't really make sense to measure it.
-            $this->addCollector(app(FrameworkCollector::class));
-        }
-    }
-
-    public function registerCollectors(): void
-    {
-        if (false !== config('elastic-apm-laravel.spans.querylog.enabled')) {
-            // DB Queries collector
-            $this->addCollector(app(DBQueryCollector::class));
-        }
-
-        // Http request collector
-        if ('cli' !== php_sapi_name()) {
-            $this->addCollector(app(HttpRequestCollector::class));
-        }
-
-        // Job collector
-        $this->addCollector(app(JobCollector::class));
-
-        // Collector for manual measurements throughout the app
-        $this->addCollector(app(SpanCollector::class));
     }
 
     public function addCollector(DataCollector $collector): void
     {
+        $collector->useAgent($this);
+
         $this->collectors->put(
             $collector->getName(),
             $collector
@@ -99,11 +78,6 @@ class Agent extends NipwaayoniAgent
                 $this->putEvent($event);
             });
         });
-    }
-
-    public function setRequestStartTime(float $startTime): void
-    {
-        $this->request_start_time = $startTime;
     }
 
     public function getRequestStartTime(): float
