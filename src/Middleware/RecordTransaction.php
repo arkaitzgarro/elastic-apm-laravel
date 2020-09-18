@@ -69,7 +69,6 @@ class RecordTransaction
             'finished' => true,
             'headers_sent' => true,
             'status_code' => $response->getStatusCode(),
-            'headers' => $this->formatHeaders($response->headers->all()),
         ]);
 
         $user = $request->user();
@@ -151,12 +150,5 @@ class RecordTransaction
     {
         // Fix leading /
         return '/' . trim($uri, '/');
-    }
-
-    protected function formatHeaders(array $headers): array
-    {
-        return collect($headers)->map(function ($values) {
-            return head($values);
-        })->toArray();
     }
 }
