@@ -20,7 +20,9 @@
         "illuminate/routing": "^5.5|^6|^7",
         "illuminate/support": "^5.5|^6|^7",
         "jasny/dbquery-mysql": "^2.0",
-        "nipwaayoni/elastic-apm-php-agent": "^7.4"
+        "nipwaayoni/elastic-apm-php-agent": "^7.4",
+        "http-interop/http-factory-guzzle": "^1.0",
+        "php-http/guzzle6-adapter": "^2.0"
     },
     "require-dev": {
         "codeception/codeception": "^4.1",
