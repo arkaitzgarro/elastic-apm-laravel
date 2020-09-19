@@ -60,6 +60,15 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         $this->registerMiddleware();
+
+        // If not collecting http events, the http middleware will not be executed and an
+        // Agent will not exist prior to events occurring. Create one here to ensure the
+        // collectors all register their listeners before any work is done. Unlike the
+        // FrameWorkCollector, the JobCollector needs an Agent object so it cannot be
+        // created independently and discovered by the ServiceProvider later.
+        if (!$this->collectHttpEvents()) {
+            $this->app->make(Agent::class);
+        }
     }
 
     /**
