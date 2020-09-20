@@ -1,6 +1,7 @@
 <?php
 
 use AG\ElasticApmLaravel\Agent;
+use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use AG\ElasticApmLaravel\Middleware\RecordTransaction;
 use Codeception\Test\Unit;
 use DMS\PHPUnitExtensions\ArraySubset\Assert;
@@ -41,6 +42,7 @@ class RecordTransactionTest extends Unit
     protected function _before()
     {
         $this->agent = Mockery::mock(Agent::class);
+        $this->requestStartTimeMock = Mockery::mock(RequestStartTime::class);
         $this->transaction = Mockery::mock(Transaction::class)->makePartial();
         $this->request = Request::create('/ping', 'GET');
         $this->response = Mockery::mock(Response::class)->makePartial();
@@ -57,10 +59,13 @@ class RecordTransactionTest extends Unit
             ->with('elastic-apm-laravel.transactions.ignorePatterns')
             ->once()
             ->andReturn($ignore_patterns);
+        $this->requestStartTimeMock->shouldReceive('microseconds')
+            ->andReturn(1000.0);
 
         $this->middleware = new RecordTransaction(
             $this->agent,
             $this->config,
+            $this->requestStartTimeMock,
         );
     }
 
@@ -126,7 +131,6 @@ class RecordTransactionTest extends Unit
             'finished' => true,
             'headers_sent' => true,
             'status_code' => 200,
-            'headers' => [],
         ], $context['response']);
 
         $this->assertEquals([

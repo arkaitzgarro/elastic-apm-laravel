@@ -27,6 +27,12 @@ class JobCollector extends EventDataCollector implements DataCollector
     public function registerEventListeners(): void
     {
         $this->app->events->listen(JobProcessing::class, function (JobProcessing $event) {
+            if ($this->app->runningInConsole()) {
+                // Since the application starts only once for async queues, make sure
+                // the transaction and all spans have the correct start time.
+                $this->start_time->setStartTime(microtime(true));
+            }
+
             $transaction_name = $this->getTransactionName($event);
             if (!$transaction_name) {
                 return;
@@ -79,19 +85,17 @@ class JobCollector extends EventDataCollector implements DataCollector
 
     protected function startTransaction(string $transaction_name): Transaction
     {
-        $start_time = 'cli' === php_sapi_name() ? microtime(true) : $this->request_start_time;
-
         return $this->agent->startTransaction(
             $transaction_name,
             [],
-            $start_time
+            $this->start_time->microseconds()
         );
     }
 
     protected function setTransactionType(string $transaction_name): void
     {
         $this->agent->getTransaction($transaction_name)->setMeta([
-            'type' => 'job',
+            'type' => 'Job',
         ]);
     }
 
@@ -122,7 +126,6 @@ class JobCollector extends EventDataCollector implements DataCollector
         try {
             if (!($job instanceof SyncJob)) {
                 // When using a queued driver, send/flush transaction to make room for the next job in the queue
-                // Otherwise just send when the agent destructs
                 $this->agent->send();
             }
         } catch (ClientException $exception) {

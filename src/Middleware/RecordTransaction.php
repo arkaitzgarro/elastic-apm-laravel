@@ -3,6 +3,7 @@
 namespace AG\ElasticApmLaravel\Middleware;
 
 use AG\ElasticApmLaravel\Agent;
+use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use Closure;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request;
@@ -27,11 +28,13 @@ class RecordTransaction
 {
     protected $agent;
     protected $config;
+    protected $start_time;
 
-    public function __construct(Agent $agent, Config $config)
+    public function __construct(Agent $agent, Config $config, RequestStartTime $start_time)
     {
         $this->agent = $agent;
         $this->config = $config;
+        $this->start_time = $start_time;
     }
 
     /**
@@ -117,7 +120,7 @@ class RecordTransaction
         return $this->agent->startTransaction(
             $transaction_name,
             [],
-            $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true)
+            $this->start_time->microseconds()
         );
     }
 

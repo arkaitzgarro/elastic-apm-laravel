@@ -3,6 +3,7 @@
 namespace AG\ElasticApmLaravel\Collectors;
 
 use AG\ElasticApmLaravel\Agent;
+use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Foundation\Application;
@@ -27,20 +28,20 @@ abstract class EventDataCollector implements DataCollector
     /** @var Config */
     protected $config;
 
-    /** @var float */
-    protected $request_start_time;
+    /** @var RequestStartTime */
+    protected $start_time;
 
     /** @var Agent */
     protected $agent;
 
-    final public function __construct(Application $app, Config $config, RequestStartTime $startTime)
+    final public function __construct(Application $app, Config $config, RequestStartTime $start_time)
     {
         $this->app = $app;
         $this->config = $config;
         $this->started_measures = new Collection();
         $this->measures = new Collection();
 
-        $this->request_start_time = $startTime->microseconds();
+        $this->start_time = $start_time;
 
         $this->registerEventListeners();
     }
@@ -69,7 +70,7 @@ abstract class EventDataCollector implements DataCollector
 
         $this->started_measures->put($name, [
             'label' => $label ?: $name,
-            'start' => $start - $this->request_start_time,
+            'start' => $start - $this->start_time->microseconds(),
             'type' => $type,
             'action' => $action,
         ]);
@@ -99,7 +100,7 @@ abstract class EventDataCollector implements DataCollector
         $this->addMeasure(
             $measure['label'],
             $measure['start'],
-            $end - $this->request_start_time,
+            $end - $this->start_time->microseconds(),
             $measure['type'],
             $measure['action'],
             $params

@@ -76,7 +76,7 @@ To record an additional span around your job execution, you may include the prov
 public function middleware()
 {
     return [
-        app(\AG\ElasticApmLaravel\Jobs\Middleware\RecordTransaction::class),
+        new \AG\ElasticApmLaravel\Jobs\Middleware\RecordTransaction,
     ];
 }
 ```

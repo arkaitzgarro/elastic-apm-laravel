@@ -32,7 +32,7 @@ class DBQueryCollector extends EventDataCollector implements DataCollector
             }
         }
 
-        $start_time = microtime(true) - $this->request_start_time - $query->time / 1000;
+        $start_time = microtime(true) - $this->start_time->microseconds() - $query->time / 1000;
         $end_time = $start_time + $query->time / 1000;
 
         $query = [

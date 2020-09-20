@@ -16,14 +16,14 @@ use Nipwaayoni\Stores\TransactionsStore;
 class AgentBuilder extends NipwaayoniAgentBuilder
 {
     /** @var RequestStartTime */
-    private $startTime;
+    private $start_time;
 
     /** @var Collection */
     private $collectors;
 
-    public function withRequestStartTime(RequestStartTime $startTime): self
+    public function withRequestStartTime(RequestStartTime $start_time): self
     {
-        $this->startTime = $startTime;
+        $this->start_time = $start_time;
 
         return $this;
     }
@@ -37,20 +37,20 @@ class AgentBuilder extends NipwaayoniAgentBuilder
 
     protected function newAgent(
         Config $config,
-        ContextCollection $sharedContext,
+        ContextCollection $shared_context,
         Connector $connector,
-        EventFactoryInterface $eventFactory,
-        TransactionsStore $transactionsStore): ApmAgent
+        EventFactoryInterface $event_factory,
+        TransactionsStore $transactions_store): ApmAgent
     {
-        if (null === $this->startTime) {
-            $this->startTime = new RequestStartTime(microtime(true));
+        if (null === $this->start_time) {
+            $this->start_time = new RequestStartTime(microtime(true));
         }
 
         if (null === $this->collectors) {
             $this->collectors = new Collection();
         }
 
-        $agent = new Agent($config, $sharedContext, $connector, $eventFactory, $transactionsStore, $this->startTime);
+        $agent = new Agent($config, $shared_context, $connector, $event_factory, $transactions_store, $this->start_time);
 
         $this->collectors->each(function (EventDataCollector $collector) use ($agent) {
             $agent->addCollector($collector);

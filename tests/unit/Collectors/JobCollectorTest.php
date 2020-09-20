@@ -46,17 +46,16 @@ class JobCollectorTest extends Unit
     protected function setUp(): void
     {
         parent::setUp();
+        
+        $requestStartTimeMock = Mockery::mock(RequestStartTime::class);
+        $requestStartTimeMock->shouldReceive('setStartTime');
+        $requestStartTimeMock->shouldReceive('microseconds')->andReturn(1000.0);
 
         $this->jobMock = Mockery::mock(Job::class);
 
         $this->transactionMock = Mockery::mock(Transaction::class);
 
         $this->agentMock = Mockery::mock(Agent::class);
-
-        $requestStartTimeMock = Mockery::mock(RequestStartTime::class);
-        $requestStartTimeMock->shouldReceive('microseconds')
-            ->once()
-            ->andReturn(self::REQUEST_START_TIME);
 
         $this->configMock = Mockery::mock(Config::class);
 
