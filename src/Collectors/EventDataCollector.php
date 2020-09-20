@@ -3,7 +3,6 @@
 namespace AG\ElasticApmLaravel\Collectors;
 
 use AG\ElasticApmLaravel\Agent;
-use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Foundation\Application;
