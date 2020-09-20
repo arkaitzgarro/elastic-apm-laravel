@@ -22,7 +22,6 @@ class JobCollectorTest extends Unit
     private const JOB_NAME = 'This\Is\A\Test\Job';
     // Use 4 backslashes to match a single backslash: https://stackoverflow.com/a/15369828
     private const JOB_IGNORE_PATTERN = "/\/health-check|This\\\\Is\\\\A\\\\Test\\\\Job/";
-    private const REQUEST_START_TIME = 1000.0;
 
     /** @var Application */
     private $app;
