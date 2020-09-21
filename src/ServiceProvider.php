@@ -87,16 +87,12 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerAgent(): void
     {
         $this->app->singleton(Agent::class, function () {
-            /** @var RequestStartTime $start_time */
-            $start_time = $this->app->make(RequestStartTime::class);
-
             /** @var AgentBuilder $builder */
             $builder = $this->app->make(AgentBuilder::class);
 
             return $builder
                 ->withConfig(new Config($this->getAgentConfig()))
                 ->withEnvData(config('elastic-apm-laravel.env.env'))
-                ->withRequestStartTime($start_time)
                 ->withEventCollectors(collect($this->app->tagged(self::COLLECTOR_TAG)))
                 ->build();
         });
