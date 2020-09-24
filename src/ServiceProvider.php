@@ -14,6 +14,7 @@ use AG\ElasticApmLaravel\Services\ApmCollectorService;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Nipwaayoni\Config;
 
@@ -186,16 +187,20 @@ class ServiceProvider extends BaseServiceProvider
 
     protected function getAgentConfig(): array
     {
-        return array_merge(
+        // Filter out null config options so that the Config class can look for environment variables
+        return array_filter(array_merge(
             [
-                'framework' => 'Laravel',
+                'defaultServiceName' => 'Laravel',
+                'frameworkName' => 'Laravel',
                 'frameworkVersion' => app()->version(),
                 'active' => config('elastic-apm-laravel.active'),
                 'environment' => config('elastic-apm-laravel.env.environment'),
+                'logger' => Log::getLogger(),
+                'logLevel' => config('elastic-apm-laravel.log-level', 'error'),
             ],
             $this->getAppConfig(),
             config('elastic-apm-laravel.server')
-        );
+        ));
     }
 
     protected function getAppConfig(): array

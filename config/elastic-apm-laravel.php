@@ -2,7 +2,9 @@
 
 return [
     // Sets whether the apm reporting should be active or not
-    'active' => env('APM_ACTIVE', true),
+    'active' => env('APM_ACTIVE'),
+
+    'log-level' => env('APM_LOG_LEVEL', 'error'),
 
     'cli' => [
         // Sets whether the apm reporting should also be active for non-HTTP requests
@@ -11,10 +13,10 @@ return [
 
     'app' => [
         // The app name that will identify your app in Kibana / Elastic APM, limited characters allowed
-        'appName' => preg_replace('/[^a-zA-Z0-9 _-]/', '-', env('APM_APPNAME', 'Laravel')),
+        'appName' => preg_replace('/[^a-zA-Z0-9 _-]/', '-', env('APM_APPNAME')),
 
         // The version of your app
-        'appVersion' => env('APM_APPVERSION', ''),
+        'appVersion' => env('APM_APPVERSION'),
     ],
 
     'env' => [
@@ -22,21 +24,18 @@ return [
         'env' => ['DOCUMENT_ROOT', 'REMOTE_ADDR'],
 
         // Application environment
-        'environment' => env('APM_ENVIRONMENT', 'development'),
+        'environment' => env('APM_ENVIRONMENT'),
     ],
-
-    // GuzzleHttp\Client options (http://docs.guzzlephp.org/en/stable/request-options.html#request-options)
-    'httpClient' => [],
 
     'server' => [
         // The apm-server to connect to
-        'serverUrl' => env('APM_SERVERURL', 'http://127.0.0.1:8200'),
+        'serverUrl' => env('APM_SERVERURL'),
 
         // Token for x
-        'secretToken' => env('APM_SECRETTOKEN', null),
+        'secretToken' => env('APM_SECRETTOKEN'),
 
         // Hostname of the system the agent is running on.
-        'hostname' => gethostname(),
+        'hostname' => null,
     ],
 
     'transactions' => [
@@ -51,7 +50,7 @@ return [
         'maxTraceItems' => env('APM_MAXTRACEITEMS', 1000),
 
         // Depth of backtraces
-        'backtraceDepth' => env('APM_BACKTRACEDEPTH', 25),
+        'backtraceDepth' => env('APM_BACKTRACEDEPTH'),
 
         'querylog' => [
             // Set to false to completely disable query logging, or to 'auto' if you would like to use the threshold feature.

@@ -4,13 +4,14 @@ namespace AG\ElasticApmLaravel;
 
 use AG\ElasticApmLaravel\Collectors\EventDataCollector;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
-use AG\ElasticApmLaravel\Events\LazySpan;
 use Illuminate\Support\Collection;
 use Nipwaayoni\Agent as NipwaayoniAgent;
 use Nipwaayoni\Config;
 use Nipwaayoni\Contexts\ContextCollection;
 use Nipwaayoni\Events\EventFactoryInterface;
 use Nipwaayoni\Events\Metadata;
+use Nipwaayoni\Events\Span;
+use Nipwaayoni\Events\Transaction;
 use Nipwaayoni\Middleware\Connector;
 use Nipwaayoni\Stores\TransactionsStore;
 
@@ -29,6 +30,9 @@ use Nipwaayoni\Stores\TransactionsStore;
 class Agent extends NipwaayoniAgent
 {
     protected $collectors;
+
+    /** @var Transaction */
+    private $current_transaction;
 
     public function __construct(
         Config $config,
@@ -57,6 +61,16 @@ class Agent extends NipwaayoniAgent
         return $this->collectors->get($name);
     }
 
+    public function setCurrentTransaction(Transaction $transaction): void
+    {
+        $this->current_transaction = $transaction;
+    }
+
+    public function currentTransaction(): Transaction
+    {
+        return $this->current_transaction;
+    }
+
     public function collectEvents(string $transaction_name): void
     {
         $max_trace_items = config('elastic-apm-laravel.spans.maxTraceItems');
@@ -64,11 +78,11 @@ class Agent extends NipwaayoniAgent
         $transaction = $this->getTransaction($transaction_name);
         $this->collectors->each(function ($collector) use ($transaction, $max_trace_items) {
             $collector->collect()->take($max_trace_items)->each(function ($measure) use ($transaction) {
-                $event = new LazySpan($measure['label'], $transaction);
+                $event = new Span($measure['label'], $transaction);
                 $event->setType($measure['type']);
                 $event->setAction($measure['action']);
-                $event->setContext($measure['context']);
-                $event->setStartTime($measure['start']);
+                $event->setCustomContext($measure['context']);
+                $event->setStartOffset($measure['start']);
                 $event->setDuration($measure['duration']);
 
                 $this->putEvent($event);
@@ -76,9 +90,18 @@ class Agent extends NipwaayoniAgent
         });
     }
 
-    public function send(): bool
+    public function startTransaction(string $name, array $context = [], float $start = null): Transaction
     {
-        $sent = parent::send();
+        $transaction = parent::startTransaction($name, $context, $start);
+        $this->setCurrentTransaction($transaction);
+
+        return $transaction;
+    }
+
+
+    public function send(): void
+    {
+        parent::send();
 
         // Ensure collectors are reset after data is sent to APM
         $this->collectors->each(function (EventDataCollector $collector) {
@@ -92,7 +115,5 @@ class Agent extends NipwaayoniAgent
          * collection better and remove the need for this.
          */
         $this->putEvent(new Metadata([], $this->getConfig(), $this->agentMetadata()));
-
-        return $sent;
     }
 }
