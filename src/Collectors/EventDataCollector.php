@@ -136,4 +136,10 @@ abstract class EventDataCollector implements DataCollector
     {
         return round($time * 1000, 3);
     }
+
+    public function reset(): void
+    {
+        $this->started_measures = new Collection();
+        $this->measures = new Collection();
+    }
 }
