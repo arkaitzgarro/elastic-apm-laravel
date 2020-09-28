@@ -2571,7 +2571,7 @@
                 "polyfill",
                 "portable",
                 "shim"
-            ],
+            ]
         },
         {
             "name": "symfony/polyfill-php56",
