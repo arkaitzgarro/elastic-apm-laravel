@@ -126,7 +126,6 @@ class RecordTransactionTest extends Unit
             'finished' => true,
             'headers_sent' => true,
             'status_code' => 200,
-            'headers' => [],
         ], $context['response']);
 
         $this->assertEquals([
