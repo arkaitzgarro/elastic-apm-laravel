@@ -120,7 +120,7 @@ class Agent extends PhilKraAgent
          * worker processes. A future release of the Agent package should handle event
          * collection better and remove the need for this.
          */
-        $this->putEvent(new Metadata([], $this->getConfig(), $this->agentMetadata()));
+        $this->putEvent(new Metadata([], $this->getConfig()));
 
         return $sent;
     }
