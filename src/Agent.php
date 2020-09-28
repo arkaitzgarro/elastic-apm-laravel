@@ -3,6 +3,7 @@
 namespace AG\ElasticApmLaravel;
 
 use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
+use AG\ElasticApmLaravel\Collectors\EventDataCollector;
 use AG\ElasticApmLaravel\Collectors\FrameworkCollector;
 use AG\ElasticApmLaravel\Collectors\HttpRequestCollector;
 use AG\ElasticApmLaravel\Collectors\JobCollector;
@@ -11,6 +12,7 @@ use AG\ElasticApmLaravel\Contracts\DataCollector;
 use AG\ElasticApmLaravel\Events\LazySpan;
 use Illuminate\Support\Collection;
 use PhilKra\Agent as PhilKraAgent;
+use PhilKra\Events\Metadata;
 
 /**
  * The Elastic APM agent sends performance metrics and error logs to the APM Server.
@@ -101,5 +103,25 @@ class Agent extends PhilKraAgent
     public function getRequestStartTime(): float
     {
         return $this->request_start_time;
+    }
+
+    public function send(): bool
+    {
+        $sent = parent::send();
+
+        // Ensure collectors are reset after data is sent to APM
+        $this->collectors->each(function (EventDataCollector $collector) {
+            $collector->reset();
+        });
+
+        /*
+         * Push new metadata onto the stack in preparation for the next send event. This
+         * simulates the behavior when a new Agent is created and is needed for long running
+         * worker processes. A future release of the Agent package should handle event
+         * collection better and remove the need for this.
+         */
+        $this->putEvent(new Metadata([], $this->getConfig()));
+
+        return $sent;
     }
 }
