@@ -9,7 +9,6 @@ use Illuminate\Console\Events\ScheduledTaskSkipped;
 use Illuminate\Console\Events\ScheduledTaskStarting;
 use Illuminate\Support\Facades\Log;
 use PhilKra\Events\Transaction;
-use PhilKra\Exception\Transaction\UnknownTransactionException;
 use Throwable;
 
 /**
@@ -63,15 +62,6 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
         });
     }
 
-    protected function getTransaction(string $transaction_name): ?Transaction
-    {
-        try {
-            return $this->agent->getTransaction($transaction_name);
-        } catch (UnknownTransactionException $e) {
-            return null;
-        }
-    }
-
     protected function startTransaction(string $transaction_name): Transaction
     {
         $start_time = microtime(true);
@@ -122,12 +112,5 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
         $transaction_name = $event->task->command;
 
         return $this->shouldIgnoreTransaction($transaction_name) ? '' : $transaction_name;
-    }
-
-    protected function shouldIgnoreTransaction(string $transaction_name): bool
-    {
-        $pattern = $this->config->get('elastic-apm-laravel.transactions.ignorePatterns');
-
-        return $pattern && preg_match($pattern, $transaction_name);
     }
 }

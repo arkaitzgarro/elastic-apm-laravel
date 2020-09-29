@@ -74,15 +74,6 @@ class JobCollector extends EventDataCollector implements DataCollector
         });
     }
 
-    protected function getTransaction(string $transaction_name): ?Transaction
-    {
-        try {
-            return $this->agent->getTransaction($transaction_name);
-        } catch (UnknownTransactionException $e) {
-            return null;
-        }
-    }
-
     protected function startTransaction(string $transaction_name): Transaction
     {
         return $this->agent->startTransaction(
@@ -143,12 +134,5 @@ class JobCollector extends EventDataCollector implements DataCollector
         $transaction_name = $event->job->resolveName();
 
         return $this->shouldIgnoreTransaction($transaction_name) ? '' : $transaction_name;
-    }
-
-    protected function shouldIgnoreTransaction(string $transaction_name): bool
-    {
-        $pattern = $this->config->get('elastic-apm-laravel.transactions.ignorePatterns');
-
-        return $pattern && preg_match($pattern, $transaction_name);
     }
 }
