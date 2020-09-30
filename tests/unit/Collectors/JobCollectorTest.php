@@ -2,6 +2,7 @@
 
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Collectors\JobCollector;
+use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use Codeception\Test\Unit;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Contracts\Queue\Job;
@@ -13,8 +14,8 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Log;
-use PhilKra\Events\Transaction;
-use PhilKra\Exception\Transaction\UnknownTransactionException;
+use Nipwaayoni\Events\Transaction;
+use Nipwaayoni\Exception\Transaction\UnknownTransactionException;
 
 class JobCollectorTest extends Unit
 {
@@ -23,11 +24,17 @@ class JobCollectorTest extends Unit
     private const JOB_IGNORE_PATTERN = "/\/health-check|This\\\\Is\\\\A\\\\Test\\\\Job/";
     private const REQUEST_START_TIME = 1000.0;
 
+    /** @var Application */
+    private $app;
+    /** @var Dispatcher */
+    private $dispatcher;
+
     /**
      * @var \AG\ElasticApmLaravel\Collectors\JobCollector
      */
     private $collector;
 
+    /** @var Agent|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
     private $agentMock;
 
     protected function _before()
@@ -45,14 +52,16 @@ class JobCollectorTest extends Unit
         $this->transactionMock = Mockery::mock(Transaction::class);
 
         $this->agentMock = Mockery::mock(Agent::class);
-        $this->agentMock
-            ->shouldReceive('getRequestStartTime')
+
+        $requestStartTimeMock = Mockery::mock(RequestStartTime::class);
+        $requestStartTimeMock->shouldReceive('microseconds')
             ->once()
             ->andReturn(self::REQUEST_START_TIME);
 
         $this->configMock = Mockery::mock(Config::class);
 
-        $this->collector = new JobCollector($this->app, $this->agentMock, $this->configMock);
+        $this->collector = new JobCollector($this->app, $this->configMock, $requestStartTimeMock);
+        $this->collector->useAgent($this->agentMock);
     }
 
     protected function tearDown(): void

@@ -8,7 +8,7 @@ use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use PhilKra\Events\Transaction;
+use Nipwaayoni\Events\Transaction;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class RecordTransactionTest extends Unit
@@ -34,7 +34,7 @@ class RecordTransactionTest extends Unit
     private $middleware;
 
     /**
-     * @var PhilKra\Events\Transaction
+     * @var Nipwaayoni\Events\Transaction
      */
     private $transaction;
 
@@ -126,8 +126,7 @@ class RecordTransactionTest extends Unit
             'finished' => true,
             'headers_sent' => true,
             'status_code' => 200,
-            'headers' => [],
-        ], $context['request']['response']);
+        ], $context['response']);
 
         $this->assertEquals([
             'id' => null,
