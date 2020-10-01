@@ -20,7 +20,7 @@ class RecordTransaction
             return $next($job);
         }
 
-        ApmCollector::startMeasure('job_processing', 'job', 'handle', get_class($job) . ' ::handle');
+        ApmCollector::startMeasure('job_processing', 'job', 'processing', get_class($job) . ' processing');
 
         $next($job);
 

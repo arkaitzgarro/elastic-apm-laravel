@@ -26,16 +26,16 @@ class AgentBuilder extends NipwaayoniAgentBuilder
 
     protected function newAgent(
         Config $config,
-        ContextCollection $shared_context,
+        ContextCollection $sharedContext,
         Connector $connector,
-        EventFactoryInterface $event_factory,
-        TransactionsStore $transactions_store): ApmAgent
+        EventFactoryInterface $eventFactory,
+        TransactionsStore $transactionsStore): ApmAgent
     {
         if (null === $this->collectors) {
             $this->collectors = new Collection();
         }
 
-        $agent = new Agent($config, $shared_context, $connector, $event_factory, $transactions_store, $this->startTime);
+        $agent = new Agent($config, $sharedContext, $connector, $eventFactory, $transactionsStore, $this->startTime);
 
         $this->collectors->each(function (EventDataCollector $collector) use ($agent) {
             $agent->addCollector($collector);
