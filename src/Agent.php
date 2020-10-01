@@ -34,15 +34,15 @@ class Agent extends NipwaayoniAgent
 
     public function __construct(
         Config $config,
-        ContextCollection $sharedContext,
+        ContextCollection $shared_context,
         Connector $connector,
-        EventFactoryInterface $eventFactory,
-        TransactionsStore $transactionsStore,
-        RequestStartTime $startTime
+        EventFactoryInterface $event_factory,
+        TransactionsStore $transactions_store,
+        RequestStartTime $start_time
     ) {
-        parent::__construct($config, $sharedContext, $connector, $eventFactory, $transactionsStore);
+        parent::__construct($config, $shared_context, $connector, $event_factory, $transactions_store);
 
-        $this->request_start_time = $startTime->microseconds();
+        $this->request_start_time = $start_time->microseconds();
         $this->collectors = new Collection();
     }
 

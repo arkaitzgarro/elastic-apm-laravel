@@ -33,14 +33,14 @@ abstract class EventDataCollector implements DataCollector
     /** @var Agent */
     protected $agent;
 
-    final public function __construct(Application $app, Config $config, RequestStartTime $startTime)
+    final public function __construct(Application $app, Config $config, RequestStartTime $start_time)
     {
         $this->app = $app;
         $this->config = $config;
         $this->started_measures = new Collection();
         $this->measures = new Collection();
 
-        $this->request_start_time = $startTime->microseconds();
+        $this->request_start_time = $start_time->microseconds();
 
         $this->registerEventListeners();
     }
