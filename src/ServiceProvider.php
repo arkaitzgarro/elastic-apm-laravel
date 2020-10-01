@@ -161,12 +161,12 @@ class ServiceProvider extends BaseServiceProvider
         // Right now, the only condition that determines the inclusion
         // of framework events is being an http request. That may change
         // in the future, so we will use a specific method.
-        return !$this->app->runningInConsole();
+        return $this->collectHttpEvents();
     }
 
     private function collectHttpEvents(): bool
     {
-        return !$this->app->runningInConsole();
+        return 'cli' !== php_sapi_name();
     }
 
     /**
@@ -214,6 +214,6 @@ class ServiceProvider extends BaseServiceProvider
     private function isAgentDisabled(): bool
     {
         return false === config('elastic-apm-laravel.active')
-            || ($this->app->runningInConsole() && false === config('elastic-apm-laravel.cli.active'));
+            || ('cli' === php_sapi_name() && false === config('elastic-apm-laravel.cli.active'));
     }
 }

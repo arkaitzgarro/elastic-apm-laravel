@@ -34,7 +34,7 @@ class ApmCollectorService
         $this->events = $events;
 
         $this->is_agent_disabled = false === $config->get('elastic-apm-laravel.active')
-            || ($this->app->runningInConsole() && false === $config->get('elastic-apm-laravel.cli.active'));
+            || ('cli' === php_sapi_name() && false === $config->get('elastic-apm-laravel.cli.active'));
     }
 
     public function startMeasure(
