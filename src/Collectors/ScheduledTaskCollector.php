@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\ClientException;
 use Illuminate\Console\Events\ScheduledTaskFinished;
 use Illuminate\Console\Events\ScheduledTaskSkipped;
 use Illuminate\Console\Events\ScheduledTaskStarting;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Nipwaayoni\Events\Transaction;
 use Throwable;
@@ -36,8 +37,8 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
                 return;
             }
 
-            $this->startTransaction($transaction_name);
-            $this->setTransactionType($transaction_name);
+            $transaction = $this->startTransaction($transaction_name);
+            $this->addMetadata($transaction);
         });
 
         $this->app->events->listen(ScheduledTaskSkipped::class, function (ScheduledTaskSkipped $event) {
@@ -73,13 +74,6 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
         );
     }
 
-    protected function setTransactionType(string $transaction_name): void
-    {
-        $this->agent->getTransaction($transaction_name)->setMeta([
-            'type' => 'scheduled-task',
-        ]);
-    }
-
     protected function stopTransaction(string $transaction_name, int $result): void
     {
         // Stop the transaction and measure the time
@@ -108,5 +102,19 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
         $transaction_name = $event->task->command;
 
         return $this->shouldIgnoreTransaction($transaction_name) ? '' : $transaction_name;
+    }
+
+    protected function addMetadata(Transaction $transaction): void
+    {
+        $transaction->setMeta([
+            'type' => 'scheduled-task',
+        ]);
+        $transaction->setCustomContext([
+            'ran_at' => Carbon::now()->toDateTimeString(),
+            'memory' => [
+                'peak' => round(memory_get_peak_usage(false) / 1024 / 1024, 2) . 'M',
+                'peak_real' => round(memory_get_peak_usage(true) / 1024 / 1024, 2) . 'M',
+            ],
+        ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace AG\ElasticApmLaravel\Collectors;
 
 use AG\ElasticApmLaravel\Contracts\DataCollector;
+use Carbon\Carbon;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Console\Events\CommandStarting;
@@ -35,8 +36,8 @@ class CommandCollector extends EventDataCollector implements DataCollector
                 return;
             }
 
-            $this->startTransaction($transaction_name);
-            $this->setTransactionType($transaction_name);
+            $transaction = $this->startTransaction($transaction_name);
+            $this->addMetadata($transaction);
         });
 
         $this->app->events->listen(CommandFinished::class, function (CommandFinished $event) {
@@ -60,13 +61,6 @@ class CommandCollector extends EventDataCollector implements DataCollector
             [],
             $start_time
         );
-    }
-
-    protected function setTransactionType(string $transaction_name): void
-    {
-        $this->agent->getTransaction($transaction_name)->setMeta([
-            'type' => 'command',
-        ]);
     }
 
     /**
@@ -105,5 +99,26 @@ class CommandCollector extends EventDataCollector implements DataCollector
         }
 
         return $this->shouldIgnoreTransaction($transaction_name) ? '' : $transaction_name;
+    }
+
+    protected function addMetadata(Transaction $transaction): void
+    {
+        $runner = null;
+        if (extension_loaded('posix')) {
+            $runner = posix_getpwuid(posix_geteuid())['name'];
+        }
+        $transaction->setUserContext([
+            'username' => $runner,
+        ]);
+        $transaction->setMeta([
+            'type' => 'command',
+        ]);
+        $transaction->setCustomContext([
+            'ran_at' => Carbon::now()->toDateTimeString(),
+            'memory' => [
+                'peak' => round(memory_get_peak_usage(false) / 1024 / 1024, 2) . 'M',
+                'peak_real' => round(memory_get_peak_usage(true) / 1024 / 1024, 2) . 'M',
+            ],
+        ]);
     }
 }
