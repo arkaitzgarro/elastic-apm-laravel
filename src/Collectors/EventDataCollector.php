@@ -8,8 +8,8 @@ use Illuminate\Config\Repository as Config;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use PhilKra\Events\Transaction;
-use PhilKra\Exception\Transaction\UnknownTransactionException;
+use Nipwaayoni\Events\Transaction;
+use Nipwaayoni\Exception\Transaction\UnknownTransactionException;
 
 /**
  * Abstract class that provides base functionality to measure

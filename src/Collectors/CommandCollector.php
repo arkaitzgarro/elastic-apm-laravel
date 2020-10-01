@@ -7,7 +7,7 @@ use GuzzleHttp\Exception\ClientException;
 use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Support\Facades\Log;
-use PhilKra\Events\Transaction;
+use Nipwaayoni\Events\Transaction;
 use Throwable;
 
 /**

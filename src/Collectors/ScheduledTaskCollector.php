@@ -8,7 +8,7 @@ use Illuminate\Console\Events\ScheduledTaskFinished;
 use Illuminate\Console\Events\ScheduledTaskSkipped;
 use Illuminate\Console\Events\ScheduledTaskStarting;
 use Illuminate\Support\Facades\Log;
-use PhilKra\Events\Transaction;
+use Nipwaayoni\Events\Transaction;
 use Throwable;
 
 /**
@@ -80,10 +80,6 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
         ]);
     }
 
-    /**
-     * Jobs don't have a response code like HTTP but we'll add the 200 success or 500 failure anyway
-     * because it helps with filtering in Elastic.
-     */
     protected function stopTransaction(string $transaction_name, int $result): void
     {
         // Stop the transaction and measure the time
