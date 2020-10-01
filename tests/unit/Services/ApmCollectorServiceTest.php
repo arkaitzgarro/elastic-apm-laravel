@@ -27,6 +27,8 @@ class ApmCollectorServiceTest extends Unit
         $this->configMock = Mockery::mock(Config::class);
         $this->eventsMock = Mockery::mock(Dispatcher::class);
 
+        $this->appMock->shouldReceive('runningInConsole')
+            ->andReturn(true);
         $this->configMock->shouldReceive('get')
             ->once()
             ->with('elastic-apm-laravel.active')

@@ -3,7 +3,6 @@
 namespace AG\ElasticApmLaravel;
 
 use AG\ElasticApmLaravel\Collectors\EventDataCollector;
-use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use Illuminate\Support\Collection;
 use Nipwaayoni\AgentBuilder as NipwaayoniAgentBuilder;
 use Nipwaayoni\ApmAgent;
@@ -15,18 +14,8 @@ use Nipwaayoni\Stores\TransactionsStore;
 
 class AgentBuilder extends NipwaayoniAgentBuilder
 {
-    /** @var RequestStartTime */
-    private $startTime;
-
     /** @var Collection */
     private $collectors;
-
-    public function withRequestStartTime(RequestStartTime $startTime): self
-    {
-        $this->startTime = $startTime;
-
-        return $this;
-    }
 
     public function withEventCollectors(Collection $collectors): self
     {
@@ -37,20 +26,16 @@ class AgentBuilder extends NipwaayoniAgentBuilder
 
     protected function newAgent(
         Config $config,
-        ContextCollection $sharedContext,
+        ContextCollection $shared_context,
         Connector $connector,
-        EventFactoryInterface $eventFactory,
-        TransactionsStore $transactionsStore): ApmAgent
+        EventFactoryInterface $event_factory,
+        TransactionsStore $transactions_store): ApmAgent
     {
-        if (null === $this->startTime) {
-            $this->startTime = new RequestStartTime(microtime(true));
-        }
-
         if (null === $this->collectors) {
             $this->collectors = new Collection();
         }
 
-        $agent = new Agent($config, $sharedContext, $connector, $eventFactory, $transactionsStore, $this->startTime);
+        $agent = new Agent($config, $shared_context, $connector, $event_factory, $transactions_store, $this->startTime);
 
         $this->collectors->each(function (EventDataCollector $collector) use ($agent) {
             $agent->addCollector($collector);

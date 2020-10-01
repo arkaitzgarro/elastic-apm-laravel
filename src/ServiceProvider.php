@@ -87,16 +87,12 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerAgent(): void
     {
         $this->app->singleton(Agent::class, function () {
-            /** @var RequestStartTime $start_time */
-            $start_time = $this->app->make(RequestStartTime::class);
-
             /** @var AgentBuilder $builder */
             $builder = $this->app->make(AgentBuilder::class);
 
             return $builder
                 ->withConfig(new Config($this->getAgentConfig()))
                 ->withEnvData(config('elastic-apm-laravel.env.env'))
-                ->withRequestStartTime($start_time)
                 ->withEventCollectors(collect($this->app->tagged(self::COLLECTOR_TAG)))
                 ->build();
         });
@@ -125,7 +121,7 @@ class ServiceProvider extends BaseServiceProvider
      * registered by tagging the abstracts in the service container. The concreate
      * implementations are not created during registration.
      *
-     * An collectors which must be created prior to the boot phase should ensure
+     * All collectors which must be created prior to the boot phase should ensure
      * they have no dependencies on other services which may not be registered yet.
      *
      * All tagged collectors will be gathered and given to the Agent when it is created.
@@ -165,12 +161,12 @@ class ServiceProvider extends BaseServiceProvider
         // Right now, the only condition that determines the inclusion
         // of framework events is being an http request. That may change
         // in the future, so we will use a specific method.
-        return $this->collectHttpEvents();
+        return !$this->app->runningInConsole();
     }
 
     private function collectHttpEvents(): bool
     {
-        return 'cli' !== php_sapi_name();
+        return !$this->app->runningInConsole();
     }
 
     /**
@@ -218,6 +214,6 @@ class ServiceProvider extends BaseServiceProvider
     private function isAgentDisabled(): bool
     {
         return false === config('elastic-apm-laravel.active')
-            || ('cli' === php_sapi_name() && false === config('elastic-apm-laravel.cli.active'));
+            || ($this->app->runningInConsole() && false === config('elastic-apm-laravel.cli.active'));
     }
 }
