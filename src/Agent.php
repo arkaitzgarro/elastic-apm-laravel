@@ -85,9 +85,9 @@ class Agent extends NipwaayoniAgent
         return $this->request_start_time;
     }
 
-    public function send(): bool
+    public function send(): void
     {
-        $sent = parent::send();
+        parent::send();
 
         // Ensure collectors are reset after data is sent to APM
         $this->collectors->each(function (EventDataCollector $collector) {
@@ -101,7 +101,5 @@ class Agent extends NipwaayoniAgent
          * collection better and remove the need for this.
          */
         $this->putEvent(new Metadata([], $this->getConfig(), $this->agentMetadata()));
-
-        return $sent;
     }
 }
