@@ -79,7 +79,7 @@ class JobCollector extends EventDataCollector implements DataCollector
 
     protected function startTransaction(string $transaction_name): Transaction
     {
-        $start_time = 'cli' === php_sapi_name() ? microtime(true) : $this->request_start_time;
+        $start_time = $this->app->runningInConsole() ? microtime(true) : $this->request_start_time;
 
         return $this->agent->startTransaction(
             $transaction_name,

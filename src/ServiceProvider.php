@@ -160,17 +160,14 @@ class ServiceProvider extends BaseServiceProvider
 
     private function collectFrameworkEvents(): bool
     {
-        // For cli executions, like queue workers, the application
-        // only starts once. It doesn't really make sense to measure it.
-        // Right now, the only condition that determines the inclusion
-        // of framework events is being an http request. That may change
-        // in the future, so we will use a specific method.
-        return $this->collectHttpEvents();
+        // For cli executions, like queue workers, the application only
+        // starts once. It doesn't really make sense to measure freamework events.
+        return !$this->app->runningInConsole();
     }
 
     private function collectHttpEvents(): bool
     {
-        return 'cli' !== php_sapi_name();
+        return !$this->app->runningInConsole();
     }
 
     /**
@@ -218,6 +215,6 @@ class ServiceProvider extends BaseServiceProvider
     private function isAgentDisabled(): bool
     {
         return false === config('elastic-apm-laravel.active')
-            || ('cli' === php_sapi_name() && false === config('elastic-apm-laravel.cli.active'));
+            || ($this->app->runningInConsole() && false === config('elastic-apm-laravel.cli.active'));
     }
 }
