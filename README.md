@@ -171,19 +171,27 @@ public function boot()
 [Distributed tracing](https://www.elastic.co/guide/en/apm/get-started/current/distributed-tracing.html) allows you to associate transactions in your Laravel application with transactions in services your application consumes. For example, if your Laravel application calls REST resources as part of handling a request, the REST transaction details will appear within your application transaction in Elastic APM. You enable distributed tracing by including an appropriate header in the http request your application makes to another service. For example:
 
 ```php
-$transaction = $agent->currentTransaction();
-
 $request = new Request(
     'PUT',
     '/some/backend/resource',
     [
         'Content-Type' => 'application/json',
-        'ELASTIC-APM-TRACEPARENT' => $transaction->getDistributedTracing(),
     ],
     json_encode(...)
 );
 
+$request = \AG\ElasticApmLaravel\Facades\ApmAgent::addTraceParentHeader($request);
+
 $this->client->send($request);
+```
+
+If you are not dealing with a `RequestInterface` object, you can get the current transaction and use the [array or string methods](https://github.com/nipwaayoni/elastic-apm-php-agent/blob/master/docs/examples/distributed-tracing.md) to get the `traceparent`.
+
+```php
+$transaction = ApmAgent::getCurrentTransaction();
+
+$headerArray = $transaction->traceHeaderAsArray();
+$headerString = $transaction->traceHeaderAsString();
 ```
 
 ## Development

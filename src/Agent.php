@@ -4,6 +4,7 @@ namespace AG\ElasticApmLaravel;
 
 use AG\ElasticApmLaravel\Collectors\EventDataCollector;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
+use AG\ElasticApmLaravel\Exception\NoCurrentTransactionException;
 use Illuminate\Support\Collection;
 use Nipwaayoni\Agent as NipwaayoniAgent;
 use Nipwaayoni\Config;
@@ -61,13 +62,33 @@ class Agent extends NipwaayoniAgent
         return $this->collectors->get($name);
     }
 
+    /**
+     * We need to keep track of the current Transaction so the app can access it for
+     * distributed tracing and other tasks. For now, we expect a single transaction
+     * to be sufficient for HTTP requests and jobs. This will need to change if we
+     * ever start allowing nested transactions.
+     */
+    public function hasCurrentTransaction(): bool
+    {
+        return null !== $this->current_transaction;
+    }
+
     public function setCurrentTransaction(Transaction $transaction): void
     {
         $this->current_transaction = $transaction;
     }
 
+    public function clearCurrentTransaction(): void
+    {
+        $this->current_transaction = null;
+    }
+
     public function currentTransaction(): Transaction
     {
+        if (null === $this->current_transaction) {
+            throw new NoCurrentTransactionException();
+        }
+
         return $this->current_transaction;
     }
 
@@ -98,10 +119,11 @@ class Agent extends NipwaayoniAgent
         return $transaction;
     }
 
-
     public function send(): void
     {
         parent::send();
+
+        $this->clearCurrentTransaction();
 
         // Ensure collectors are reset after data is sent to APM
         $this->collectors->each(function (EventDataCollector $collector) {

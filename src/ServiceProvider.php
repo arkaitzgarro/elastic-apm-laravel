@@ -10,6 +10,7 @@ use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use AG\ElasticApmLaravel\Collectors\SpanCollector;
 use AG\ElasticApmLaravel\Contracts\VersionResolver;
 use AG\ElasticApmLaravel\Middleware\RecordTransaction;
+use AG\ElasticApmLaravel\Services\ApmAgentService;
 use AG\ElasticApmLaravel\Services\ApmCollectorService;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
@@ -79,6 +80,10 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->app->bind('apm-collector', function ($app) {
             return $app->make(ApmCollectorService::class);
+        });
+
+        $this->app->bind('apm-agent', function ($app) {
+            return $app->make(ApmAgentService::class);
         });
     }
 

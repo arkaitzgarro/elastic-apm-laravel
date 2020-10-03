@@ -84,14 +84,6 @@ class RecordTransactionTest extends Unit
             })
             ->andReturn($this->transaction);
 
-        $this->agent->shouldReceive('setCurrentTransaction')
-            ->once()
-            ->withArgs(function ($transaction) {
-                $this->assertEquals($this->transaction, $transaction);
-
-                return true;
-            });
-
         $this->middleware->handle($this->request, function () {
             return $this->response;
         });
@@ -104,14 +96,6 @@ class RecordTransactionTest extends Unit
         $this->agent->shouldReceive('startTransaction')
             ->once()
             ->andReturn($this->transaction);
-
-        $this->agent->shouldReceive('setCurrentTransaction')
-            ->once()
-            ->withArgs(function ($transaction) {
-                $this->assertEquals($this->transaction, $transaction);
-
-                return true;
-            });
 
         $this->response->shouldReceive('getStatusCode')
             ->times(2)
@@ -134,14 +118,6 @@ class RecordTransactionTest extends Unit
         $this->agent->shouldReceive('startTransaction')
             ->once()
             ->andReturn($this->transaction);
-
-        $this->agent->shouldReceive('setCurrentTransaction')
-            ->once()
-            ->withArgs(function ($transaction) {
-                $this->assertEquals($this->transaction, $transaction);
-
-                return true;
-            });
 
         $this->response->shouldReceive('getStatusCode')
             ->times(2)
@@ -175,14 +151,6 @@ class RecordTransactionTest extends Unit
         $this->agent->shouldReceive('startTransaction')
             ->once()
             ->andReturn($this->transaction);
-
-        $this->agent->shouldReceive('setCurrentTransaction')
-            ->once()
-            ->withArgs(function ($transaction) {
-                $this->assertEquals($this->transaction, $transaction);
-
-                return true;
-            });
 
         $this->middleware->handle($this->request, function () {
             return $this->response;
