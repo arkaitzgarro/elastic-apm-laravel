@@ -29,11 +29,11 @@ From here, we will take care of everything based on your configuration. The agen
 
 ## Agent configuration
 
-The underlying APM Agent may be configured using environment variables as of version 2.0 of this package. Place the `ELASTIC_APM_*` variables in your `.env` file or us any other appropriate means to make them available to your project.
+The underlying APM Agent may be configured using environment variables as of version 2.0 of this package. Place the `ELASTIC_APM_*` variables in your `.env` file or use any other appropriate means to make them available to your project.
 
 Note that features of the Agent may not be documented here and you should refer to the `nipwaayoni/elastic-apm-php-agent` [project documentation](https://github.com/nipwaayoni/elastic-apm-php-agent/blob/master/docs/config.md) for the full feature set. 
 
-The following options are still supported by this package and will take precedence over their `ELASTIC_APM_*` counterparts.
+The following options are still supported by this package and will take precedence over their `ELASTIC_APM_*` counterparts if present.
 
 | Variable          | Alternative | Description |
 |-------------------|-------------|-------------|
@@ -69,7 +69,7 @@ Once published, open the `config/elastic-apm-laravel.php` file and review the va
 
 ## Logging
 
-The Monolog instance used by your Laravel application will be automatically given to the Agent for logging. The log level for the Agent package is independent of the log level for your Laravel application. This allows you to only include Agent messages when they are useful. Use the `APM_LOG_LEVEL` environment setting for this.
+The Monolog instance used by your Laravel application will be automatically given to the Agent for logging. The log level for the Agent package is independent of the log level for your Laravel application. This allows you to only include Agent messages when they are useful. Use the `APM_LOG_LEVEL` environment setting for this. The default log level for the agent package is `info`.
 
 ## Collectors
 
@@ -153,7 +153,7 @@ public function boot()
 }
 ```
 
-Alternatively, you can now simply tag your collector in the container and it will be discovered:
+Alternatively, you can now simply tag your collector in the container and it will be discovered. Note that the collector **must** be tagged before the `Agent` is first resolved from the container, normally in the `boot` method of your provider.
 
 ```php
 // app/Providers/AppServiceProvider.php
@@ -211,7 +211,7 @@ composer install
 Run the unit test suite:
 
 ```bash
-php vendor/bin/codecept run unit
+php vendor/bin/codecept run
 ```
 
 Please adhere to [PSR-2](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md) and [Symfony](https://symfony.com/doc/current/contributing/code/standards.html) coding standard. Run the following commands before pushing your code:

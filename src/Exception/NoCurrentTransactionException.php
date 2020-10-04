@@ -2,12 +2,7 @@
 
 namespace AG\ElasticApmLaravel\Exception;
 
-/**
- * Base exception class all other package exceptions should extend.
- *
- * Class ElasticApmLaravelException
- */
-class NoCurrentTransactionException extends \Exception
+class NoCurrentTransactionException extends ElasticApmLaravelException
 {
     public function __construct(int $code = 0, \Throwable $previous = null)
     {

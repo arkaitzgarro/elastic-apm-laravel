@@ -12,6 +12,7 @@ use AG\ElasticApmLaravel\Contracts\VersionResolver;
 use AG\ElasticApmLaravel\Middleware\RecordTransaction;
 use AG\ElasticApmLaravel\Services\ApmAgentService;
 use AG\ElasticApmLaravel\Services\ApmCollectorService;
+use Illuminate\Config\Repository;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -99,6 +100,7 @@ class ServiceProvider extends BaseServiceProvider
             return $builder
                 ->withConfig(new Config($this->getAgentConfig()))
                 ->withEnvData(config('elastic-apm-laravel.env.env'))
+                ->withAppConfig($this->app->make(Repository::class))
                 ->withEventCollectors(collect($this->app->tagged(self::COLLECTOR_TAG)))
                 ->build();
         });

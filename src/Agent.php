@@ -5,6 +5,7 @@ namespace AG\ElasticApmLaravel;
 use AG\ElasticApmLaravel\Collectors\EventDataCollector;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use AG\ElasticApmLaravel\Exception\NoCurrentTransactionException;
+use Illuminate\Config\Repository;
 use Illuminate\Support\Collection;
 use Nipwaayoni\Agent as NipwaayoniAgent;
 use Nipwaayoni\Config;
@@ -34,15 +35,20 @@ class Agent extends NipwaayoniAgent
 
     /** @var Transaction */
     private $current_transaction;
+    /** @var Repository */
+    private $app_config;
 
     public function __construct(
         Config $config,
         ContextCollection $sharedContext,
         Connector $connector,
         EventFactoryInterface $eventFactory,
-        TransactionsStore $transactionsStore
+        TransactionsStore $transactionsStore,
+        Repository $app_config
     ) {
         parent::__construct($config, $sharedContext, $connector, $eventFactory, $transactionsStore);
+
+        $this->app_config = $app_config;
 
         $this->collectors = new Collection();
     }
@@ -85,7 +91,7 @@ class Agent extends NipwaayoniAgent
 
     public function currentTransaction(): Transaction
     {
-        if (null === $this->current_transaction) {
+        if (!$this->hasCurrentTransaction()) {
             throw new NoCurrentTransactionException();
         }
 
@@ -94,7 +100,7 @@ class Agent extends NipwaayoniAgent
 
     public function collectEvents(string $transaction_name): void
     {
-        $max_trace_items = config('elastic-apm-laravel.spans.maxTraceItems');
+        $max_trace_items = $this->app_config->get('elastic-apm-laravel.spans.maxTraceItems');
 
         $transaction = $this->getTransaction($transaction_name);
         $this->collectors->each(function ($collector) use ($transaction, $max_trace_items) {
