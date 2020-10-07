@@ -13,27 +13,26 @@ class ApmAgentService
      * @var Application
      */
     protected $app;
+    /**
+     * @var Agent
+     */
+    private $agent;
 
-    public function __construct(Application $app)
+    public function __construct(Application $app, Agent $agent)
     {
         $this->app = $app;
-    }
-
-    public function addTraceParentHeader(RequestInterface $request): RequestInterface
-    {
-        /** @var Agent $agent */
-        $agent = $this->app->make(Agent::class);
-
-        $transaction = $agent->currentTransaction();
-
-        return $transaction->addTraceHeaderToRequest($request);
+        $this->agent = $agent;
     }
 
     public function getCurrentTransaction(): Transaction
     {
-        /** @var Agent $agent */
-        $agent = $this->app->make(Agent::class);
+        return $this->agent->currentTransaction();
+    }
 
-        return $agent->currentTransaction();
+    public function addTraceParentHeader(RequestInterface $request): RequestInterface
+    {
+        $transaction = $this->agent->currentTransaction();
+
+        return $transaction->addTraceHeaderToRequest($request);
     }
 }

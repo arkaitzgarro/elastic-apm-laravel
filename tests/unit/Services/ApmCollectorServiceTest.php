@@ -16,6 +16,7 @@ class ApmCollectorServiceTest extends Unit
     private $appMock;
     private $configMock;
     private $eventsMock;
+    private $agentMock;
 
     private $collectorService;
 
@@ -26,6 +27,7 @@ class ApmCollectorServiceTest extends Unit
         $this->appMock = Mockery::mock(Application::class);
         $this->configMock = Mockery::mock(Config::class);
         $this->eventsMock = Mockery::mock(Dispatcher::class);
+        $this->agentMock = Mockery::mock(Agent::class);
 
         $this->appMock->shouldReceive('runningInConsole')
             ->andReturn(true);
@@ -41,7 +43,8 @@ class ApmCollectorServiceTest extends Unit
         $this->collectorService = new ApmCollectorService(
             $this->appMock,
             $this->eventsMock,
-            $this->configMock
+            $this->configMock,
+            $this->agentMock
         );
     }
 
@@ -118,17 +121,11 @@ class ApmCollectorServiceTest extends Unit
 
     public function testAddCollector()
     {
-        $agentMock = Mockery::mock(Agent::class);
         $collectorMock = Mockery::mock(DataCollector::class);
 
-        $agentMock->shouldReceive('addCollector')
+        $this->agentMock->shouldReceive('addCollector')
             ->once()
             ->with($collectorMock);
-
-        $this->appMock->shouldReceive('make')
-            ->once()
-            ->with(Agent::class)
-            ->andReturn($agentMock);
 
         $this->appMock->shouldReceive('make')
             ->once()
@@ -148,7 +145,8 @@ class ApmCollectorServiceTest extends Unit
         $this->collectorService = new ApmCollectorService(
             $this->appMock,
             $this->eventsMock,
-            $this->configMock
+            $this->configMock,
+            $this->agentMock
         );
 
         $this->appMock->shouldNotReceive('make');
@@ -170,7 +168,8 @@ class ApmCollectorServiceTest extends Unit
         $this->collectorService = new ApmCollectorService(
             $this->appMock,
             $this->eventsMock,
-            $this->configMock
+            $this->configMock,
+            $this->agentMock
         );
 
         $this->appMock->shouldNotReceive('make');
@@ -180,35 +179,22 @@ class ApmCollectorServiceTest extends Unit
 
     public function testCaptureThrowable()
     {
-        $agentMock = Mockery::mock(Agent::class);
         $exception = new Exception();
 
-        $agentMock->shouldReceive('captureThrowable')
+        $this->agentMock->shouldReceive('captureThrowable')
             ->once()
             ->with($exception, [], null);
-
-        $this->appMock->shouldReceive('make')
-            ->once()
-            ->with(Agent::class)
-            ->andReturn($agentMock);
 
         $this->collectorService->captureThrowable($exception);
     }
 
     public function testCaptureThrowableExtraArgs()
     {
-        $agentMock = Mockery::mock(Agent::class);
-
         $args = [new Exception(), ['abc' => 123], new Transaction('test', [])];
 
-        $agentMock->shouldReceive('captureThrowable')
+        $this->agentMock->shouldReceive('captureThrowable')
             ->once()
             ->with(...$args);
-
-        $this->appMock->shouldReceive('make')
-            ->once()
-            ->with(Agent::class)
-            ->andReturn($agentMock);
 
         $this->collectorService->captureThrowable(...$args);
     }
@@ -223,7 +209,8 @@ class ApmCollectorServiceTest extends Unit
         $this->collectorService = new ApmCollectorService(
             $this->appMock,
             $this->eventsMock,
-            $this->configMock
+            $this->configMock,
+            $this->agentMock
         );
 
         $this->appMock->shouldNotReceive('make');
@@ -237,6 +224,7 @@ class ApmCollectorServiceTest extends Unit
             ->once()
             ->with('elastic-apm-laravel.active')
             ->andReturn(true);
+
         $this->configMock->shouldReceive('get')
             ->once()
             ->with('elastic-apm-laravel.cli.active')
@@ -245,7 +233,8 @@ class ApmCollectorServiceTest extends Unit
         $this->collectorService = new ApmCollectorService(
             $this->appMock,
             $this->eventsMock,
-            $this->configMock
+            $this->configMock,
+            $this->agentMock
         );
 
         $this->appMock->shouldNotReceive('make');
