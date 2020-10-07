@@ -3,7 +3,6 @@
 namespace AG\ElasticApmLaravel;
 
 use AG\ElasticApmLaravel\Collectors\EventDataCollector;
-use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use AG\ElasticApmLaravel\Events\LazySpan;
 use Illuminate\Support\Collection;
@@ -30,19 +29,16 @@ use Nipwaayoni\Stores\TransactionsStore;
 class Agent extends NipwaayoniAgent
 {
     protected $collectors;
-    protected $request_start_time;
 
     public function __construct(
         Config $config,
         ContextCollection $sharedContext,
         Connector $connector,
         EventFactoryInterface $eventFactory,
-        TransactionsStore $transactionsStore,
-        RequestStartTime $startTime
+        TransactionsStore $transactionsStore
     ) {
         parent::__construct($config, $sharedContext, $connector, $eventFactory, $transactionsStore);
 
-        $this->request_start_time = $startTime->microseconds();
         $this->collectors = new Collection();
     }
 
@@ -78,11 +74,6 @@ class Agent extends NipwaayoniAgent
                 $this->putEvent($event);
             });
         });
-    }
-
-    public function getRequestStartTime(): float
-    {
-        return $this->request_start_time;
     }
 
     public function send(): bool

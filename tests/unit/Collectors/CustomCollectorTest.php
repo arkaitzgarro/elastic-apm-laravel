@@ -39,7 +39,6 @@ class CustomCollectorTest extends Unit
         $configMock = Mockery::mock(Config::class);
 
         $requestStartTimeMock->shouldReceive('microseconds')
-            ->once()
             ->andReturn(1000.0);
 
         Log::shouldReceive('info')
