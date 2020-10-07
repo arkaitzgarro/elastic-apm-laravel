@@ -51,7 +51,6 @@ class AgentTest extends Unit
             $this->connectorMock,
             $this->eventFactoryMock,
             $this->transactionStore,
-            $this->requestStartTime,
             $this->appConfigMock
         );
     }
