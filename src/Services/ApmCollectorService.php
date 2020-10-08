@@ -14,12 +14,12 @@ use Throwable;
 class ApmCollectorService
 {
     /**
-     * @var Illuminate\Foundation\Application
+     * @var \Illuminate\Foundation\Application
      */
     protected $app;
 
     /**
-     * @var Illuminate\Events\Dispatcher
+     * @var \Illuminate\Events\Dispatcher
      */
     protected $events;
 
@@ -27,11 +27,16 @@ class ApmCollectorService
      * @var bool
      */
     private $is_agent_disabled;
+    /**
+     * @var Agent
+     */
+    private $agent;
 
-    public function __construct(Application $app, Dispatcher $events, Config $config)
+    public function __construct(Application $app, Dispatcher $events, Config $config, Agent $agent)
     {
         $this->app = $app;
         $this->events = $events;
+        $this->agent = $agent;
 
         $this->is_agent_disabled = false === $config->get('elastic-apm-laravel.active')
             || ($this->app->runningInConsole() && false === $config->get('elastic-apm-laravel.cli.active'));
@@ -73,7 +78,7 @@ class ApmCollectorService
             return;
         }
 
-        $this->app->make(Agent::class)->addCollector(
+        $this->agent->addCollector(
             $this->app->make($collector_class)
         );
     }
@@ -84,6 +89,6 @@ class ApmCollectorService
             return;
         }
 
-        $this->app->make(Agent::class)->captureThrowable($thrown, $context, $parent);
+        $this->agent->captureThrowable($thrown, $context, $parent);
     }
 }

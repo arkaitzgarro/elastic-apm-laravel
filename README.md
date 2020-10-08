@@ -29,21 +29,34 @@ From here, we will take care of everything based on your configuration. The agen
 
 ## Agent configuration
 
+The underlying APM Agent may be configured using environment variables as of version 2.0 of this package. Place the `ELASTIC_APM_*` variables in your `.env` file or use any other appropriate means to make them available to your project.
+
+Note that features of the Agent may not be documented here and you should refer to the `nipwaayoni/elastic-apm-php-agent` [project documentation](https://github.com/nipwaayoni/elastic-apm-php-agent/blob/master/docs/config.md) for the full feature set. 
+
+The following options are still supported by this package and will take precedence over their `ELASTIC_APM_*` counterparts if present.
+
+| Variable          | Alternative | Description |
+|-------------------|-------------|-------------|
+|APM_ACTIVE         | ELASTIC_APM_ENABLED |  `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data; span collection will also be disabled. |
+|APM_APPNAME        | ELASTIC_APM_SERVICE_NAME |  Name of the app as it will appear in APM. Invalid special characters will be replaced with a hyphen. |
+|APM_APPVERSION     | ELASTIC_APM_SERVICE_VERSION |  Version of the app as it will appear in APM. |
+|APM_SERVERURL      | ELASTIC_APM_SERVER_URL |  URL to the APM intake service. |
+|APM_SECRETTOKEN    | ELASTIC_APM_SECRET_TOKEN |  Secret token, if required. |
+|APM_BACKTRACEDEPTH | ELASTIC_APM_STACK_TRACE_LIMIT |  Defaults to `0` (unlimited). Depth of backtrace in query span. |
+
+The `APM_*` variables listed above _may_ be removed in a future release.
+
+### Laravel Options
+
 The following environment variables are supported in the default configuration:
 
 | Variable          | Description |
-|-------------------|-------------|
-|APM_ACTIVE         | `true` or `false` defaults to `true`. If `false`, the agent will collect, but not send, transaction data; span collection will also be disabled. |
-|APM_ACTIVE_CLI     | `true` or `false` defaults to `true`. If `false`, the agent will not collect or send transaction or span data for non-HTTP requests but HTTP requests will still follow APM_ACTIVE. When APM_ACTIVE is `false`, this will have no effect. |
-|APM_APPNAME        | Name of the app as it will appear in APM. Invalid special characters will be replaced with a hyphen. |
-|APM_APPVERSION     | Version of the app as it will appear in APM. |
-|APM_SERVERURL      | URL to the APM intake service. |
-|APM_SECRETTOKEN    | Secret token, if required. |
+|APM_LOG_LEVEL      | Log level for the APM Agent package. Must be PSR-3 compliant. Defaults to `error`. |
+|APM_ACTIVE_CLI     | `true` or `false` defaults to `true`. If `false`, the agent will not collect or send transaction or span data for non-HTTP requests but HTTP requests will still follow ELASTIC_APM_ENABLED. When ELASTIC_APM_ENABLED is `false`, this will have no effect. |
 |APM_USEROUTEURI    | `true` or `false` defaults to `true`. The default behavior is to record the URL as defined in your routes configuration. Set to `false` to record the requested URL, but keep in mind that this can result in excessive unique entries in APM. |
 |APM_IGNORE_PATTERNS| Ignore specific routes or jobs by transaction name. Should be a regular expression, and will match multiple patterns via pipe `\|` in the regex. Note that 4 backslashes should be used to match a single backslash. Example: `"/\/health-check\|^OPTIONS \|Foo\\\\Bar\\\\Job/"` |
 |APM_QUERYLOG       | `true` or `false` defaults to 'true'. Set to `false` to completely disable query logging, or to `auto` if you would like to use the threshold feature. |
 |APM_THRESHOLD      | Query threshold in milliseconds, defaults to `200`. If a query takes longer then 200ms, we enable the query log. Make sure you set `APM_QUERYLOG=auto`. |
-|APM_BACKTRACEDEPTH | Defaults to `25`. Depth of backtrace in query span. |
 |APM_MAXTRACEITEMS  | Defaults to `1000`. Max number of child items displayed when viewing trace details. |
 
 You may also publish the `elastic-apm-laravel.php` configuration file to change additional settings:
@@ -53,6 +66,10 @@ php artisan vendor:publish --tag=config
 ```
 
 Once published, open the `config/elastic-apm-laravel.php` file and review the various settings.
+
+## Logging
+
+The Monolog instance used by your Laravel application will be automatically given to the Agent for logging. The log level for the Agent package is independent of the log level for your Laravel application. This allows you to only include Agent messages when they are useful. Use the `APM_LOG_LEVEL` environment setting for this. The default log level for the agent package is `info`.
 
 ## Collectors
 
@@ -136,6 +153,47 @@ public function boot()
 }
 ```
 
+Alternatively, you can now simply tag your collector in the container and it will be discovered. Note that the collector **must** be tagged before the `Agent` is first resolved from the container, normally in the `boot` method of your provider.
+
+```php
+// app/Providers/AppServiceProvider.php
+
+use YourApp\Collectors\MailMessageCollector;
+
+public function boot()
+{
+    $this->app->tag(MailMessageCollector::class, \AG\ElasticApmLaravel\ServiceProvider::COLLECTOR_TAG);
+}
+```
+
+## Distributed Tracing
+
+[Distributed tracing](https://www.elastic.co/guide/en/apm/get-started/current/distributed-tracing.html) allows you to associate transactions in your Laravel application with transactions in services your application consumes. For example, if your Laravel application calls REST resources as part of handling a request, the REST transaction details will appear within your application transaction in Elastic APM. You enable distributed tracing by including an appropriate header in the http request your application makes to another service. For example:
+
+```php
+$request = new Request(
+    'PUT',
+    '/some/backend/resource',
+    [
+        'Content-Type' => 'application/json',
+    ],
+    json_encode(...)
+);
+
+$request = \AG\ElasticApmLaravel\Facades\ApmAgent::addTraceParentHeader($request);
+
+$this->client->send($request);
+```
+
+If you are not dealing with a `RequestInterface` object, you can get the current transaction and use the [array or string methods](https://github.com/nipwaayoni/elastic-apm-php-agent/blob/master/docs/examples/distributed-tracing.md) to get the `traceparent`.
+
+```php
+$transaction = ApmAgent::getCurrentTransaction();
+
+$headerArray = $transaction->traceHeaderAsArray();
+$headerString = $transaction->traceHeaderAsString();
+```
+
 ## Development
 
 Get Composer. Follow the instructions defined on the official [Composer page](https://getcomposer.org/doc/00-intro.md), or if you are using `homebrew`, just run:
@@ -153,7 +211,7 @@ composer install
 Run the unit test suite:
 
 ```bash
-php vendor/bin/codecept run unit
+php vendor/bin/codecept run
 ```
 
 Please adhere to [PSR-2](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md) and [Symfony](https://symfony.com/doc/current/contributing/code/standards.html) coding standard. Run the following commands before pushing your code:

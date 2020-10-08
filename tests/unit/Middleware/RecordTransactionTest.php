@@ -43,7 +43,7 @@ class RecordTransactionTest extends Unit
     {
         $this->agent = Mockery::mock(Agent::class);
         $this->requestStartTimeMock = Mockery::mock(RequestStartTime::class);
-        $this->transaction = Mockery::mock(Transaction::class)->makePartial();
+        $this->transaction = new Transaction('Test transaction', []);
         $this->request = Request::create('/ping', 'GET');
         $this->response = Mockery::mock(Response::class)->makePartial();
         $this->response->headers = new ResponseHeaderBag();
@@ -105,8 +105,10 @@ class RecordTransactionTest extends Unit
             return $this->response;
         });
 
-        $this->assertEquals(200, $this->transaction->getMetaResult());
-        $this->assertEquals('HTTP', $this->transaction->getMetaType());
+        $data = $this->getTransactionData();
+
+        $this->assertEquals(200, $data['result']);
+        $this->assertEquals('HTTP', $data['type']);
     }
 
     public function testTransactionContext()
@@ -125,7 +127,9 @@ class RecordTransactionTest extends Unit
             return $this->response;
         });
 
-        $context = $this->transaction->getContext();
+        $data = $this->getTransactionData();
+
+        $context = $data['context'];
 
         Assert::assertArraySubset([
             'finished' => true,
@@ -148,13 +152,13 @@ class RecordTransactionTest extends Unit
             ->once()
             ->andReturn($this->transaction);
 
-        $this->transaction->shouldReceive('setTransactionName')
-            ->once()
-            ->with('GET /path/script.php');
-
         $this->middleware->handle($this->request, function () {
             return $this->response;
         });
+
+        $data = $this->getTransactionData();
+
+        $this->assertEquals('GET /path/script.php', $data['name']);
     }
 
     public function testTransactionTerminate()
@@ -197,5 +201,12 @@ class RecordTransactionTest extends Unit
             ->with('error message');
 
         $this->middleware->terminate($this->request);
+    }
+
+    private function getTransactionData(): array
+    {
+        $data = json_decode(json_encode($this->transaction), true);
+
+        return $data['transaction'];
     }
 }
