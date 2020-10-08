@@ -197,7 +197,7 @@ class ServiceProvider extends BaseServiceProvider
         // Filter out null config options so that the Config class can look for environment variables
         return array_filter(array_merge(
             [
-                'defaultServiceName' => 'Laravel',
+                'defaultServiceName' => config('elastic-apm-laravel.app.appName', 'Laravel'),
                 'frameworkName' => 'Laravel',
                 'frameworkVersion' => app()->version(),
                 'active' => config('elastic-apm-laravel.active'),
