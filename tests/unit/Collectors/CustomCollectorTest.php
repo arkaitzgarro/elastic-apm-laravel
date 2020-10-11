@@ -1,7 +1,9 @@
 <?php
 
+use AG\ElasticApmLaravel\Collectors\EventCounter;
 use AG\ElasticApmLaravel\Collectors\EventDataCollector;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
+use AG\ElasticApmLaravel\EventClock;
 use Codeception\Test\Unit;
 use DMS\PHPUnitExtensions\ArraySubset\Assert;
 use Illuminate\Config\Repository as Config;
@@ -35,17 +37,19 @@ class CustomCollectorTest extends Unit
     protected function _before()
     {
         $appMock = Mockery::mock(Application::class);
-        $requestStartTimeMock = Mockery::mock(RequestStartTime::class);
         $configMock = Mockery::mock(Config::class);
-
+        $requestStartTimeMock = Mockery::mock(RequestStartTime::class);
         $requestStartTimeMock->shouldReceive('microseconds')
             ->andReturn(1000.0);
+
+        $eventCounter = new EventCounter();
+        $eventClock = new EventClock();
 
         Log::shouldReceive('info')
             ->once()
             ->with('registerEventListeners method has been called.');
 
-        $this->collector = new CustomCollector($appMock, $configMock, $requestStartTimeMock);
+        $this->collector = new CustomCollector($appMock, $configMock, $requestStartTimeMock, $eventCounter, $eventClock);
     }
 
     public function testEmptyMeasures()

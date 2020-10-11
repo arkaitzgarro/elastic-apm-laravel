@@ -102,6 +102,7 @@ class Agent extends NipwaayoniAgent
     {
         $max_trace_items = $this->app_config->get('elastic-apm-laravel.spans.maxTraceItems');
 
+        // TODO remove max trace items from here
         $transaction = $this->getTransaction($transaction_name);
         $this->collectors->each(function ($collector) use ($transaction, $max_trace_items) {
             $collector->collect()->take($max_trace_items)->each(function ($measure) use ($transaction) {
@@ -135,6 +136,8 @@ class Agent extends NipwaayoniAgent
         $this->collectors->each(function (EventDataCollector $collector) {
             $collector->reset();
         });
+
+        // TODO reset started event counter
 
         /*
          * Push new metadata onto the stack in preparation for the next send event. This

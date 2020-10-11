@@ -4,6 +4,7 @@ namespace AG\ElasticApmLaravel;
 
 use AG\ElasticApmLaravel\Collectors\CommandCollector;
 use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
+use AG\ElasticApmLaravel\Collectors\EventCounter;
 use AG\ElasticApmLaravel\Collectors\FrameworkCollector;
 use AG\ElasticApmLaravel\Collectors\HttpRequestCollector;
 use AG\ElasticApmLaravel\Collectors\JobCollector;
@@ -95,6 +96,12 @@ class ServiceProvider extends BaseServiceProvider
      */
     protected function registerAgent(): void
     {
+        $this->app->singleton(EventCounter::class, function () {
+            $limit = config('elastic-apm-laravel.spans.maxTraceItems');
+
+            return new EventCounter($limit);
+        });
+
         $this->app->singleton(Agent::class, function () {
             /** @var AgentBuilder $builder */
             $builder = $this->app->make(AgentBuilder::class);
