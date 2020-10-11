@@ -210,6 +210,17 @@ class EventDataCollectorTest extends Unit
         });
     }
 
+    public function testDirectAddingOfMeasuresRespectsLimit(): void
+    {
+        $this->eventDataCollector->addMeasure(uniqid('test-event'), 100, 200);
+        $this->eventDataCollector->addMeasure(uniqid('test-event'), 100, 200);
+        $this->eventDataCollector->addMeasure(uniqid('test-event'), 100, 200);
+
+        $events = $this->eventDataCollector->collect();
+
+        $this->assertCount(self::EVENT_LIMIT, $events);
+    }
+
     private function createEventCollector(): EventDataCollector
     {
         self::$registeredListeners = false;

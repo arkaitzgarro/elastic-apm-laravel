@@ -37,7 +37,7 @@ abstract class EventDataCollector implements DataCollector
     protected $event_counter;
 
     /** @var EventClock */
-    private $event_clock;
+    protected $event_clock;
 
     /** @var Agent */
     protected $agent;
@@ -118,7 +118,9 @@ abstract class EventDataCollector implements DataCollector
             return;
         }
 
-        $this->addMeasure(
+        // Use the private pushMeasure() method since using addMeasure would reject valid measures
+        // created before the limit was reached
+        $this->pushMeasure(
             $measure['label'],
             $measure['start'],
             $end - $this->start_time->microseconds(),
@@ -139,7 +141,31 @@ abstract class EventDataCollector implements DataCollector
         ?string $action = 'request',
         ?array $context = []
     ): void {
-        // return if limit is exceeded
+        if ($this->event_counter->reachedLimit()) {
+            return;
+        }
+
+        $this->pushMeasure(
+            $label,
+            $start,
+            $end,
+            $type,
+            $action,
+            $context
+        );
+
+        $this->event_counter->increment();
+    }
+
+    // Only other exposed methods may push measures, this ensures the limit is respected
+    private function pushMeasure(
+        string $label,
+        float $start,
+        float $end,
+        string $type = 'request',
+        ?string $action = 'request',
+        ?array $context = []
+    ): void {
         $this->measures->push([
             'label' => $label,
             'start' => $this->toMilliseconds($start),
