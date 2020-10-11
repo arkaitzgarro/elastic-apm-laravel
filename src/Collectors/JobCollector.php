@@ -29,7 +29,7 @@ class JobCollector extends EventDataCollector implements DataCollector
             if ($this->app->runningInConsole()) {
                 // Since the application starts only once for async queues, make sure
                 // the transaction and all spans have the correct start time.
-                $this->start_time->setStartTime(microtime(true));
+                $this->start_time->setStartTime($this->event_clock->microtime());
             }
 
             $transaction_name = $this->getTransactionName($event);
