@@ -141,33 +141,8 @@ class AgentTest extends Unit
         $this->eventFactoryMock->shouldReceive('newTransaction')
             ->andReturn(new \Nipwaayoni\Events\Transaction('test-transaction', []));
 
-        $this->appConfigMock->expects('get')
-            ->with('elastic-apm-laravel.spans.maxTraceItems')
-            ->andReturn($this->totalEvents);
-
         // The `times()` constraint ensures we put the expected number of events
         $this->connectorMock->expects('putEvent')->times($this->totalEvents);
-
-        $this->agent->startTransaction('test-transaction');
-        $this->agent->collectEvents('test-transaction');
-    }
-
-    public function testOnlyMaxTraceItemsEventsAreAddedToConnectorWhenCollected(): void
-    {
-        $this->markTestSkipped('The max-trace-items option is currently applied per collector, is that desired?');
-        $maxTraceItems = 4; // there are a total of 8 events that will be created
-
-        $this->setupCollectors();
-
-        $this->eventFactoryMock->shouldReceive('newTransaction')
-            ->andReturn(new \Nipwaayoni\Events\Transaction('test-transaction', []));
-
-        $this->appConfigMock->expects('get')
-            ->with('elastic-apm-laravel.spans.maxTraceItems')
-            ->andReturn($maxTraceItems);
-
-        // The `times()` constraint ensures we put the expected number of events
-        $this->connectorMock->expects('putEvent')->times($maxTraceItems);
 
         $this->agent->startTransaction('test-transaction');
         $this->agent->collectEvents('test-transaction');

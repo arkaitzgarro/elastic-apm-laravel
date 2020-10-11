@@ -78,17 +78,18 @@ abstract class EventDataCollector implements DataCollector
             return;
         }
 
-        // TODO include limited flag = over limit
         $transactionStart = $this->start_time->microseconds();
         $data = [
             'label' => $label ?: $name,
             'start' => $start - $transactionStart,
             'type' => $type,
             'action' => $action,
+            'exceeds_limit' => $this->event_counter->reachedLimit(),
         ];
 
         $this->started_measures->put($name, $data);
-        // TODO increment started and use to match limit
+
+        $this->event_counter->increment();
     }
 
     /**
@@ -113,7 +114,10 @@ abstract class EventDataCollector implements DataCollector
 
         $measure = $this->started_measures->pull($name);
 
-        // TODO if limited flag, do not add, quietly discard
+        if ($measure['exceeds_limit']) {
+            return;
+        }
+
         $this->addMeasure(
             $measure['label'],
             $measure['start'],

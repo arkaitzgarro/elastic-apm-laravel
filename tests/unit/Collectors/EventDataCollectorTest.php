@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 class EventDataCollectorTest extends Unit
 {
     private const SPAN_NAME = 'test-measure';
+    private const EVENT_LIMIT = 2;
 
     /** @var EventDataCollector */
     private $eventDataCollector;
@@ -31,7 +32,15 @@ class EventDataCollectorTest extends Unit
 
     public function setUp(): void
     {
-        $this->createEventCollector();
+        $this->appMock = Mockery::mock(Application::class);
+        $this->configMock = Mockery::mock(Config::class);
+        $this->requestStartTimeMock = Mockery::mock(RequestStartTime::class);
+        $this->requestStartTimeMock->shouldReceive('microseconds')->andReturn(1000.0);
+        $this->eventClock = Mockery::mock(EventClock::class);
+
+        $this->eventCounter = new EventCounter(self::EVENT_LIMIT);
+
+        $this->eventDataCollector = $this->createEventCollector();
 
         parent::setUp();
     }
@@ -147,20 +156,65 @@ class EventDataCollectorTest extends Unit
         $this->assertEquals(0, $this->eventDataCollector->collect()->count());
     }
 
-    private function createEventCollector(): void
+    public function testStopsCollectingEventsWhenLimitIsReached(): void
     {
-        $this->appMock = Mockery::mock(Application::class);
-        $this->configMock = Mockery::mock(Config::class);
-        $this->requestStartTimeMock = Mockery::mock(RequestStartTime::class);
-        $this->requestStartTimeMock->shouldReceive('microseconds')->andReturn(1000.0);
+        $this->eventClock->shouldReceive('microtime')->andReturn(1500, 1550, 1600, 1650, 1700, 1750);
 
-        $this->eventCounter = new EventCounter();
+        $this->eventDataCollector->startMeasure(self::SPAN_NAME, 'request', 'GET', 'span 1');
+        $this->eventDataCollector->stopMeasure(self::SPAN_NAME);
+        $this->eventDataCollector->startMeasure(self::SPAN_NAME, 'request', 'GET', 'span 2');
+        $this->eventDataCollector->stopMeasure(self::SPAN_NAME);
+        $this->eventDataCollector->startMeasure(self::SPAN_NAME, 'request', 'GET', 'span 3');
+        $this->eventDataCollector->stopMeasure(self::SPAN_NAME);
 
-        $this->eventClock = Mockery::mock(EventClock::class);
+        $events = $this->eventDataCollector->collect();
 
+        $this->assertCount(self::EVENT_LIMIT, $events);
+    }
+
+    public function testEventLimitAppliesAcrossCollectors(): void
+    {
+        $this->eventClock->shouldReceive('microtime')->andReturn(1500, 1550, 1600, 1650, 1700, 1750);
+        $otherCollector = $this->createEventCollector();
+
+        $this->eventDataCollector->startMeasure(self::SPAN_NAME, 'request', 'GET', 'span 1');
+        $this->eventDataCollector->stopMeasure(self::SPAN_NAME);
+        $otherCollector->startMeasure(self::SPAN_NAME, 'request', 'GET', 'span 2');
+        $otherCollector->stopMeasure(self::SPAN_NAME);
+        $otherCollector->startMeasure(self::SPAN_NAME, 'request', 'GET', 'span 3');
+        $otherCollector->stopMeasure(self::SPAN_NAME);
+
+        $events = $this->eventDataCollector->collect()->merge($otherCollector->collect());
+
+        $this->assertCount(self::EVENT_LIMIT, $events);
+    }
+
+    public function testCollectsEventsByStartOrderWhenLimitIsReached(): void
+    {
+        $this->eventClock->shouldReceive('microtime')->andReturn(1500, 1600, 1700, 1550, 1650, 1750);
+
+        // Event 3 should not be collected even though it is stopped first.
+        $this->eventDataCollector->startMeasure(self::SPAN_NAME . ' 1', 'request', 'GET', 'span 1');
+        $this->eventDataCollector->startMeasure(self::SPAN_NAME . ' 2', 'request', 'GET', 'span 2');
+        $this->eventDataCollector->startMeasure(self::SPAN_NAME . ' 3', 'request', 'GET', 'span 3');
+        $this->eventDataCollector->stopMeasure(self::SPAN_NAME . ' 3');
+        $this->eventDataCollector->stopMeasure(self::SPAN_NAME . ' 2');
+        $this->eventDataCollector->stopMeasure(self::SPAN_NAME . ' 1');
+
+        $events = $this->eventDataCollector->collect();
+
+        $this->assertCount(self::EVENT_LIMIT, $events);
+
+        $events->each(function (array $eventData) {
+            $this->assertNotEquals(self::SPAN_NAME . ' 3', $eventData['label']);
+        });
+    }
+
+    private function createEventCollector(): EventDataCollector
+    {
         self::$registeredListeners = false;
 
-        $this->eventDataCollector = new class($this->appMock, $this->configMock, $this->requestStartTimeMock, $this->eventCounter, $this->eventClock) extends EventDataCollector {
+        return new class($this->appMock, $this->configMock, $this->requestStartTimeMock, $this->eventCounter, $this->eventClock) extends EventDataCollector {
             public function getName(): string
             {
                 return 'event-collector';
