@@ -8,6 +8,8 @@ use Illuminate\Config\Repository as Config;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Nipwaayoni\Events\Transaction;
+use Nipwaayoni\Exception\Transaction\UnknownTransactionException;
 
 /**
  * Abstract class that provides base functionality to measure
@@ -145,5 +147,21 @@ abstract class EventDataCollector implements DataCollector
     {
         $this->started_measures = new Collection();
         $this->measures = new Collection();
+    }
+
+    protected function shouldIgnoreTransaction(string $transaction_name): bool
+    {
+        $pattern = $this->config->get('elastic-apm-laravel.transactions.ignorePatterns');
+
+        return $pattern && preg_match($pattern, $transaction_name);
+    }
+
+    protected function getTransaction(string $transaction_name): ?Transaction
+    {
+        try {
+            return $this->agent->getTransaction($transaction_name);
+        } catch (UnknownTransactionException $e) {
+            return null;
+        }
     }
 }
