@@ -137,7 +137,7 @@ class CommandCollectorTest extends Unit
         $this->agentMock->expects('getTransaction')
             ->with(self::COMMAND_NAME)
             ->andReturn($this->transactionMock);
-        $this->agentMock->expects('stopTransaction')->with(self::COMMAND_NAME, ['result' => 200]);
+        $this->agentMock->expects('stopTransaction')->with(self::COMMAND_NAME, ['result' => 0]);
         $this->agentMock->expects('collectEvents')->with(self::COMMAND_NAME);
         $this->agentMock->expects('send');
 
@@ -157,7 +157,7 @@ class CommandCollectorTest extends Unit
         $this->agentMock->expects('getTransaction')
             ->with(self::COMMAND_NAME)
             ->andReturn($this->transactionMock);
-        $this->agentMock->expects('stopTransaction')->with(self::COMMAND_NAME, ['result' => 200]);
+        $this->agentMock->expects('stopTransaction')->with(self::COMMAND_NAME, ['result' => 0]);
         $this->agentMock->expects('collectEvents')->with(self::COMMAND_NAME);
         $expectedLogMessage = 'snowball';
         $this->agentMock->expects('send')->andThrow(new Exception($expectedLogMessage));

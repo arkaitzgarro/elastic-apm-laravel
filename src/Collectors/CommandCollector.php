@@ -47,7 +47,7 @@ class CommandCollector extends EventDataCollector implements DataCollector
                 if ($transaction) {
                     $this->stopTransaction(
                         $transaction_name,
-                        0 === $event->exitCode ? 200 : 500
+                        $event->exitCode
                     );
                     $this->send($event);
                 }
