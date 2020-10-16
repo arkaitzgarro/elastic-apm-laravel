@@ -136,7 +136,7 @@ class CommandCollectorTest extends Unit
         $this->agentMock->expects('getTransaction')
             ->with(self::COMMAND_NAME)
             ->andReturn(null);
-//        $this->transactionMock->expects('setMeta')->with('command');
+
         $this->agentMock->expects('startTransaction')
             ->with(
                 self::COMMAND_NAME,
