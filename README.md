@@ -51,6 +51,7 @@ The `APM_*` variables listed above _may_ be removed in a future release.
 The following environment variables are supported in the default configuration:
 
 | Variable          | Description |
+|-------------------|-------------|
 |APM_LOG_LEVEL      | Log level for the APM Agent package. Must be PSR-3 compliant. Defaults to `error`. |
 |APM_ACTIVE_CLI     | `true` or `false` defaults to `true`. If `false`, the agent will not collect or send transaction or span data for non-HTTP requests but HTTP requests will still follow ELASTIC_APM_ENABLED. When ELASTIC_APM_ENABLED is `false`, this will have no effect. |
 |APM_USEROUTEURI    | `true` or `false` defaults to `true`. The default behavior is to record the URL as defined in your routes configuration. Set to `false` to record the requested URL, but keep in mind that this can result in excessive unique entries in APM. |
