@@ -21,7 +21,6 @@ class CommandCollectorTest extends Unit
     private const COMMAND_NAME = 'work:do';
     // Use 4 backslashes to match a single backslash: https://stackoverflow.com/a/15369828
     private const COMMAND_IGNORE_PATTERN = '/(?:Application\\\\Commands\\\\DoWork|work:do)/';
-    private const REQUEST_START_TIME = 1000.0;
 
     /** @var Application */
     private $app;
@@ -111,16 +110,48 @@ class CommandCollectorTest extends Unit
         ));
     }
 
-    public function testCommandStartingListener(): void
+    public function testDuplicatedTransactionForCommandStartingWillBeOmitted(): void
     {
-        self::markTestSkipped('something weird is happening here');
-
         $this->patternConfigReturn();
 
         $this->agentMock->expects('getTransaction')
             ->with(self::COMMAND_NAME)
             ->andReturn($this->transactionMock);
-        $this->agentMock->expects('startTransaction')->with(self::COMMAND_NAME, ['result' => 200]);
+
+        $this->dispatcher->dispatch(
+            new CommandStarting(
+                self::COMMAND_NAME,
+                $this->commandInputMock,
+                $this->commandOutputMock
+            ));
+    }
+
+    /**
+     * @group shit
+     */
+    public function testCommandStartingListener(): void
+    {
+        $this->patternConfigReturn();
+
+        $this->agentMock->expects('getTransaction')
+            ->with(self::COMMAND_NAME)
+            ->andReturn(null);
+//        $this->transactionMock->expects('setMeta')->with('command');
+        $this->agentMock->expects('startTransaction')
+            ->with(
+                self::COMMAND_NAME,
+                [],
+                Mockery::on(function (float $param): bool {
+                    $this->assertEqualsWithDelta(
+                        $param,
+                        microtime(true),
+                        1
+                    );
+
+                    return true;
+                }),
+            )
+            ->andReturn($this->transactionMock);
 
         $this->dispatcher->dispatch(
             new CommandStarting(
