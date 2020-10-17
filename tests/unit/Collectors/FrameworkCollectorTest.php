@@ -18,13 +18,17 @@ class FrameworkCollectorTest extends Unit
 
     public function _before(): void
     {
-        define('LARAVEL_START', microtime(true));
         $this->app = app(Application::class);
         $this->collector = new FrameworkCollector(
             $this->app,
             new Repository([]),
-            new RequestStartTime(microtime(true))
+            new RequestStartTime(0.0)
         );
+    }
+
+    public function testCollectorName(): void
+    {
+        self::assertEquals('framework-collector', $this->collector->getName());
     }
 
     public function testItCanRegisterBootingEvent(): void
@@ -32,8 +36,19 @@ class FrameworkCollectorTest extends Unit
         $this->app->boot();
 
         self::assertCount(2, $this->collector->collect());
-        self::assertFalse($this->collector->hasStartedMeasure('app_boot'));
-        self::assertFalse($this->collector->hasStartedMeasure('laravel_boot'));
-        // ...
+
+        $measure = $this->collector->collect()->get(0);
+        self::assertEquals('App boot', $measure['label']);
+        self::assertEquals('app', $measure['type']);
+        self::assertEquals('boot', $measure['action']);
+        self::assertEquals(0.0, $measure['start']);
+        self::assertGreaterThan(0.0, $measure['duration']);
+
+        $measure = $this->collector->collect()->get(1);
+        self::assertEquals('Laravel boot', $measure['label']);
+        self::assertEquals('laravel', $measure['type']);
+        self::assertEquals('boot', $measure['action']);
+        self::assertGreaterThan(0.0, $measure['start']);
+        self::assertGreaterThan(0.0, $measure['duration']);
     }
 }

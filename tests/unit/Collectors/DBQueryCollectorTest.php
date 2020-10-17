@@ -33,9 +33,6 @@ class DBQueryCollectorTest extends Unit
     /** @var Connection|LegacyMockInterface|MockInterface */
     private $connectionMock;
 
-    /** @var RequestStartTime|LegacyMockInterface|MockInterface */
-    private $requestStartTimeMock;
-
     protected function _before(): void
     {
         $this->app = app(Application::class);
@@ -46,7 +43,6 @@ class DBQueryCollectorTest extends Unit
     {
         parent::setUp();
 
-        $this->requestStartTimeMock = Mockery::mock(RequestStartTime::class);
         $this->agentMock = Mockery::mock(Agent::class);
         $this->configMock = Mockery::mock(Config::class);
         $this->connectionMock = Mockery::mock(Connection::class);
@@ -57,7 +53,7 @@ class DBQueryCollectorTest extends Unit
         $this->collector = new DBQueryCollector(
             $this->app,
             $this->configMock,
-            $this->requestStartTimeMock
+            new RequestStartTime(0.0)
         );
         $this->collector->useAgent($this->agentMock);
     }
@@ -79,10 +75,6 @@ class DBQueryCollectorTest extends Unit
             ->with('elastic-apm-laravel.spans.querylog.enabled')
             ->andReturn(true);
 
-        $this->requestStartTimeMock
-            ->shouldReceive('microseconds')
-            ->andReturn(1000.0);
-
         $this->dispatcher->dispatch(
             new QueryExecuted(
                 self::SQL,
@@ -94,6 +86,7 @@ class DBQueryCollectorTest extends Unit
 
         $measure = $this->collector->collect()->first();
         self::assertEquals('SELECT user', $measure['label']);
+        self::assertGreaterThan(0.0, $measure['start']);
         self::assertEquals(500.0, $measure['duration']);
         self::assertEquals('db.mysql.query', $measure['type']);
         self::assertEquals('query', $measure['action']);
@@ -131,10 +124,6 @@ class DBQueryCollectorTest extends Unit
             ->with('elastic-apm-laravel.spans.querylog.enabled')
             ->andReturn(true);
 
-        $this->requestStartTimeMock
-            ->shouldReceive('microseconds')
-            ->andReturn(1000.0);
-
         $this->dispatcher->dispatch(
             new QueryExecuted(
                 self::PROPRIETARY_SQL,
@@ -146,6 +135,7 @@ class DBQueryCollectorTest extends Unit
 
         $measure = $this->collector->collect()->first();
         self::assertEquals('Eloquent Query', $measure['label']);
+        self::assertGreaterThan(0.0, $measure['start']);
         self::assertEquals(500.0, $measure['duration']);
         self::assertEquals('db.mysql.query', $measure['type']);
         self::assertEquals('query', $measure['action']);
