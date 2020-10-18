@@ -20,6 +20,9 @@ class HttpRequestCollectorTest extends Unit
     /** @var Dispatcher */
     private $dispatcher;
 
+    /** @var HttpRequestCollector */
+    private $collector;
+
     /** @var Request */
     private $requestMock;
 
@@ -28,9 +31,6 @@ class HttpRequestCollectorTest extends Unit
 
     /** @var Route */
     private $routeMock;
-
-    /** @var HttpRequestCollector */
-    private $collector;
 
     public function _before(): void
     {
@@ -52,6 +52,13 @@ class HttpRequestCollectorTest extends Unit
             new RequestStartTime(0.0)
         );
     }
+
+    protected function tearDown(): void
+    {
+        $this->dispatcher->forget(RouteMatched::class);
+        $this->dispatcher->forget(RequestHandled::class);
+    }
+
 
     public function testCollectorName(): void
     {

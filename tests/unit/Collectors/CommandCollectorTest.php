@@ -106,7 +106,7 @@ class CommandCollectorTest extends Unit
             self::COMMAND_NAME,
             $this->commandInputMock,
             $this->commandOutputMock,
-            $exitCode = 0
+            0
         ));
     }
 
@@ -123,12 +123,10 @@ class CommandCollectorTest extends Unit
                 self::COMMAND_NAME,
                 $this->commandInputMock,
                 $this->commandOutputMock
-            ));
+            )
+        );
     }
 
-    /**
-     * @group shit
-     */
     public function testCommandStartingListener(): void
     {
         $this->patternConfigReturn();
@@ -150,15 +148,15 @@ class CommandCollectorTest extends Unit
 
                     return true;
                 }),
-            )
-            ->andReturn($this->transactionMock);
+            );
 
         $this->dispatcher->dispatch(
             new CommandStarting(
                 self::COMMAND_NAME,
                 $this->commandInputMock,
                 $this->commandOutputMock
-            ));
+            )
+        );
     }
 
     public function testCommandFinishedListener(): void
@@ -177,8 +175,9 @@ class CommandCollectorTest extends Unit
                 self::COMMAND_NAME,
                 $this->commandInputMock,
                 $this->commandOutputMock,
-                $exitCode = 0
-            ));
+                0
+            )
+        );
     }
 
     public function testCommandFinishedButExceptionThrownOnSend(): void
@@ -200,7 +199,8 @@ class CommandCollectorTest extends Unit
                 self::COMMAND_NAME,
                 $this->commandInputMock,
                 $this->commandOutputMock,
-                $exitCode = 0
-            ));
+                0
+            )
+        );
     }
 }
