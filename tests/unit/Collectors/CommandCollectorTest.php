@@ -2,7 +2,9 @@
 
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Collectors\CommandCollector;
+use AG\ElasticApmLaravel\Collectors\EventCounter;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
+use AG\ElasticApmLaravel\EventClock;
 use Codeception\Test\Unit;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Console\Events\CommandFinished;
@@ -58,11 +60,17 @@ class CommandCollectorTest extends Unit
         $requestStartTimeMock = Mockery::mock(RequestStartTime::class);
         $this->configMock = Mockery::mock(Config::class);
 
+        $eventCounter = new EventCounter();
+        $eventClock = new EventClock();
+
         $this->collector = new CommandCollector(
             $this->app,
             $this->configMock,
-            $requestStartTimeMock
+            $requestStartTimeMock,
+            $eventCounter,
+            $eventClock
         );
+
         $this->collector->useAgent($this->agentMock);
     }
 
