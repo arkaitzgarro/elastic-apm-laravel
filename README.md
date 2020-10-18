@@ -99,6 +99,8 @@ public function middleware()
 }
 ```
 
+**Note** Job middleware is **not** run when a job is created with the `dispatchNow()` method. Spans explicitly created within the job will still be collected, but the overall job span will not be included.
+ 
 ### Add a collector for other events
 
 You can add extra collector(s) to listen to your own application events or Laravel events like `Illuminate\Mail\Events\MessageSending` for example. We created a base collector that already includes functionality to measure events, that you can extend from:
