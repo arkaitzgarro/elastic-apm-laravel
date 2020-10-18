@@ -63,7 +63,11 @@ class CommandCollectorTest extends Unit
         $requestStartTimeMock = Mockery::mock(RequestStartTime::class);
         $this->configMock = Mockery::mock(Config::class);
 
-        $this->collector = new CommandCollector($this->app, $this->configMock, $requestStartTimeMock);
+        $this->collector = new CommandCollector(
+            $this->app,
+            $this->configMock,
+            $requestStartTimeMock
+        );
         $this->collector->useAgent($this->agentMock);
     }
 

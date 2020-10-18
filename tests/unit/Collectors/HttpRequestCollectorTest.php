@@ -3,7 +3,7 @@
 use AG\ElasticApmLaravel\Collectors\HttpRequestCollector;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use Codeception\Test\Unit;
-use Illuminate\Config\Repository;
+use Illuminate\Config\Repository as Config;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Http\Events\RequestHandled;
@@ -48,7 +48,7 @@ class HttpRequestCollectorTest extends Unit
 
         $this->collector = new HttpRequestCollector(
             $this->app,
-            new Repository([]),
+            new Config([]),
             new RequestStartTime(0.0)
         );
     }

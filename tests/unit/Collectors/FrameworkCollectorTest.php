@@ -3,7 +3,7 @@
 use AG\ElasticApmLaravel\Collectors\FrameworkCollector;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use Codeception\Test\Unit;
-use Illuminate\Config\Repository;
+use Illuminate\Config\Repository as Config;
 use Illuminate\Foundation\Application;
 
 class FrameworkCollectorTest extends Unit
@@ -25,7 +25,7 @@ class FrameworkCollectorTest extends Unit
 
         $this->collector = new FrameworkCollector(
             $this->app,
-            new Repository([]),
+            new Config([]),
             new RequestStartTime(0.0)
         );
     }
@@ -37,8 +37,6 @@ class FrameworkCollectorTest extends Unit
 
     public function testItCanRegisterBootingEvent(): void
     {
-        $this->markTestSkipped('This test does not work when running it with other tests, $this->app->booting event is never fired.');
-
         $this->app->boot();
 
         self::assertCount(2, $this->collector->collect());
