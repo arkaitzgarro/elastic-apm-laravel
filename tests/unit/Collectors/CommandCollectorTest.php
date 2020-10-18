@@ -113,14 +113,14 @@ class CommandCollectorTest extends Unit
 
     public function testCommandStartingListener(): void
     {
-        self::markTestSkipped('something weird is happening here');
-
         $this->patternConfigReturn();
 
         $this->agentMock->expects('getTransaction')
             ->with(self::COMMAND_NAME)
+            ->andReturn(null);
+        $this->agentMock->expects('startTransaction')
+            ->with(self::COMMAND_NAME, [], \Mockery::any())
             ->andReturn($this->transactionMock);
-        $this->agentMock->expects('startTransaction')->with(self::COMMAND_NAME, ['result' => 200]);
 
         $this->dispatcher->dispatch(
             new CommandStarting(
