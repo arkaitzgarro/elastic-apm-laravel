@@ -42,6 +42,9 @@ class CommandCollectorTest extends Unit
     /** @var Config|LegacyMockInterface|MockInterface */
     private $configMock;
 
+    /** @var EventClock|LegacyMockInterface|MockInterface  */
+    private $eventClockMock;
+
     /** @var LegacyMockInterface|MockInterface|InputInterface */
     private $commandInputMock;
 
@@ -59,16 +62,16 @@ class CommandCollectorTest extends Unit
         $this->agentMock = Mockery::mock(Agent::class);
         $requestStartTimeMock = Mockery::mock(RequestStartTime::class);
         $this->configMock = Mockery::mock(Config::class);
+        $this->eventClockMock = Mockery::mock(EventClock::class);
 
         $eventCounter = new EventCounter();
-        $eventClock = new EventClock();
 
         $this->collector = new CommandCollector(
             $this->app,
             $this->configMock,
             $requestStartTimeMock,
             $eventCounter,
-            $eventClock
+            $this->eventClockMock
         );
 
         $this->collector->useAgent($this->agentMock);
@@ -138,24 +141,15 @@ class CommandCollectorTest extends Unit
     {
         $this->patternConfigReturn();
 
+        $this->eventClockMock->shouldReceive('microtime')->andReturn(1000);
+
         $this->agentMock->expects('getTransaction')
             ->with(self::COMMAND_NAME)
             ->andReturn(null);
 
         $this->agentMock->expects('startTransaction')
-            ->with(
-                self::COMMAND_NAME,
-                [],
-                Mockery::on(function (float $param): bool {
-                    $this->assertEqualsWithDelta(
-                        $param,
-                        microtime(true),
-                        1
-                    );
-
-                    return true;
-                }),
-            );
+            ->with(self::COMMAND_NAME, [], 1000)
+            ->andReturn($this->transactionMock);
 
         $this->dispatcher->dispatch(
             new CommandStarting(
