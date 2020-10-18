@@ -42,7 +42,7 @@ class CommandCollectorTest extends Unit
     /** @var Config|LegacyMockInterface|MockInterface */
     private $configMock;
 
-    /** @var EventClock|LegacyMockInterface|MockInterface  */
+    /** @var EventClock|LegacyMockInterface|MockInterface */
     private $eventClockMock;
 
     /** @var LegacyMockInterface|MockInterface|InputInterface */
