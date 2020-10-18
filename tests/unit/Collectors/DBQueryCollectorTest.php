@@ -5,10 +5,10 @@ use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use Codeception\Test\Unit;
 use Illuminate\Config\Repository as Config;
-use Illuminate\Events\Dispatcher;
-use Illuminate\Foundation\Application;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Events\Dispatcher;
+use Illuminate\Foundation\Application;
 
 class DBQueryCollectorTest extends Unit
 {
