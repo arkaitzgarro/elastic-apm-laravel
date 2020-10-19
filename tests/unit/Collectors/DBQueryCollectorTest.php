@@ -113,8 +113,7 @@ class DBQueryCollectorTest extends Unit
             )
         );
 
-        $measure = $this->collector->collect()->first();
-        self::assertNull($measure);
+        self::assertTrue($this->collector->collect()->isEmpty());
     }
 
     public function testFallbackQueryName(): void
