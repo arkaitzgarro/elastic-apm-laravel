@@ -13,10 +13,8 @@ class ApmAgentServiceTest extends Unit
     private $appMock;
     private $agentMock;
 
-    protected function setUp(): void
+    protected function _before(): void
     {
-        parent::setup();
-
         $this->appMock = Mockery::mock(Application::class);
         $this->agentMock = Mockery::mock(Agent::class);
 

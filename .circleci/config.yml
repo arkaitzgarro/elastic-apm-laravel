@@ -50,7 +50,7 @@ jobs:
           command: composer install -n --prefer-dist
       - run:
           name: Run unit tests
-          command: ./vendor/bin/codecept run --xml test_report.xml --coverage
+          command: ./vendor/bin/codecept run --xml test_report.xml --coverage --coverage-html --coverage-xml
       - store_test_results:
           path: tests/_output
       - store_artifacts:

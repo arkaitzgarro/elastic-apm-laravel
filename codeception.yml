@@ -12,6 +12,7 @@ paths:
      
 coverage:
     enabled: true
+    show_uncovered: true
     include:
         - src/*
         - config/*

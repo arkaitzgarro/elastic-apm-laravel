@@ -25,44 +25,50 @@ class JobCollectorTest extends Unit
 
     /** @var Application */
     private $app;
+
     /** @var Dispatcher */
     private $dispatcher;
 
     /**
-     * @var \AG\ElasticApmLaravel\Collectors\JobCollector
+     * @var JobCollector
      */
     private $collector;
 
     /** @var Agent|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
     private $agentMock;
 
+    /** @var Job|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
+    private $jobMock;
+
+    /** @var Transaction|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
+    private $transactionMock;
+
+    /** @var Config|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
+    private $configMock;
+
     protected function _before()
     {
         $this->app = app(Application::class);
         $this->dispatcher = app(Dispatcher::class);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
 
         $this->jobMock = Mockery::mock(Job::class);
-
         $this->transactionMock = Mockery::mock(Transaction::class);
-
         $this->agentMock = Mockery::mock(Agent::class);
+        $this->configMock = Mockery::mock(Config::class);
 
         $requestStartTimeMock = Mockery::mock(RequestStartTime::class);
         $requestStartTimeMock->shouldReceive('setStartTime');
         $requestStartTimeMock->shouldReceive('microseconds')->andReturn(1000.0);
 
-        $this->configMock = Mockery::mock(Config::class);
-
-        $this->collector = new JobCollector($this->app, $this->configMock, $requestStartTimeMock);
+        $this->collector = new JobCollector(
+            $this->app,
+            $this->configMock,
+            $requestStartTimeMock
+        );
         $this->collector->useAgent($this->agentMock);
     }
 
-    protected function tearDown(): void
+    protected function _after(): void
     {
         // JobCollector registers these listeners and we need to start fresh each for every test
         $this->dispatcher->forget(JobProcessing::class);
