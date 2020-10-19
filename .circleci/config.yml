@@ -8,7 +8,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - composer-v1-{{ checksum "composer.lock" }}
+            - composer-v1-{{ .Revision }}
             - composer-v1-
       - run:
           name: Composer install
@@ -16,7 +16,7 @@ jobs:
           environment:
             COMPOSER_MEMORY_LIMIT: -1
       - save_cache:
-          key: composer-v1-{{ checksum "composer.lock" }}
+          key: composer-v1-{{ .Revision }}
           paths:
             - vendor
 
@@ -28,7 +28,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - composer-v1-{{ checksum "composer.lock" }}
+            - composer-v1-{{ .Revision }}
             - composer-v1-
       - run:
           name: Composer install
@@ -49,7 +49,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - composer-v1-{{ checksum "composer.lock" }}
+            - composer-v1-{{ .Revision }}
             - composer-v1-
       - run:
           name: Composer install
