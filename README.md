@@ -2,6 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/arkaitzgarro/elastic-apm-laravel.svg?style=svg)](https://circleci.com/gh/arkaitzgarro/elastic-apm-laravel)
 [![Latest Stable Version](https://poser.pugx.org/arkaitzgarro/elastic-apm-laravel/v/stable)](https://packagist.org/packages/arkaitzgarro/elastic-apm-laravel)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/e5a66b9bf5161e299c8c/test_coverage)](https://codeclimate.com/github/arkaitzgarro/elastic-apm-laravel/test_coverage)
 [![License](https://poser.pugx.org/arkaitzgarro/elastic-apm-laravel/license)](https://packagist.org/packages/arkaitzgarro/elastic-apm-laravel)
 
 Elastic APM agent for v2 intake API. Compatible with Laravel 5.5+.
