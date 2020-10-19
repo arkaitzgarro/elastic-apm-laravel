@@ -2,7 +2,9 @@
 
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Collectors\DBQueryCollector;
+use AG\ElasticApmLaravel\Collectors\EventCounter;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
+use AG\ElasticApmLaravel\EventClock;
 use Codeception\Test\Unit;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Database\Connection;
@@ -45,10 +47,15 @@ class DBQueryCollectorTest extends Unit
         $this->connectionMock
             ->shouldReceive('getName');
 
+        $eventCounter = new EventCounter();
+        $eventClock = new EventClock();
+
         $this->collector = new DBQueryCollector(
             $this->app,
             $this->configMock,
-            new RequestStartTime(0.0)
+            new RequestStartTime(0.0),
+            $eventCounter,
+            $eventClock
         );
         $this->collector->useAgent($this->agentMock);
     }

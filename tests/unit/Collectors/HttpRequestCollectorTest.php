@@ -1,7 +1,9 @@
 <?php
 
+use AG\ElasticApmLaravel\Collectors\EventCounter;
 use AG\ElasticApmLaravel\Collectors\HttpRequestCollector;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
+use AG\ElasticApmLaravel\EventClock;
 use Codeception\Test\Unit;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Events\Dispatcher;
@@ -41,10 +43,15 @@ class HttpRequestCollectorTest extends Unit
         $this->responseMock = Mockery::mock(Response::class);
         $this->routeMock = Mockery::mock(Route::class);
 
+        $eventCounter = new EventCounter();
+        $eventClock = new EventClock();
+
         $this->collector = new HttpRequestCollector(
             $this->app,
             new Config([]),
-            new RequestStartTime(0.0)
+            new RequestStartTime(0.0),
+            $eventCounter,
+            $eventClock
         );
     }
 

@@ -1,8 +1,10 @@
 <?php
 
 use AG\ElasticApmLaravel\Agent;
+use AG\ElasticApmLaravel\Collectors\EventCounter;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use AG\ElasticApmLaravel\Collectors\ScheduledTaskCollector;
+use AG\ElasticApmLaravel\EventClock;
 use Codeception\Test\Unit;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Events\Dispatcher;
@@ -24,11 +26,17 @@ class ScheduledTaskCollectorTest extends Unit
         $this->app = app(Application::class);
         $this->dispatcher = app(Dispatcher::class);
 
+        $eventCounter = new EventCounter();
+        $eventClock = new EventClock();
+
         $this->collector = new ScheduledTaskCollector(
             $this->app,
             new Config([]),
-            new RequestStartTime(0.0)
+            new RequestStartTime(0.0),
+            $eventCounter,
+            $eventClock
         );
+
         $this->collector->useAgent(Mockery::mock(Agent::class));
     }
 
