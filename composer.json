@@ -21,8 +21,7 @@
         "illuminate/support": "^5.5|^6|^7",
         "jasny/dbquery-mysql": "^2.0",
         "nipwaayoni/elastic-apm-php-agent": "^7.5",
-        "http-interop/http-factory-guzzle": "^1.0",
-        "php-http/guzzle6-adapter": "^2.0"
+        "http-interop/http-factory-guzzle": "^1.0"
     },
     "require-dev": {
         "codeception/codeception": "^4.1",
@@ -31,6 +30,10 @@
         "friendsofphp/php-cs-fixer": "^2.16",
         "dms/phpunit-arraysubset-asserts": "^0.1.0",
         "codeception/mockery-module": "^0.4.0"
+    },
+    "suggest": {
+        "php-http/guzzle6-adapter": "Guzzle Http client adapter for guzzlehttp/guzzle version 6",
+        "php-http/guzzle7-adapter": "Guzzle Http client adapter for guzzlehttp/guzzle version 7"
     },
     "autoload": {
         "psr-4": {

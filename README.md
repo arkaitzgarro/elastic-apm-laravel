@@ -10,6 +10,22 @@ Elastic APM agent for v2 intake API. Compatible with Laravel 5.5+.
 | --------------------------------------------- | ----------------------------------------------- |
 | <img src="public/apm-transaction-list.png" /> | <img src="public/apm-transaction-detail.png" /> |
 
+## Prerequisites
+
+This package uses `nipwaayoni/elastic-apm-php-agent` which requires you to bring your own Http Client adapter as long as it compliant with [PSR-18](https://www.php-fig.org/psr/psr-18/).
+
+By default, since Laravel version 7 uses `guzzlehttp/guzzle` as the default http client, you need to specify which version of the adapter you want to use.
+
+```bash
+    # if you are using guzzlehttp/guzzle version 6
+    composer require php-http/guzzle6-adapter
+```
+
+```bash
+    # if you are using  guzzlehttp/guzzle version 7
+    composer require php-http/guzzle7-adapter
+```
+
 ## Installation
 
 Require this package with composer:
@@ -31,7 +47,7 @@ From here, we will take care of everything based on your configuration. The agen
 
 The underlying APM Agent may be configured using environment variables as of version 2.0 of this package. Place the `ELASTIC_APM_*` variables in your `.env` file or use any other appropriate means to make them available to your project.
 
-Note that features of the Agent may not be documented here and you should refer to the `nipwaayoni/elastic-apm-php-agent` [project documentation](https://github.com/nipwaayoni/elastic-apm-php-agent/blob/master/docs/config.md) for the full feature set. 
+Note that features of the Agent may not be documented here and you should refer to the `nipwaayoni/elastic-apm-php-agent` [project documentation](https://github.com/nipwaayoni/elastic-apm-php-agent/blob/master/docs/config.md) for the full feature set.
 
 The following options are still supported by this package and will take precedence over their `ELASTIC_APM_*` counterparts if present.
 
