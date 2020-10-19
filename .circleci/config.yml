@@ -10,9 +10,11 @@ jobs:
           keys:
             - composer-v1-{{ checksum "composer.lock" }}
             - composer-v1-
-      - run: 
+      - run:
           name: Composer install
           command: composer install -n --prefer-dist
+          environment:
+            COMPOSER_MEMORY_LIMIT: -1
       - save_cache:
           key: composer-v1-{{ checksum "composer.lock" }}
           paths:
@@ -28,9 +30,11 @@ jobs:
           keys:
             - composer-v1-{{ checksum "composer.lock" }}
             - composer-v1-
-      - run: 
+      - run:
           name: Composer install
           command: composer install -n --prefer-dist
+          environment:
+            COMPOSER_MEMORY_LIMIT: -1
       - run:
           name: Lint PHP code
           command: php ./vendor/bin/php-cs-fixer fix --config .php_cs --dry-run --diff
@@ -47,9 +51,11 @@ jobs:
           keys:
             - composer-v1-{{ checksum "composer.lock" }}
             - composer-v1-
-      - run: 
+      - run:
           name: Composer install
           command: composer install -n --prefer-dist
+          environment:
+            COMPOSER_MEMORY_LIMIT: -1
       - run:
           name: Install Code Climate
           command: |
@@ -60,7 +66,7 @@ jobs:
           command: |
             ./cc-test-reporter before-build
             ./vendor/bin/codecept run --xml test_report.xml --coverage --coverage-html --coverage-xml
-            mv tests/_output/coverage.xml clover.xml 
+            mv tests/_output/coverage.xml clover.xml
             ./cc-test-reporter after-build --coverage-input-type clover --exit-code $?
       - store_test_results:
           path: tests/_output
