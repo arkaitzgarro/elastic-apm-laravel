@@ -1,7 +1,9 @@
 <?php
 
 use AG\ElasticApmLaravel\Agent;
+use AG\ElasticApmLaravel\Collectors\EventCounter;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
+use AG\ElasticApmLaravel\EventClock;
 use Codeception\Test\Unit;
 use Illuminate\Config\Repository;
 use Nipwaayoni\Config;
@@ -25,10 +27,15 @@ class AgentTest extends Unit
     private $eventFactoryMock;
     /** @var TransactionsStore */
     private $transactionStore;
-    /** @var RequestStartTime */
-    private $requestStartTime;
     /** @var \Mockery\Mock|Repository */
     private $appConfigMock;
+
+    /** @var RequestStartTime */
+    private $requestStartTime;
+    /** @var EventCounter */
+    private $eventCounter;
+    /** @var EventClock */
+    private $eventClock;
 
     private $expectedCollectors = [];
     private $totalEvents = 0;
@@ -40,8 +47,11 @@ class AgentTest extends Unit
         $this->connectorMock = Mockery::mock(Connector::class)->makePartial();
         $this->eventFactoryMock = Mockery::mock(EventFactoryInterface::class);
         $this->transactionStore = new TransactionsStore();
-        $this->requestStartTime = new RequestStartTime(microtime(true));
         $this->appConfigMock = Mockery::mock(Repository::class);
+
+        $this->requestStartTime = new RequestStartTime(microtime(true));
+        $this->eventCounter = new EventCounter();
+        $this->eventClock = new EventClock();
 
         $this->agent = new Agent(
             $this->config,
@@ -131,33 +141,8 @@ class AgentTest extends Unit
         $this->eventFactoryMock->shouldReceive('newTransaction')
             ->andReturn(new \Nipwaayoni\Events\Transaction('test-transaction', []));
 
-        $this->appConfigMock->expects('get')
-            ->with('elastic-apm-laravel.spans.maxTraceItems')
-            ->andReturn($this->totalEvents);
-
         // The `times()` constraint ensures we put the expected number of events
         $this->connectorMock->expects('putEvent')->times($this->totalEvents);
-
-        $this->agent->startTransaction('test-transaction');
-        $this->agent->collectEvents('test-transaction');
-    }
-
-    public function testOnlyMaxTraceItemsEventsAreAddedToConnectorWhenCollected(): void
-    {
-        $this->markTestSkipped('The max-trace-items option is currently applied per collector, is that desired?');
-        $maxTraceItems = 4; // there are a total of 8 events that will be created
-
-        $this->setupCollectors();
-
-        $this->eventFactoryMock->shouldReceive('newTransaction')
-            ->andReturn(new \Nipwaayoni\Events\Transaction('test-transaction', []));
-
-        $this->appConfigMock->expects('get')
-            ->with('elastic-apm-laravel.spans.maxTraceItems')
-            ->andReturn($maxTraceItems);
-
-        // The `times()` constraint ensures we put the expected number of events
-        $this->connectorMock->expects('putEvent')->times($maxTraceItems);
 
         $this->agent->startTransaction('test-transaction');
         $this->agent->collectEvents('test-transaction');
@@ -240,7 +225,7 @@ class AgentTest extends Unit
         // create collectors with events
         foreach (array_keys($this->expectedCollectors) as $type) {
             /** @var \AG\ElasticApmLaravel\Collectors\EventDataCollector $collector */
-            $collector = new $this->expectedCollectors[$type]['class']($app, $config, $this->requestStartTime);
+            $collector = new $this->expectedCollectors[$type]['class']($app, $config, $this->requestStartTime, $this->eventCounter, $this->eventClock);
 
             for ($i = 0; $i < $this->expectedCollectors[$type]['eventCount']; ++$i) {
                 $collector->addMeasure(uniqid('test-event'), 100, 200);

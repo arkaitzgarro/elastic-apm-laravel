@@ -100,11 +100,9 @@ class Agent extends NipwaayoniAgent
 
     public function collectEvents(string $transaction_name): void
     {
-        $max_trace_items = $this->app_config->get('elastic-apm-laravel.spans.maxTraceItems');
-
         $transaction = $this->getTransaction($transaction_name);
-        $this->collectors->each(function ($collector) use ($transaction, $max_trace_items) {
-            $collector->collect()->take($max_trace_items)->each(function ($measure) use ($transaction) {
+        $this->collectors->each(function ($collector) use ($transaction) {
+            $collector->collect()->each(function ($measure) use ($transaction) {
                 $event = new Span($measure['label'], $transaction);
                 $event->setType($measure['type']);
                 $event->setAction($measure['action']);
@@ -135,6 +133,8 @@ class Agent extends NipwaayoniAgent
         $this->collectors->each(function (EventDataCollector $collector) {
             $collector->reset();
         });
+
+        // TODO reset started event counter
 
         /*
          * Push new metadata onto the stack in preparation for the next send event. This

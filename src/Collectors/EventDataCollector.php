@@ -4,6 +4,7 @@ namespace AG\ElasticApmLaravel\Collectors;
 
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
+use AG\ElasticApmLaravel\EventClock;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
@@ -32,17 +33,25 @@ abstract class EventDataCollector implements DataCollector
     /** @var RequestStartTime */
     protected $start_time;
 
+    /** @var EventCounter */
+    protected $event_counter;
+
+    /** @var EventClock */
+    protected $event_clock;
+
     /** @var Agent */
     protected $agent;
 
-    final public function __construct(Application $app, Config $config, RequestStartTime $start_time)
+    final public function __construct(Application $app, Config $config, RequestStartTime $start_time, EventCounter $event_counter, EventClock $event_clock)
     {
         $this->app = $app;
         $this->config = $config;
+        $this->start_time = $start_time;
+        $this->event_counter = $event_counter;
+        $this->event_clock = $event_clock;
+
         $this->started_measures = new Collection();
         $this->measures = new Collection();
-
-        $this->start_time = $start_time;
 
         $this->registerEventListeners();
     }
@@ -62,19 +71,25 @@ abstract class EventDataCollector implements DataCollector
         string $label = null,
         float $start_time = null
     ): void {
-        $start = $start_time ?? microtime(true);
+        $start = $start_time ?? $this->event_clock->microtime();
         if ($this->hasStartedMeasure($name)) {
             Log::warning("Did not start measure '{$name}' because it's already started.");
 
             return;
         }
 
-        $this->started_measures->put($name, [
+        $transactionStart = $this->start_time->microseconds();
+        $data = [
             'label' => $label ?: $name,
-            'start' => $start - $this->start_time->microseconds(),
+            'start' => $start - $transactionStart,
             'type' => $type,
             'action' => $action,
-        ]);
+            'exceeds_limit' => $this->event_counter->reachedLimit(),
+        ];
+
+        $this->started_measures->put($name, $data);
+
+        $this->event_counter->increment();
     }
 
     /**
@@ -90,7 +105,7 @@ abstract class EventDataCollector implements DataCollector
      */
     public function stopMeasure(string $name, array $params = []): void
     {
-        $end = microtime(true);
+        $end = $this->event_clock->microtime();
         if (!$this->hasStartedMeasure($name)) {
             Log::warning("Did not stop measure '{$name}' because it hasn't been started.");
 
@@ -98,7 +113,14 @@ abstract class EventDataCollector implements DataCollector
         }
 
         $measure = $this->started_measures->pull($name);
-        $this->addMeasure(
+
+        if ($measure['exceeds_limit']) {
+            return;
+        }
+
+        // Use the private pushMeasure() method since using addMeasure would reject valid measures
+        // created before the limit was reached
+        $this->pushMeasure(
             $measure['label'],
             $measure['start'],
             $end - $this->start_time->microseconds(),
@@ -112,6 +134,31 @@ abstract class EventDataCollector implements DataCollector
      * Adds a measure.
      */
     public function addMeasure(
+        string $label,
+        float $start,
+        float $end,
+        string $type = 'request',
+        ?string $action = 'request',
+        ?array $context = []
+    ): void {
+        if ($this->event_counter->reachedLimit()) {
+            return;
+        }
+
+        $this->pushMeasure(
+            $label,
+            $start,
+            $end,
+            $type,
+            $action,
+            $context
+        );
+
+        $this->event_counter->increment();
+    }
+
+    // Only other exposed methods may push measures, this ensures the limit is respected
+    private function pushMeasure(
         string $label,
         float $start,
         float $end,

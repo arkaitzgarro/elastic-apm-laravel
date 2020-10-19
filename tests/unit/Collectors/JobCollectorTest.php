@@ -1,8 +1,10 @@
 <?php
 
 use AG\ElasticApmLaravel\Agent;
+use AG\ElasticApmLaravel\Collectors\EventCounter;
 use AG\ElasticApmLaravel\Collectors\JobCollector;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
+use AG\ElasticApmLaravel\EventClock;
 use Codeception\Test\Unit;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Contracts\Queue\Job;
@@ -56,15 +58,23 @@ class JobCollectorTest extends Unit
         $this->agentMock = Mockery::mock(Agent::class);
         $this->configMock = Mockery::mock(Config::class);
 
+        $this->configMock = Mockery::mock(Config::class);
+
         $requestStartTimeMock = Mockery::mock(RequestStartTime::class);
         $requestStartTimeMock->shouldReceive('setStartTime');
         $requestStartTimeMock->shouldReceive('microseconds')->andReturn(1000.0);
 
+        $eventCounter = new EventCounter();
+        $eventClock = new EventClock();
+
         $this->collector = new JobCollector(
             $this->app,
             $this->configMock,
-            $requestStartTimeMock
+            $requestStartTimeMock,
+            $eventCounter,
+            $eventClock
         );
+
         $this->collector->useAgent($this->agentMock);
     }
 

@@ -57,12 +57,10 @@ class CommandCollector extends EventDataCollector implements DataCollector
 
     protected function startTransaction(string $transaction_name): Transaction
     {
-        $start_time = microtime(true);
-
         return $this->agent->startTransaction(
             $transaction_name,
             [],
-            $start_time
+            $this->event_clock->microtime()
         );
     }
 

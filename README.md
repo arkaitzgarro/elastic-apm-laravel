@@ -170,6 +170,8 @@ public function boot()
 }
 ```
 
+**Note** Collecting events is subject to the `APM_MAXTRACEITEMS` setting. If your collector defers adding events until the request is complete, and the total event count exceeds the max trace items, a higher than expected number of your events may be dropped. You should make every effort to collect events at the point they occur during the request processing. Using the `EventDataCollector::startMeasure()` method will flag an event for collection even if the max trace items has been reached when the measure is stopped.
+
 ## Distributed Tracing
 
 [Distributed tracing](https://www.elastic.co/guide/en/apm/get-started/current/distributed-tracing.html) allows you to associate transactions in your Laravel application with transactions in services your application consumes. For example, if your Laravel application calls REST resources as part of handling a request, the REST transaction details will appear within your application transaction in Elastic APM. You enable distributed tracing by including an appropriate header in the http request your application makes to another service. For example:

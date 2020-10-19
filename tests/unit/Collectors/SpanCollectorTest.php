@@ -1,8 +1,10 @@
 <?php
 
 use AG\ElasticApmLaravel\Agent;
+use AG\ElasticApmLaravel\Collectors\EventCounter;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use AG\ElasticApmLaravel\Collectors\SpanCollector;
+use AG\ElasticApmLaravel\EventClock;
 use AG\ElasticApmLaravel\Events\StartMeasuring;
 use AG\ElasticApmLaravel\Events\StopMeasuring;
 use Codeception\Test\Unit;
@@ -26,11 +28,17 @@ class SpanCollectorTest extends Unit
         $this->app = app(Application::class);
         $this->dispatcher = app(Dispatcher::class);
 
+        $eventCounter = new EventCounter();
+        $eventClock = new EventClock();
+
         $this->collector = new SpanCollector(
             $this->app,
             new Config([]),
-            new RequestStartTime(0.0)
+            new RequestStartTime(0.0),
+            $eventCounter,
+            $eventClock
         );
+
         $this->collector->useAgent(Mockery::mock(Agent::class));
     }
 

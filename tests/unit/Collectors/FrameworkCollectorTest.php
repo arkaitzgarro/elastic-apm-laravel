@@ -1,7 +1,9 @@
 <?php
 
+use AG\ElasticApmLaravel\Collectors\EventCounter;
 use AG\ElasticApmLaravel\Collectors\FrameworkCollector;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
+use AG\ElasticApmLaravel\EventClock;
 use Codeception\Test\Unit;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Foundation\Application;
@@ -17,10 +19,16 @@ class FrameworkCollectorTest extends Unit
     protected function _before(): void
     {
         $this->app = new Application();
+
+        $eventCounter = new EventCounter();
+        $eventClock = new EventClock();
+
         $this->collector = new FrameworkCollector(
             $this->app,
             new Config([]),
-            new RequestStartTime(0.0)
+            new RequestStartTime(0.0),
+            $eventCounter,
+            $eventClock
         );
     }
 
