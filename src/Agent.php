@@ -35,7 +35,7 @@ class Agent extends NipwaayoniAgent
 
     /** @var Transaction */
     private $current_transaction;
-    
+
     /** @var Repository */
     private $app_config;
 

@@ -3,7 +3,7 @@
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\AgentBuilder;
 use AG\ElasticApmLaravel\Exception\MissingAppConfigurationException;
-use AG\ElasticApmLaravel\Collectors\EventDataCollector;
+use AG\ElasticApmLaravel\Collectors\SpanCollector;
 use Codeception\Test\Unit;
 use Illuminate\Config\Repository as Config;
 
@@ -14,13 +14,13 @@ class AgentBuilderTest extends Unit
     /** @var AgentBuilder */
     private $builder;
 
-    /** @var EventDataCollector */
+    /** @var SpanCollector */
     private $collector;
 
     protected function _before(): void
     {
         $this->builder = new AgentBuilder();
-        $this->collector = Mockery::mock(EventDataCollector::class);
+        $this->collector = Mockery::mock(SpanCollector::class);
     }
 
     public function testMissingConfigurationException(): void
@@ -44,7 +44,8 @@ class AgentBuilderTest extends Unit
     {
         $this->collector
             ->shouldReceive('useAgent')
-            ->shouldReceive('getName');
+            ->shouldReceive('getName')
+            ->andReturn('span-collector');
 
         /** @var Agent */
         $agent = $this->builder
@@ -52,6 +53,6 @@ class AgentBuilderTest extends Unit
             ->withEventCollectors(collect([$this->collector]))
             ->build();
 
-        self::assertEquals(Agent::class, get_class($agent));
+        self::assertEquals('span-collector', $agent->getCollector('span-collector')->getName());
     }
 }
