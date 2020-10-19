@@ -16,10 +16,10 @@
     "require": {
         "php": ">=7.3",
         "http-interop/http-factory-guzzle": "^1.0",
-        "illuminate/database": "^5.5|^6|^7",
-        "illuminate/http": "^5.5|^6|^7",
-        "illuminate/routing": "^5.5|^6|^7",
-        "illuminate/support": "^5.5|^6|^7",
+        "illuminate/database": "^6.0 || ^7.0 || ^8.0",
+        "illuminate/http": "^6.0 || ^7.0 || ^8.0",
+        "illuminate/routing": "^6.0 || ^7.0 || ^8.0",
+        "illuminate/support": "^6.0 || ^7.0 || ^8.0",
         "jasny/dbquery-mysql": "^2.0",
         "nipwaayoni/elastic-apm-php-agent": "^7.5"
     },
@@ -28,7 +28,7 @@
         "codeception/mockery-module": "^0.4.0",
         "dms/phpunit-arraysubset-asserts": "^0.1.0",
         "friendsofphp/php-cs-fixer": "^2.16",
-        "orchestra/testbench": "^3.5",
+        "orchestra/testbench": "^4.0",
         "php-http/guzzle7-adapter": "^0.1.0",
         "symfony/service-contracts": "^2.0"
     },

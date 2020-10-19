@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   build:
     docker:
@@ -15,8 +15,6 @@ jobs:
       - run:
           name: Composer install
           command: composer install -n --prefer-dist
-          environment:
-            COMPOSER_MEMORY_LIMIT: -1
       - save_cache:
           key: composer-v1-{{ checksum "composer.json" }}
           paths:
@@ -37,15 +35,23 @@ jobs:
       - run:
           name: Composer install
           command: composer install -n --prefer-dist
-          environment:
-            COMPOSER_MEMORY_LIMIT: -1
       - run:
           name: Lint PHP code
           command: php ./vendor/bin/php-cs-fixer fix --config .php_cs --dry-run --diff
 
   unit_tests:
+    parameters:
+      php-version:
+        type: string
+        default: "7.3"
+      laravel-version:
+        type: string
+        default: "6.*"
+      testbench-version:
+        type: string
+        default: "4.*"
     docker:
-      - image: circleci/php:7.3
+      - image: circleci/php:<< parameters.php-version >>
     working_directory: ~/elastic-apm-laravel
     environment:
       CC_TEST_REPORTER_ID: 23639f09f4ef515ddb5fea9baf90f9f5cd9bb5e0801cf1dc062d993a3d70d3eb
@@ -54,13 +60,11 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - composer-v1-{{ checksum "composer.json" }}
+            - composer-v1-{{ checksum "composer.json" }}-<< parameters.laravel-version >>
             - composer-v1-
-      - run:
-          name: Composer install
-          command: composer install -n --prefer-dist
-          environment:
-            COMPOSER_MEMORY_LIMIT: -1
+      - run: |
+          composer require "laravel/framework:<< parameters.laravel-version >>" "orchestra/testbench:<< parameters.testbench-version >>" --no-interaction --no-update
+          composer update --prefer-dist --no-interaction --no-suggest
       - run:
           name: Install Code Climate
           command: |
@@ -73,6 +77,11 @@ jobs:
             ./vendor/bin/codecept run --xml test_report.xml --coverage --coverage-html --coverage-xml
             mv tests/_output/coverage.xml clover.xml
             ./cc-test-reporter after-build --coverage-input-type clover --exit-code $?
+      - save_cache:
+          key: composer-v1-{{ checksum "composer.json" }}-<< parameters.laravel-version >>
+          paths:
+            - vendor
+            - composer.lock
       - store_test_results:
           path: tests/_output
       - store_artifacts:
@@ -89,3 +98,45 @@ workflows:
       - unit_tests:
           requires:
             - build
+          matrix:
+            parameters:
+              php-version: ["7.3", "7.4"]
+              laravel-version: ["6.*", "7.*", "8.*"]
+              testbench-version: ["4.*", "5.*", "6.*"]
+            exclude:
+              - php-version: "7.3"
+                laravel-version: "6.*"
+                testbench-version: "5.*"
+              - php-version: "7.3"
+                laravel-version: "6.*"
+                testbench-version: "6.*"
+              - php-version: "7.4"
+                laravel-version: "6.*"
+                testbench-version: "5.*"
+              - php-version: "7.4"
+                laravel-version: "6.*"
+                testbench-version: "6.*"
+              - php-version: "7.3"
+                laravel-version: "7.*"
+                testbench-version: "4.*"
+              - php-version: "7.3"
+                laravel-version: "7.*"
+                testbench-version: "6.*"
+              - php-version: "7.4"
+                laravel-version: "7.*"
+                testbench-version: "4.*"
+              - php-version: "7.4"
+                laravel-version: "7.*"
+                testbench-version: "6.*"
+              - php-version: "7.3"
+                laravel-version: "8.*"
+                testbench-version: "4.*"
+              - php-version: "7.3"
+                laravel-version: "8.*"
+                testbench-version: "5.*"
+              - php-version: "7.4"
+                laravel-version: "8.*"
+                testbench-version: "4.*"
+              - php-version: "7.4"
+                laravel-version: "8.*"
+                testbench-version: "5.*"
