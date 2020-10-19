@@ -37,11 +37,6 @@ class DBQueryCollectorTest extends Unit
     {
         $this->app = app(Application::class);
         $this->dispatcher = app(Dispatcher::class);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
 
         $this->agentMock = Mockery::mock(Agent::class);
         $this->configMock = Mockery::mock(Config::class);
@@ -58,7 +53,7 @@ class DBQueryCollectorTest extends Unit
         $this->collector->useAgent($this->agentMock);
     }
 
-    protected function tearDown(): void
+    protected function _after(): void
     {
         $this->dispatcher->forget(QueryExecuted::class);
     }

@@ -50,11 +50,6 @@ class JobCollectorTest extends Unit
     {
         $this->app = app(Application::class);
         $this->dispatcher = app(Dispatcher::class);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
 
         $this->jobMock = Mockery::mock(Job::class);
         $this->transactionMock = Mockery::mock(Transaction::class);
@@ -73,7 +68,7 @@ class JobCollectorTest extends Unit
         $this->collector->useAgent($this->agentMock);
     }
 
-    protected function tearDown(): void
+    protected function _after(): void
     {
         // JobCollector registers these listeners and we need to start fresh each for every test
         $this->dispatcher->forget(JobProcessing::class);

@@ -50,11 +50,6 @@ class CommandCollectorTest extends Unit
     {
         $this->app = app(Application::class);
         $this->dispatcher = app(Dispatcher::class);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
 
         $this->commandInputMock = Mockery::mock(InputInterface::class);
         $this->commandOutputMock = Mockery::mock(OutputInterface::class);
@@ -71,7 +66,7 @@ class CommandCollectorTest extends Unit
         $this->collector->useAgent($this->agentMock);
     }
 
-    protected function tearDown(): void
+    protected function _after(): void
     {
         $this->dispatcher->forget(CommandStarting::class);
         $this->dispatcher->forget(CommandFinished::class);

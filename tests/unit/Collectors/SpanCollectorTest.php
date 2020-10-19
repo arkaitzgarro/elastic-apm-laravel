@@ -25,11 +25,6 @@ class SpanCollectorTest extends Unit
     {
         $this->app = app(Application::class);
         $this->dispatcher = app(Dispatcher::class);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
 
         $this->collector = new SpanCollector(
             $this->app,
@@ -39,7 +34,7 @@ class SpanCollectorTest extends Unit
         $this->collector->useAgent(Mockery::mock(Agent::class));
     }
 
-    protected function tearDown(): void
+    protected function _after(): void
     {
         $this->dispatcher->forget(StartMeasuring::class);
         $this->dispatcher->forget(StopMeasuring::class);

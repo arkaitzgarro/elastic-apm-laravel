@@ -33,10 +33,8 @@ class AgentTest extends Unit
     private $expectedCollectors = [];
     private $totalEvents = 0;
 
-    protected function setUp(): void
+    protected function _before(): void
     {
-        parent::setup();
-
         $this->config = new Config(['serviceName' => 'My Service']);
         $this->context = new ContextCollection([]);
         $this->connectorMock = Mockery::mock(Connector::class)->makePartial();

@@ -36,11 +36,6 @@ class HttpRequestCollectorTest extends Unit
     {
         $this->app = app(Application::class);
         $this->dispatcher = app(Dispatcher::class);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
 
         $this->requestMock = Mockery::mock(Request::class);
         $this->responseMock = Mockery::mock(Response::class);
@@ -53,7 +48,7 @@ class HttpRequestCollectorTest extends Unit
         );
     }
 
-    protected function tearDown(): void
+    protected function _after(): void
     {
         $this->dispatcher->forget(RouteMatched::class);
         $this->dispatcher->forget(RequestHandled::class);

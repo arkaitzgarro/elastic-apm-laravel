@@ -23,11 +23,6 @@ class ScheduledTaskCollectorTest extends Unit
     {
         $this->app = app(Application::class);
         $this->dispatcher = app(Dispatcher::class);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
 
         $this->collector = new ScheduledTaskCollector(
             $this->app,
