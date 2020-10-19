@@ -2,8 +2,8 @@
 
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\AgentBuilder;
-use AG\ElasticApmLaravel\Exception\MissingAppConfigurationException;
 use AG\ElasticApmLaravel\Collectors\SpanCollector;
+use AG\ElasticApmLaravel\Exception\MissingAppConfigurationException;
 use Codeception\Test\Unit;
 use Illuminate\Config\Repository as Config;
 
@@ -34,7 +34,7 @@ class AgentBuilderTest extends Unit
     {
         /** @var Agent */
         $agent = $this->builder
-            ->withAppConfig(new Config([ 'serviceName' => 'Test' ]))
+            ->withAppConfig(new Config(['serviceName' => 'Test']))
             ->build();
 
         self::assertEquals(Agent::class, get_class($agent));
@@ -49,7 +49,7 @@ class AgentBuilderTest extends Unit
 
         /** @var Agent */
         $agent = $this->builder
-            ->withAppConfig(new Config([ 'serviceName' => 'Test' ]))
+            ->withAppConfig(new Config(['serviceName' => 'Test']))
             ->withEventCollectors(collect([$this->collector]))
             ->build();
 
