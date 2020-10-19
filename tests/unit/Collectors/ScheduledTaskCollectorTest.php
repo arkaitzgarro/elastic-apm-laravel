@@ -1,8 +1,8 @@
 <?php
 
 use AG\ElasticApmLaravel\Agent;
-use AG\ElasticApmLaravel\Collectors\ScheduledTaskCollector;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
+use AG\ElasticApmLaravel\Collectors\ScheduledTaskCollector;
 use Codeception\Test\Unit;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Events\Dispatcher;

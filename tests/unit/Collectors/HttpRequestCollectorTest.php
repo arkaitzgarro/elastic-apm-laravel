@@ -59,7 +59,6 @@ class HttpRequestCollectorTest extends Unit
         $this->dispatcher->forget(RequestHandled::class);
     }
 
-
     public function testCollectorName(): void
     {
         self::assertEquals('request-collector', $this->collector->getName());
