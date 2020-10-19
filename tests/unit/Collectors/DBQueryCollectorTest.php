@@ -95,12 +95,12 @@ class DBQueryCollectorTest extends Unit
     public function testDisabledFastQueryExecutedListener(): void
     {
         $this->configMock
-            ->shouldReceive('get')
+            ->expects('get')
             ->with('elastic-apm-laravel.spans.querylog.enabled')
             ->andReturn('auto');
 
         $this->configMock
-            ->shouldReceive('get')
+            ->expects('get')
             ->with('elastic-apm-laravel.spans.querylog.threshold')
             ->andReturn(1000.0);
 
@@ -120,7 +120,7 @@ class DBQueryCollectorTest extends Unit
     public function testFallbackQueryName(): void
     {
         $this->configMock
-            ->shouldReceive('get')
+            ->expects('get')
             ->with('elastic-apm-laravel.spans.querylog.enabled')
             ->andReturn(true);
 
