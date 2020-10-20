@@ -9,8 +9,6 @@ use Illuminate\Config\Repository as Config;
 
 class AgentBuilderTest extends Unit
 {
-    use Codeception\AssertThrows;
-
     /** @var AgentBuilder */
     private $builder;
 
@@ -25,9 +23,8 @@ class AgentBuilderTest extends Unit
 
     public function testMissingConfigurationException(): void
     {
-        self::assertThrows(MissingAppConfigurationException::class, function () {
-            $this->builder->build();
-        });
+        $this->expectException(MissingAppConfigurationException::class);
+        $this->builder->build();
     }
 
     public function testBuildAgent()
@@ -44,7 +41,9 @@ class AgentBuilderTest extends Unit
     {
         $this->collector
             ->shouldReceive('useAgent')
+                ->once()
             ->shouldReceive('getName')
+                ->times(2)
             ->andReturn('span-collector');
 
         /** @var Agent */
