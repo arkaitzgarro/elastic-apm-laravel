@@ -33,20 +33,14 @@ class JobCollector extends EventDataCollector implements DataCollector
             }
 
             $transaction_name = $this->getTransactionName($event);
-            if (!$transaction_name) {
-                return;
+            if ($transaction_name) {
+                $transaction = $this->getTransaction($transaction_name);
+                if (!$transaction) {
+                    $this->startTransaction($transaction_name);
+                    $this->setTransactionType($transaction_name);
+                    $this->addMetadata($transaction_name, $event->job);
+                }
             }
-
-            $transaction = $this->getTransaction($transaction_name);
-            if ($transaction) {
-                // Somehow, a transaction with the same name has already been created.
-                // If so, ignore this job, otherwise the agent will throw an exception.
-                return;
-            }
-
-            $this->startTransaction($transaction_name);
-            $this->setTransactionType($transaction_name);
-            $this->addMetadata($transaction_name, $event->job);
         });
 
         $this->app->events->listen(JobProcessed::class, function (JobProcessed $event) {
