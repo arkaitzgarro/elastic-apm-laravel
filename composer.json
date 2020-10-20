@@ -24,9 +24,7 @@
         "nipwaayoni/elastic-apm-php-agent": "^7.5"
     },
     "require-dev": {
-        "codeception/assert-throws": "^1.1",
         "codeception/codeception": "^4.1",
-        "codeception/mockery-module": "^0.4.0",
         "codeception/mockery-module": "^0.4.0",
         "dms/phpunit-arraysubset-asserts": "^0.1.0",
         "friendsofphp/php-cs-fixer": "^2.16",
