@@ -21,7 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class CommandCollectorTest extends Unit
 {
     private const COMMAND_NAME = 'work:do';
-    
+
     // Use 4 backslashes to match a single backslash: https://stackoverflow.com/a/15369828
     private const COMMAND_IGNORE_PATTERN = '/(?:Application\\\\Commands\\\\DoWork|work:do)/';
 

@@ -183,7 +183,7 @@ class ScheduledTaskCollectorTest extends Unit
             ->with(self::COMMAND_NAME, ['result' => 0]);
         $this->agentMock->expects('collectEvents')
             ->with(self::COMMAND_NAME);
-        
+
         $expectedLogMessage = 'snowball';
         $this->agentMock->expects('send')
             ->andThrow(new Exception($expectedLogMessage));
