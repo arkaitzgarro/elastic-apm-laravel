@@ -29,7 +29,8 @@
         "symfony/service-contracts": "^2.0",
         "friendsofphp/php-cs-fixer": "^2.16",
         "dms/phpunit-arraysubset-asserts": "^0.1.0",
-        "codeception/mockery-module": "^0.4.0"
+        "codeception/mockery-module": "^0.4.0",
+        "orchestra/testbench": "^3.5"
     },
     "suggest": {
         "php-http/guzzle6-adapter": "Guzzle Http client adapter for guzzlehttp/guzzle version 6",

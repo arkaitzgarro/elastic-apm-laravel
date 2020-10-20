@@ -15,9 +15,14 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 class RecordTransactionTest extends Unit
 {
     /**
-     * @var AG\ElasticApmLaravel\Agent
+     * @var AG\ElasticApmLaravel\Agent|\Mockery\MockInterface
      */
     private $agent;
+
+    /**
+     * @var RequestStartTime|\Mockery\MockInterface
+     */
+    private $requestStartTimeMock;
 
     /**
      * @var Illuminate\Http\Request
@@ -25,7 +30,7 @@ class RecordTransactionTest extends Unit
     private $request;
 
     /**
-     * @var Illuminate\Http\Response
+     * @var Response|\Mockery\MockInterface
      */
     private $response;
 
@@ -72,6 +77,8 @@ class RecordTransactionTest extends Unit
     public function testStartTransaction()
     {
         $this->createMiddlewareInstance(false);
+
+        $this->response->shouldReceive('getStatusCode')->andReturn(200);
 
         $this->agent->shouldReceive('startTransaction')
             ->once()
@@ -140,13 +147,15 @@ class RecordTransactionTest extends Unit
         $this->assertEquals([
             'id' => null,
             'ip' => '127.0.0.1',
-            'user-agent' => 'Symfony/3.X',
+            'user-agent' => 'Symfony',
         ], $context['user']);
     }
 
     public function testUseRouteUri()
     {
         $this->createMiddlewareInstance(true);
+
+        $this->response->shouldReceive('getStatusCode')->andReturn(200);
 
         $this->agent->shouldReceive('startTransaction')
             ->once()

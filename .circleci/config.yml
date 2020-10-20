@@ -4,17 +4,19 @@ jobs:
     docker:
       - image: circleci/php:7.3
     working_directory: ~/elastic-apm-laravel
+    environment:
+      COMPOSER_MEMORY_LIMIT: -1
     steps:
       - checkout
       - restore_cache:
           keys:
-            - composer-v1-{{ checksum "composer.lock" }}
+            - composer-v1-{{ checksum "composer.json" }}
             - composer-v1-
-      - run: 
+      - run:
           name: Composer install
           command: composer install -n --prefer-dist
       - save_cache:
-          key: composer-v1-{{ checksum "composer.lock" }}
+          key: composer-v1-{{ checksum "composer.json" }}
           paths:
             - vendor
 
@@ -22,13 +24,15 @@ jobs:
     docker:
       - image: circleci/php:7.3
     working_directory: ~/elastic-apm-laravel
+    environment:
+      COMPOSER_MEMORY_LIMIT: -1
     steps:
       - checkout
       - restore_cache:
           keys:
-            - composer-v1-{{ checksum "composer.lock" }}
+            - composer-v1-{{ checksum "composer.json" }}
             - composer-v1-
-      - run: 
+      - run:
           name: Composer install
           command: composer install -n --prefer-dist
       - run:
@@ -41,13 +45,14 @@ jobs:
     working_directory: ~/elastic-apm-laravel
     environment:
       CC_TEST_REPORTER_ID: 23639f09f4ef515ddb5fea9baf90f9f5cd9bb5e0801cf1dc062d993a3d70d3eb
+      COMPOSER_MEMORY_LIMIT: -1
     steps:
       - checkout
       - restore_cache:
           keys:
-            - composer-v1-{{ checksum "composer.lock" }}
+            - composer-v1-{{ checksum "composer.json" }}
             - composer-v1-
-      - run: 
+      - run:
           name: Composer install
           command: composer install -n --prefer-dist
       - run:
@@ -60,7 +65,7 @@ jobs:
           command: |
             ./cc-test-reporter before-build
             ./vendor/bin/codecept run --xml test_report.xml --coverage --coverage-html --coverage-xml
-            mv tests/_output/coverage.xml clover.xml 
+            mv tests/_output/coverage.xml clover.xml
             ./cc-test-reporter after-build --coverage-input-type clover --exit-code $?
       - store_test_results:
           path: tests/_output
