@@ -190,7 +190,6 @@ class ScheduledTaskCollectorTest extends Unit
 
         Log::shouldReceive('error')->once()->with($expectedLogMessage);
 
-        $this->dispatcher->dispatch(new ScheduledTaskFinished($this->eventMock, 1000.0)
-        );
+        $this->dispatcher->dispatch(new ScheduledTaskFinished($this->eventMock, 1000.0));
     }
 }
