@@ -4,7 +4,6 @@ use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
 use AG\ElasticApmLaravel\Middleware\RecordTransaction;
 use Codeception\Test\Unit;
-use DMS\PHPUnitExtensions\ArraySubset\Assert;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -138,11 +137,9 @@ class RecordTransactionTest extends Unit
 
         $context = $data['context'];
 
-        Assert::assertArraySubset([
-            'finished' => true,
-            'headers_sent' => true,
-            'status_code' => 200,
-        ], $context['response']);
+        $this->assertTrue($context['response']['finished']);
+        $this->assertTrue($context['response']['headers_sent']);
+        $this->assertEquals(200, $context['response']['status_code']);
 
         $this->assertEquals([
             'id' => null,
