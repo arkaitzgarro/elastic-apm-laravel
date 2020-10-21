@@ -6,7 +6,7 @@ use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use AG\ElasticApmLaravel\EventClock;
 use Illuminate\Config\Repository as Config;
-use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Nipwaayoni\Events\Transaction;

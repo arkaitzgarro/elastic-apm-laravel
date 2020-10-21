@@ -7,14 +7,14 @@ use AG\ElasticApmLaravel\Events\StartMeasuring;
 use AG\ElasticApmLaravel\Events\StopMeasuring;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Foundation\Application;
 use Nipwaayoni\Events\Transaction;
 use Throwable;
 
 class ApmCollectorService
 {
     /**
-     * @var \Illuminate\Foundation\Application
+     * @var \Illuminate\Contracts\Foundation\Application
      */
     protected $app;
 
