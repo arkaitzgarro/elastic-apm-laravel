@@ -58,9 +58,3 @@ jobs:
                   coverageCommand: vendor/bin/codecept run --xml test_report.xml --coverage --coverage-html --coverage-xml
                   coverageLocations: |
                     ${{github.workspace}}/tests/_output/coverage.xml:clover
-
-            - name: Archive code coverage results
-              uses: actions/upload-artifact@v2
-              with:
-                name: code-coverage-report
-                path: tests/_output/coverage
