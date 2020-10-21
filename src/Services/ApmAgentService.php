@@ -3,7 +3,7 @@
 namespace AG\ElasticApmLaravel\Services;
 
 use AG\ElasticApmLaravel\Agent;
-use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Foundation\Application;
 use Nipwaayoni\Events\Transaction;
 use Psr\Http\Message\RequestInterface;
 
