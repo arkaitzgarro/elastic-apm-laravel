@@ -1,0 +1,41 @@
+name: Lint
+
+on: push
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                php: [7.4, 7.3]
+
+        name: PHP${{ matrix.php }}
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v1
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php }}
+                  
+            - name: Get Composer Cache Directory
+              id: composer-cache
+              run: |
+                echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+            - uses: actions/cache@v2
+              with:
+                path: ${{ steps.composer-cache.outputs.dir }}
+                key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-php${{ matrix.php }}
+                restore-keys: |
+                  ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+                  ${{ runner.os }}-composer-
+
+            - name: Install dependencies
+              run: composer install --prefer-dist --no-interaction --no-suggest
+
+            - name: Execute linters
+              run: php vendor/bin/php-cs-fixer fix --config .php_cs --dry-run --diff

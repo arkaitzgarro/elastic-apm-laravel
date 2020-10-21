@@ -5,7 +5,7 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/e5a66b9bf5161e299c8c/test_coverage)](https://codeclimate.com/github/arkaitzgarro/elastic-apm-laravel/test_coverage)
 [![License](https://poser.pugx.org/arkaitzgarro/elastic-apm-laravel/license)](https://packagist.org/packages/arkaitzgarro/elastic-apm-laravel)
 
-Elastic APM agent for v2 intake API. Compatible with Laravel 5.5+.
+Elastic APM agent for v2 intake API. Compatible with Laravel 6+.
 
 | Transactions list                             | Transaction detail                              |
 | --------------------------------------------- | ----------------------------------------------- |
@@ -105,7 +105,7 @@ ApmCollector::startMeasure('my-custom-span', 'custom', 'measure', 'My custom spa
 ApmCollector::stopMeasure('my-custom-span');
 ```
 
-To record an additional span around your job execution, you may include the provided job middleware (Laravel 6+ only https://laravel.com/docs/6.x/queues#job-middleware):
+To record an additional span around your job execution, you may include the provided [job middleware](https://laravel.com/docs/6.x/queues#job-middleware):
 
 ```php
 public function middleware()
