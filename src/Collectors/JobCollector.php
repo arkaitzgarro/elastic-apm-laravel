@@ -79,7 +79,7 @@ class JobCollector extends EventDataCollector implements DataCollector
     protected function setTransactionType(string $transaction_name): void
     {
         $this->agent->getTransaction($transaction_name)->setMeta([
-            'type' => 'Job',
+            'type' => 'job',
         ]);
     }
 
