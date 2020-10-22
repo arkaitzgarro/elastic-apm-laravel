@@ -216,12 +216,21 @@ class ServiceProvider extends BaseServiceProvider
                 'frameworkVersion' => app()->version(),
                 'active' => config('elastic-apm-laravel.active'),
                 'environment' => config('elastic-apm-laravel.env.environment'),
-                'logger' => Log::getLogger(),
+                'logger' => $this->getLogInstance(),
                 'logLevel' => config('elastic-apm-laravel.log-level', 'error'),
             ],
             $this->getAppConfig(),
             config('elastic-apm-laravel.server')
         ));
+    }
+
+    private function getLogInstance()
+    {
+        if (version_compare($this->app->version(), '5.6.0', 'lt')) {
+            return Log::getMonolog();
+        }
+
+        return Log::getLogger();
     }
 
     protected function getAppConfig(): array

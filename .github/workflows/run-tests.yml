@@ -9,12 +9,8 @@ jobs:
         strategy:
             matrix:
                 php: [7.4, 7.3]
-                laravel: [7.*, 6.*, 5.8.*, 5.7.*, 5.6.*, 5.5.*]
+                laravel: [5.8.*, 5.7.*, 5.6.*, 5.5.*]
                 include:
-                    - laravel: 7.*
-                      testbench: ^5.2
-                    - laravel: 6.*
-                      testbench: 4.*
                     - laravel: 5.8.*
                       testbench: 3.8.*
                     - laravel: 5.7.*
@@ -42,7 +38,7 @@ jobs:
               with:
                   php-version: ${{ matrix.php }}
                   coverage: xdebug
-                  
+
             - name: Get Composer Cache Directory
               id: composer-cache
               run: |
