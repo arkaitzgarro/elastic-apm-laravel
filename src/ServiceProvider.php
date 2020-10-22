@@ -97,7 +97,7 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerAgent(): void
     {
         $this->app->singleton(EventCounter::class, function () {
-            $limit = config('elastic-apm-laravel.spans.maxTraceItems');
+            $limit = config('elastic-apm-laravel.spans.maxTraceItems', EventCounter::EVENT_LIMIT);
 
             return new EventCounter($limit);
         });
