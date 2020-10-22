@@ -9,7 +9,6 @@ use AG\ElasticApmLaravel\Collectors\FrameworkCollector;
 use AG\ElasticApmLaravel\Collectors\HttpRequestCollector;
 use AG\ElasticApmLaravel\Collectors\JobCollector;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
-use AG\ElasticApmLaravel\Collectors\ScheduledTaskCollector;
 use AG\ElasticApmLaravel\Collectors\SpanCollector;
 use AG\ElasticApmLaravel\Contracts\VersionResolver;
 use AG\ElasticApmLaravel\Middleware\RecordTransaction;
@@ -166,7 +165,7 @@ class ServiceProvider extends BaseServiceProvider
             $this->app->tag(CommandCollector::class, self::COLLECTOR_TAG);
             // Laravel ^6.0
             if (class_exists('Illuminate\Console\Events\ScheduledTaskStarting')) {
-                $this->app->tag(ScheduledTaskCollector::class, self::COLLECTOR_TAG);
+                $this->app->tag(\Illuminate\Console\Events\ScheduledTaskStarting::class, self::COLLECTOR_TAG);
             }
         }
 

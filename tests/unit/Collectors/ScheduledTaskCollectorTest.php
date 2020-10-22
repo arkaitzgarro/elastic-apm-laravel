@@ -7,9 +7,6 @@ use AG\ElasticApmLaravel\Collectors\ScheduledTaskCollector;
 use AG\ElasticApmLaravel\EventClock;
 use Codeception\Test\Unit;
 use Illuminate\Config\Repository as Config;
-use Illuminate\Console\Events\ScheduledTaskFinished;
-use Illuminate\Console\Events\ScheduledTaskSkipped;
-use Illuminate\Console\Events\ScheduledTaskStarting;
 use Illuminate\Console\Scheduling\Event;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Foundation\Application;
@@ -78,9 +75,13 @@ class ScheduledTaskCollectorTest extends Unit
 
     protected function _after(): void
     {
-        $this->dispatcher->forget(ScheduledTaskStarting::class);
-        $this->dispatcher->forget(ScheduledTaskSkipped::class);
-        $this->dispatcher->forget(ScheduledTaskFinished::class);
+        if (!class_exists('Illuminate\Console\Events\ScheduledTaskStarting')) {
+            return;
+        }
+
+        $this->dispatcher->forget(\Illuminate\Console\Events\ScheduledTaskStarting::class);
+        $this->dispatcher->forget(\Illuminate\Console\Events\ScheduledTaskSkipped::class);
+        $this->dispatcher->forget(\Illuminate\Console\Events\ScheduledTaskFinished::class);
     }
 
     protected function patternConfigReturn($configIgnore = null): void
@@ -97,33 +98,49 @@ class ScheduledTaskCollectorTest extends Unit
 
     public function testScheduledTaskStartingListenerIgnored(): void
     {
+        if (!class_exists('Illuminate\Console\Events\ScheduledTaskStarting')) {
+            return;
+        }
+
         $this->eventMock->command = 'work:do';
         $this->patternConfigReturn(self::TASK_IGNORE_PATTERN);
         $this->agentMock->shouldNotReceive(['startTransaction', 'getTransaction']);
 
-        $this->dispatcher->dispatch(new ScheduledTaskStarting($this->eventMock));
+        $this->dispatcher->dispatch(new \Illuminate\Console\Events\ScheduledTaskStarting($this->eventMock));
     }
 
     public function testScheduledTaskSkippedListenerIgnored(): void
     {
+        if (!class_exists('Illuminate\Console\Events\ScheduledTaskStarting')) {
+            return;
+        }
+
         $this->eventMock->command = 'work:do';
         $this->patternConfigReturn(self::TASK_IGNORE_PATTERN);
         $this->agentMock->shouldNotReceive(['startTransaction', 'getTransaction']);
 
-        $this->dispatcher->dispatch(new ScheduledTaskSkipped($this->eventMock));
+        $this->dispatcher->dispatch(new \Illuminate\Console\Events\ScheduledTaskSkipped($this->eventMock));
     }
 
     public function testScheduledTaskFinishedListenerIgnored(): void
     {
+        if (!class_exists('Illuminate\Console\Events\ScheduledTaskStarting')) {
+            return;
+        }
+
         $this->eventMock->command = 'work:do';
         $this->patternConfigReturn(self::TASK_IGNORE_PATTERN);
         $this->agentMock->shouldNotReceive(['startTransaction', 'getTransaction']);
 
-        $this->dispatcher->dispatch(new ScheduledTaskFinished($this->eventMock, 1000.0));
+        $this->dispatcher->dispatch(new \Illuminate\Console\Events\ScheduledTaskFinished($this->eventMock, 1000.0));
     }
 
     public function testScheduledTaskStartingListener(): void
     {
+        if (!class_exists('Illuminate\Console\Events\ScheduledTaskStarting')) {
+            return;
+        }
+
         $this->patternConfigReturn();
 
         $this->eventClockMock->expects('microtime')->andReturn(1000);
@@ -136,11 +153,15 @@ class ScheduledTaskCollectorTest extends Unit
             ->with(self::COMMAND_NAME, [], 1000)
             ->andReturn($this->transactionMock);
 
-        $this->dispatcher->dispatch(new ScheduledTaskStarting($this->eventMock));
+        $this->dispatcher->dispatch(new \Illuminate\Console\Events\ScheduledTaskStarting($this->eventMock));
     }
 
     public function testScheduledTaskSkippedListener(): void
     {
+        if (!class_exists('Illuminate\Console\Events\ScheduledTaskStarting')) {
+            return;
+        }
+
         $this->patternConfigReturn();
 
         $this->agentMock->expects('getTransaction')
@@ -152,11 +173,15 @@ class ScheduledTaskCollectorTest extends Unit
         $this->agentMock->expects('collectEvents')
             ->with(self::COMMAND_NAME);
 
-        $this->dispatcher->dispatch(new ScheduledTaskSkipped($this->eventMock));
+        $this->dispatcher->dispatch(new \Illuminate\Console\Events\ScheduledTaskSkipped($this->eventMock));
     }
 
     public function testScheduledTaskFinishedListener(): void
     {
+        if (!class_exists('Illuminate\Console\Events\ScheduledTaskStarting')) {
+            return;
+        }
+
         $this->patternConfigReturn();
 
         $this->agentMock->expects('getTransaction')
@@ -169,11 +194,15 @@ class ScheduledTaskCollectorTest extends Unit
             ->with(self::COMMAND_NAME);
         $this->agentMock->expects('send');
 
-        $this->dispatcher->dispatch(new ScheduledTaskFinished($this->eventMock, 1000.0));
+        $this->dispatcher->dispatch(new \Illuminate\Console\Events\ScheduledTaskFinished($this->eventMock, 1000.0));
     }
 
     public function testCommandFinishedButExceptionThrownOnSend(): void
     {
+        if (!class_exists('Illuminate\Console\Events\ScheduledTaskStarting')) {
+            return;
+        }
+
         $this->patternConfigReturn();
 
         $this->agentMock->expects('getTransaction')
@@ -190,6 +219,6 @@ class ScheduledTaskCollectorTest extends Unit
 
         Log::shouldReceive('error')->once()->with($expectedLogMessage);
 
-        $this->dispatcher->dispatch(new ScheduledTaskFinished($this->eventMock, 1000.0));
+        $this->dispatcher->dispatch(new \Illuminate\Console\Events\ScheduledTaskFinished($this->eventMock, 1000.0));
     }
 }
