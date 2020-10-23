@@ -96,7 +96,7 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerAgent(): void
     {
         $this->app->singleton(EventCounter::class, function () {
-            $limit = config('elastic-apm-laravel.spans.maxTraceItems');
+            $limit = config('elastic-apm-laravel.spans.maxTraceItems', EventCounter::EVENT_LIMIT);
 
             return new EventCounter($limit);
         });
@@ -163,10 +163,6 @@ class ServiceProvider extends BaseServiceProvider
             $this->app->tag(HttpRequestCollector::class, self::COLLECTOR_TAG);
         } else {
             $this->app->tag(CommandCollector::class, self::COLLECTOR_TAG);
-            // Laravel ^6.0
-            if (class_exists('Illuminate\Console\Events\ScheduledTaskStarting')) {
-                $this->app->tag(\Illuminate\Console\Events\ScheduledTaskStarting::class, self::COLLECTOR_TAG);
-            }
         }
 
         // Job collector
@@ -216,12 +212,21 @@ class ServiceProvider extends BaseServiceProvider
                 'frameworkVersion' => app()->version(),
                 'active' => config('elastic-apm-laravel.active'),
                 'environment' => config('elastic-apm-laravel.env.environment'),
-                'logger' => Log::getLogger(),
+                'logger' => $this->getLogInstance(),
                 'logLevel' => config('elastic-apm-laravel.log-level', 'error'),
             ],
             $this->getAppConfig(),
             config('elastic-apm-laravel.server')
         ));
+    }
+
+    private function getLogInstance()
+    {
+        if (version_compare($this->app->version(), '5.6.0', 'lt')) {
+            return Log::getMonolog();
+        }
+
+        return Log::getLogger();
     }
 
     protected function getAppConfig(): array

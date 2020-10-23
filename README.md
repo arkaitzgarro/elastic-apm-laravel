@@ -5,7 +5,7 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/e5a66b9bf5161e299c8c/test_coverage)](https://codeclimate.com/github/arkaitzgarro/elastic-apm-laravel/test_coverage)
 [![License](https://poser.pugx.org/arkaitzgarro/elastic-apm-laravel/license)](https://packagist.org/packages/arkaitzgarro/elastic-apm-laravel)
 
-Elastic APM agent for v2 intake API. Compatible with Laravel 5.5+.
+Elastic APM agent for v2 intake API. Compatible with Laravel 5.6 through 5.8. If you want to use APM with Laravel 6+, use the 3.x or higher release.
 
 | Transactions list                             | Transaction detail                              |
 | --------------------------------------------- | ----------------------------------------------- |
@@ -14,8 +14,6 @@ Elastic APM agent for v2 intake API. Compatible with Laravel 5.5+.
 ## Prerequisites
 
 This package uses `nipwaayoni/elastic-apm-php-agent` which requires you to bring your own Http Client adapter as long as it compliant with [PSR-18](https://www.php-fig.org/psr/psr-18/).
-
-By default, since Laravel version 7 uses `guzzlehttp/guzzle` as the default http client, you need to specify which version of the adapter you want to use.
 
 ```bash
     # if you are using guzzlehttp/guzzle version 6
@@ -105,19 +103,6 @@ ApmCollector::startMeasure('my-custom-span', 'custom', 'measure', 'My custom spa
 ApmCollector::stopMeasure('my-custom-span');
 ```
 
-To record an additional span around your job execution, you may include the provided job middleware (Laravel 6+ only https://laravel.com/docs/6.x/queues#job-middleware):
-
-```php
-public function middleware()
-{
-    return [
-        app(\AG\ElasticApmLaravel\Jobs\Middleware\RecordTransaction::class),
-    ];
-}
-```
-
-**Note** Job middleware is **not** run when a job is created with the `dispatchNow()` method. Spans explicitly created within the job will still be collected, but the overall job span will not be included.
- 
 ### Add a collector for other events
 
 You can add extra collector(s) to listen to your own application events or Laravel events like `Illuminate\Mail\Events\MessageSending` for example. We created a base collector that already includes functionality to measure events, that you can extend from:
