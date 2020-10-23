@@ -163,10 +163,6 @@ class ServiceProvider extends BaseServiceProvider
             $this->app->tag(HttpRequestCollector::class, self::COLLECTOR_TAG);
         } else {
             $this->app->tag(CommandCollector::class, self::COLLECTOR_TAG);
-            // Laravel ^6.0
-            if (class_exists('Illuminate\Console\Events\ScheduledTaskStarting')) {
-                $this->app->tag(\Illuminate\Console\Events\ScheduledTaskStarting::class, self::COLLECTOR_TAG);
-            }
         }
 
         // Job collector
