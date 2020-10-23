@@ -1,6 +1,6 @@
 name: Lint
 
-on: push
+on: [push, pull_request]
 
 jobs:
     lint:
@@ -20,7 +20,7 @@ jobs:
               uses: shivammathur/setup-php@v2
               with:
                   php-version: ${{ matrix.php }}
-                  
+
             - name: Get Composer Cache Directory
               id: composer-cache
               run: |
