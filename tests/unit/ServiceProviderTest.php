@@ -23,6 +23,7 @@ class ServiceProviderTest extends TestCase
     protected function getEnvironmentSetUp($app)
     {
         $app['config']->set('elastic-apm-laravel.app.appName', 'Laravel');
+        $app['config']->set('elastic-apm-laravel.spans.maxTraceItems', EventCounter::EVENT_LIMIT);
     }
 
     public function testRegistersAgent(): void
