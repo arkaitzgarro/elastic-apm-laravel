@@ -30,7 +30,7 @@ class EventDataCollectorTest extends Unit
 
     public static $registeredListeners = false;
 
-    public function setUp(): void
+    public function _before(): void
     {
         $this->appMock = Mockery::mock(Application::class);
         $this->configMock = Mockery::mock(Config::class);
@@ -41,8 +41,6 @@ class EventDataCollectorTest extends Unit
         $this->eventCounter = new EventCounter(self::EVENT_LIMIT);
 
         $this->eventDataCollector = $this->createEventCollector();
-
-        parent::setUp();
     }
 
     public function testEmptyMeasures()
