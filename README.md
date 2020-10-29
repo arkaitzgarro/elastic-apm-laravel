@@ -13,15 +13,20 @@ Elastic APM agent for v2 intake API. Compatible with Laravel 5.6 through 5.8. If
 
 ## Prerequisites
 
-This package uses `nipwaayoni/elastic-apm-php-agent` which requires you to bring your own Http Client adapter as long as it compliant with [PSR-18](https://www.php-fig.org/psr/psr-18/).
+You are responsible for completing the following as part of installing this package.
+
+### HTTP Client
+
+In order to minimize potential dependency conflicts, this package does not dictate the HTTP client which will be used to send data to APM. Instead, your project must include a suitable [PSR-18](https://www.php-fig.org/psr/psr-18/) compatible implementation. The easiest way to do this is using the [php-http](http://docs.php-http.org/en/latest/) adapter for GuzzleHTTP. Require either the guzzle6 or guzzle7 adapter, depending on your specific needs.
 
 ```bash
     # if you are using guzzlehttp/guzzle version 6
+    # note that you must use >=2.0 of the guzzle6-adapter
     composer require php-http/guzzle6-adapter
 ```
 
 ```bash
-    # if you are using  guzzlehttp/guzzle version 7
+    # if you are using guzzlehttp/guzzle version 7
     composer require php-http/guzzle7-adapter
 ```
 
@@ -29,9 +34,12 @@ This package uses `nipwaayoni/elastic-apm-php-agent` which requires you to bring
 
 Require this package with composer:
 
-    composer require arkaitzgarro/elastic-apm-laravel
+```bash
+# Laravel 5.5 - 5.8
+composer require arkaitzgarro/elastic-apm-laravel:^2.0
+```
 
-Add the ServiceProvider class to the providers array in `config/app.php`:
+Laravel's provider auto-discover should find the package ServiceProvider. Otherwise, add the ServiceProvider class to the providers array in `config/app.php`:
 
 ```php
 'providers' => [
