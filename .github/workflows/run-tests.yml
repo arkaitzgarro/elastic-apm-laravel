@@ -1,6 +1,6 @@
 name: Unit tests
 
-on: push
+on: [push, pull_request]
 
 jobs:
     unit-tests:
@@ -30,7 +30,7 @@ jobs:
                   php-version: ${{ matrix.php }}
                   tools: composer:v2
                   coverage: xdebug
-                  
+
             - name: Get Composer Cache Directory
               id: composer-cache
               run: |
