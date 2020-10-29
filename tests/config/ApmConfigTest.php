@@ -6,9 +6,9 @@ class ApmConfigTest extends \Codeception\Test\Unit
 {
     private $configFilePath = __DIR__ . '/../../config/elastic-apm-laravel.php';
 
-    protected function _before()
+    protected function _after()
     {
-        // Make sure all environment variables are unset before every spec
+        // Make sure all environment variables are unset after every spec
         putenv('APM_ACTIVE');
         putenv('APM_APPNAME');
         putenv('APM_APPVERSION');
