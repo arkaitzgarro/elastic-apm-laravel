@@ -38,10 +38,6 @@ class ServiceProvider extends BaseServiceProvider
         // Always available, even when inactive
         $this->registerFacades();
 
-        if ($this->isAgentDisabled()) {
-            return;
-        }
-
         // Create a single representation of the request start time which can be injected
         // to other classes.
         $this->app->singleton(RequestStartTime::class, function () {
@@ -49,7 +45,10 @@ class ServiceProvider extends BaseServiceProvider
         });
 
         $this->registerAgent();
-        $this->registerCollectors();
+
+        if (!$this->isAgentDisabled()) {
+            $this->registerCollectors();
+        }
     }
 
     /**
@@ -59,10 +58,6 @@ class ServiceProvider extends BaseServiceProvider
     public function boot(): void
     {
         $this->publishConfig();
-
-        if ($this->isAgentDisabled()) {
-            return;
-        }
 
         $this->registerMiddleware();
 
