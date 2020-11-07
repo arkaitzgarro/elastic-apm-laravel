@@ -21,7 +21,7 @@
         "illuminate/routing": "^6 || ^7 || ^8",
         "illuminate/support": "^6 || ^7 || ^8",
         "illuminate/contracts": "^6 || ^7 || ^8",
-        "jasny/dbquery-mysql": "^2.0",
+        "jasny/persist-sql-query": "^2.0",
         "nipwaayoni/elastic-apm-php-agent": "^7.5"
     },
     "require-dev": {
