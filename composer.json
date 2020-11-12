@@ -20,7 +20,7 @@
         "illuminate/http": "^5.5 <6.0",
         "illuminate/routing": "^5.5 <6.0",
         "illuminate/support": "^5.5 <6.0",
-        "jasny/dbquery-mysql": "^2.0",
+        "jasny/persist-sql-query": "^2.0",
         "nipwaayoni/elastic-apm-php-agent": "^7.5"
     },
     "require-dev": {
