@@ -220,19 +220,24 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         // Filter out null config options so that the Config class can look for environment variables
-        return array_filter(array_merge(
-            [
-                'defaultServiceName' => $appName,
-                'frameworkName' => 'Laravel',
-                'frameworkVersion' => app()->version(),
-                'active' => config('elastic-apm-laravel.active'),
-                'environment' => config('elastic-apm-laravel.env.environment'),
-                'logger' => $this->getLogInstance(),
-                'logLevel' => config('elastic-apm-laravel.log-level', 'error'),
-            ],
-            $this->getAppConfig(),
-            config('elastic-apm-laravel.server')
-        ));
+        return array_filter(
+            array_merge(
+                [
+                    'defaultServiceName' => $appName,
+                    'frameworkName' => 'Laravel',
+                    'frameworkVersion' => app()->version(),
+                    'active' => config('elastic-apm-laravel.active'),
+                    'environment' => config('elastic-apm-laravel.env.environment'),
+                    'logger' => $this->getLogInstance(),
+                    'logLevel' => config('elastic-apm-laravel.log-level', 'error'),
+                ],
+                $this->getAppConfig(),
+                config('elastic-apm-laravel.server')
+            ),
+            function ($item) {
+                return null !== $item;
+            }
+        );
     }
 
     private function getLogInstance()
