@@ -66,10 +66,10 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
         );
     }
 
-    protected function stopTransaction(string $transaction_name, int $result): void
+    protected function stopTransaction(string $transaction_name, ?int $result): void
     {
         // Stop the transaction and measure the time
-        $this->agent->stopTransaction($transaction_name, ['result' => $result]);
+        $this->agent->stopTransaction($transaction_name, ['result' => (int) $result]);
         $this->agent->collectEvents($transaction_name);
     }
 
