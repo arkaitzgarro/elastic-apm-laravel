@@ -172,6 +172,25 @@ class ScheduledTaskCollectorTest extends Unit
         $this->dispatcher->dispatch(new ScheduledTaskFinished($this->eventMock, 1000.0));
     }
 
+    public function testScheduledTaskFinishedNullResult(): void
+    {
+        $this->patternConfigReturn();
+
+        $this->eventMock->exitCode = null;
+
+        $this->agentMock->expects('getTransaction')
+            ->with(self::COMMAND_NAME)
+            ->andReturn($this->transactionMock);
+
+        $this->agentMock->expects('stopTransaction')
+            ->with(self::COMMAND_NAME, ['result' => 0]);
+        $this->agentMock->expects('collectEvents')
+            ->with(self::COMMAND_NAME);
+        $this->agentMock->expects('send');
+
+        $this->dispatcher->dispatch(new ScheduledTaskFinished($this->eventMock, 1000.0));
+    }
+
     public function testCommandFinishedButExceptionThrownOnSend(): void
     {
         $this->patternConfigReturn();
