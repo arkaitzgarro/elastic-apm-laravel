@@ -249,7 +249,7 @@ class ServiceProvider extends BaseServiceProvider
             $config['appVersion'] = $this->app->make(VersionResolver::class)->getVersion();
         }
 
-        return $config;
+        return empty($config) ? [] : $config;
     }
 
     private function isAgentDisabled(): bool
