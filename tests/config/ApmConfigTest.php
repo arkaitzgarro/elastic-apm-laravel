@@ -26,18 +26,16 @@ class ApmConfigTest extends \Codeception\Test\Unit
     {
         $config = include $this->configFilePath;
 
-        // Defer defaults to the Agent package in order to support configuration through environment variables
-        $this->assertEmpty($config['active']);
-        $this->assertEmpty($config['app']['appName']);
-        $this->assertEmpty($config['env']['environment']);
-        $this->assertEmpty($config['server']['serverUrl']);
-        $this->assertEmpty($config['spans']['backtraceDepth']);
+        $this->assertTrue($config['active']);
+        $this->assertEquals('http://127.0.0.1:8200', $config['server']['serverUrl']);
 
         // app block
+        $this->assertEquals('Laravel', $config['app']['appName']);
         $this->assertEquals('', $config['app']['appVersion']);
 
         // env block
         $this->assertEquals(['DOCUMENT_ROOT', 'REMOTE_ADDR'], $config['env']['env']);
+        $this->assertEquals('development', $config['env']['environment']);
 
         // server block
         $this->assertNull($config['server']['secretToken']);
@@ -49,6 +47,7 @@ class ApmConfigTest extends \Codeception\Test\Unit
         $this->assertEquals(1000, $config['spans']['maxTraceItems']);
         $this->assertEquals(25, $config['spans']['querylog']['enabled']);
         $this->assertEquals(200, $config['spans']['querylog']['threshold']);
+        $this->assertEquals(25, $config['spans']['backtraceDepth']);
     }
 
     public function testAppConfigEnvVariables()
