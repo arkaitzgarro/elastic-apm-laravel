@@ -143,9 +143,35 @@ class ApmConfigTest extends \Codeception\Test\Unit
             'ELASTIC_APM_SERVER_URL' => ['ELASTIC_APM_SERVER_URL=https://example.com', 'server.serverUrl', 'https://example.com'],
             'ELASTIC_APM_SERVICE_VERSION' => ['ELASTIC_APM_SERVICE_VERSION=8.0', 'app.appVersion', '8.0'],
             'ELASTIC_APM_SECRET_TOKEN' => ['ELASTIC_APM_SECRET_TOKEN=abc123', 'server.secretToken', 'abc123'],
-            'ELASTIC_APM_HOSTNAME' => ['ELASTIC_APM_HOSTNAME=node1.example.com', 'agent.hostname', 'node1.example.com'],
+            'ELASTIC_APM_HOSTNAME' => ['ELASTIC_APM_HOSTNAME=node1.example.com', 'server.hostname', 'node1.example.com'],
             'ELASTIC_APM_STACK_TRACE_LIMIT' => ['ELASTIC_APM_STACK_TRACE_LIMIT=10', 'spans.backtraceDepth', '10'],
             'ELASTIC_APM_TRANSACTION_SAMPLE_RATE' => ['ELASTIC_APM_TRANSACTION_SAMPLE_RATE=.5', 'agent.transactionSampleRate', '.5'],
+        ];
+    }
+
+    /**
+     * @dataProvider apmVariablePreferenceChecks
+     */
+    public function testPrefersApmEnvironmentVariables(string $apmVariable, string $elasticVariable, string $configPath, $expected): void
+    {
+        putenv($apmVariable);
+        putenv($elasticVariable);
+
+        $this->config = include $this->configFilePath;
+
+        $this->assertEquals($expected, $this->getConfigPathValue($configPath));
+    }
+
+    public function apmVariablePreferenceChecks(): array
+    {
+        return [
+            'APM_ACTIVE true' => ['APM_ACTIVE=true', 'ELASTIC_APM_ENABLED=false', 'active', true],
+            'APM_ACTIVE false' => ['APM_ACTIVE=false', 'ELASTIC_APM_ENABLED=true', 'active', false],
+            'APM_APPNAME' => ['APM_APPNAME=ApmTestService', 'ELASTIC_APM_SERVICE_NAME=TestService', 'app.appName', 'ApmTestService'],
+            'APM_APPVERSION' => ['APM_APPVERSION=7.0', 'ELASTIC_APM_SERVICE_VERSION=8.0', 'app.appVersion', '7.0'],
+            'APM_SERVERURL' => ['APM_SERVERURL=https://example2.com', 'ELASTIC_APM_SERVER_URL=https://example.com', 'server.serverUrl', 'https://example2.com'],
+            'APM_SECRETTOKEN' => ['APM_SECRETTOKEN=xyz789', 'ELASTIC_APM_SECRET_TOKEN=abc123', 'server.secretToken', 'xyz789'],
+            'APM_BACKTRACEDEPTH' => ['APM_BACKTRACEDEPTH=5', 'ELASTIC_APM_STACK_TRACE_LIMIT=10', 'spans.backtraceDepth', '5'],
         ];
     }
 

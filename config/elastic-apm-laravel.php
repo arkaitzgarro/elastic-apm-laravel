@@ -2,7 +2,7 @@
 
 return [
     // Sets whether the apm reporting should be active or not
-    'active' => env('ELASTIC_APM_ENABLED', env('APM_ACTIVE', true)),
+    'active' => env('APM_ACTIVE', env('ELASTIC_APM_ENABLED', true)),
 
     'log-level' => env('APM_LOG_LEVEL', 'error'),
 
@@ -13,10 +13,10 @@ return [
 
     'app' => [
         // The app name that will identify your app in Kibana / Elastic APM, limited characters allowed
-        'appName' => preg_replace('/[^a-zA-Z0-9 _-]/', '-', env('ELASTIC_APM_SERVICE_NAME', env('APM_APPNAME', 'Laravel'))),
+        'appName' => preg_replace('/[^a-zA-Z0-9 _-]/', '-', env('APM_APPNAME', env('ELASTIC_APM_SERVICE_NAME', 'Laravel'))),
 
         // The version of your app
-        'appVersion' => env('ELASTIC_APM_SERVICE_VERSION', env('APM_APPVERSION')),
+        'appVersion' => env('APM_APPVERSION', env('ELASTIC_APM_SERVICE_VERSION')),
     ],
 
     'env' => [
@@ -29,17 +29,16 @@ return [
 
     'server' => [
         // The apm-server to connect to
-        'serverUrl' => env('ELASTIC_APM_SERVER_URL', env('APM_SERVERURL', 'http://127.0.0.1:8200')),
+        'serverUrl' => env('APM_SERVERURL', env('ELASTIC_APM_SERVER_URL', 'http://127.0.0.1:8200')),
 
         // Token for x
-        'secretToken' => env('ELASTIC_APM_SECRET_TOKEN', env('APM_SECRETTOKEN')),
+        'secretToken' => env('APM_SECRETTOKEN', env('ELASTIC_APM_SECRET_TOKEN')),
 
         // Hostname of the system the agent is running on.
-        'hostname' => null,
+        'hostname' => env('ELASTIC_APM_HOSTNAME', gethostname()),
     ],
 
     'agent' => [
-        'hostname' => env('ELASTIC_APM_HOSTNAME', gethostname()),
         'transactionSampleRate' => env('ELASTIC_APM_TRANSACTION_SAMPLE_RATE', 1),
     ],
 
@@ -55,7 +54,7 @@ return [
         'maxTraceItems' => env('APM_MAXTRACEITEMS', 1000),
 
         // Depth of backtraces
-        'backtraceDepth' => env('ELASTIC_APM_STACK_TRACE_LIMIT', env('APM_BACKTRACEDEPTH', 25)),
+        'backtraceDepth' => env('APM_BACKTRACEDEPTH', env('ELASTIC_APM_STACK_TRACE_LIMIT', 25)),
 
         'querylog' => [
             // Set to false to completely disable query logging, or to 'auto' if you would like to use the threshold feature.
