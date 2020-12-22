@@ -190,7 +190,7 @@ class AgentTest extends Unit
     {
         $this->connectorMock->shouldReceive('commit');
         $this->connectorMock->expects('putEvent')
-            ->withArgs(function (\Nipwaayoni\Events\EventBean $event) {
+            ->withArgs(function (Nipwaayoni\Events\EventBean $event) {
                 $this->assertEquals('metadata', $event->getEventType());
 
                 return true;

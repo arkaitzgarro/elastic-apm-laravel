@@ -201,31 +201,9 @@ class ServiceProvider extends BaseServiceProvider
 
     protected function getAgentConfig(): array
     {
-        /*
-         * Changes in how the Agent package uses environment variables impacted this package. Previous versions
-         * required the service name to be set with the `APM_APPNAME` environment variable. The underlying Agent
-         * package can now use `ELASTIC_APM_SERVICE_NAME` to get the value directly. A new `defaultServiceName`
-         * option is available which is used if the service name is not provided.
-         *
-         * In order to provide backward compatibility with existing configurations, we want to set the default
-         * service name in the Agent config to the value derived from the `APM_APPNAME` in the Laravel config.
-         * The user can still use `ELASTIC_APM_SERVICE_NAME` if desired.
-         *
-         * When using Laravel's config() helper, be aware that the default value "will be returned if the
-         * configuration option does not exist". Because the 'elastic-apm-laravel.app.appName' is _always_
-         * defined, a default value will never be used. Therefore, we must use additional logic to determine
-         * if an app name has been given.
-         */
-        $appName = config('elastic-apm-laravel.app.appName');
-        if (empty($appName)) {
-            $appName = 'Laravel';
-        }
-
-        // Filter out null config options so that the Config class can look for environment variables
-        return array_filter(
-            array_merge(
+        return array_merge(
                 [
-                    'defaultServiceName' => $appName,
+                    'defaultServiceName' => config('elastic-apm-laravel.app.appName'),
                     'frameworkName' => 'Laravel',
                     'frameworkVersion' => app()->version(),
                     'active' => config('elastic-apm-laravel.active'),
@@ -234,12 +212,9 @@ class ServiceProvider extends BaseServiceProvider
                     'logLevel' => config('elastic-apm-laravel.log-level', 'error'),
                 ],
                 $this->getAppConfig(),
-                config('elastic-apm-laravel.server')
-            ),
-            function ($item) {
-                return null !== $item;
-            }
-        );
+                config('elastic-apm-laravel.server'),
+                config('elastic-apm-laravel.agent')
+            );
     }
 
     protected function getAppConfig(): array
