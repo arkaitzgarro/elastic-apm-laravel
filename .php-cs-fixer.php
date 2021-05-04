@@ -5,8 +5,8 @@ $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__)
 ;
 
-return PhpCsFixer\Config::create()
-    ->setRules([
+$config = new PhpCsFixer\Config();
+return $config->setRules([
         '@PSR2' => true,
         '@Symfony' => true,
         'concat_space' => [ 'spacing' => 'one' ],
