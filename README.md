@@ -126,7 +126,7 @@ public function middleware()
 ```
 
 **Note** Job middleware is **not** run when a job is created with the `dispatchNow()` method. Spans explicitly created within the job will still be collected, but the overall job span will not be included.
- 
+
 ### Add a collector for other events
 
 You can add extra collector(s) to listen to your own application events or Laravel events like `Illuminate\Mail\Events\MessageSending` for example. We created a base collector that already includes functionality to measure events, that you can extend from:
@@ -248,7 +248,7 @@ php vendor/bin/codecept run
 Please adhere to [PSR-2](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md) and [Symfony](https://symfony.com/doc/current/contributing/code/standards.html) coding standard. Run the following commands before pushing your code:
 
 ```bash
-php ./vendor/bin/php-cs-fixer fix --config .php_cs
+php ./vendor/bin/php-cs-fixer fix
 ```
 
 ### Integrate with a running application
