@@ -39,4 +39,4 @@ jobs:
               run: composer install --prefer-dist --no-interaction --no-suggest
 
             - name: Execute linters
-              run: php vendor/bin/php-cs-fixer fix --config .php_cs --dry-run --diff
+              run: php vendor/bin/php-cs-fixer fix --dry-run --diff
