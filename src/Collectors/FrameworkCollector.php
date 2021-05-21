@@ -18,8 +18,12 @@ class FrameworkCollector extends EventDataCollector implements DataCollector
     {
         // Application and Laravel startup times
         // LARAVEL_START is defined at the entry point of the application
-        // https://github.com/laravel/laravel/blob/master/public/index.php#L10
-        $this->startMeasure('app_boot', 'app', 'boot', 'App boot', LARAVEL_START);
+        // https://github.com/laravel/laravel/blob/507d499577e4f3edb51577e144b61e61de4fb57f/public/index.php#L6
+        // But for serverless applications like Vapor or Octane,
+        // the constant is not defined making the application fail.
+        $start_time = defined('LARAVEL_START') ? constant('LARAVEL_START') : microtime(true);
+
+        $this->startMeasure('app_boot', 'app', 'boot', 'App boot', $start_time);
 
         $this->app->booting(function () {
             $this->startMeasure('laravel_boot', 'laravel', 'boot', 'Laravel boot');
