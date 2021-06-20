@@ -159,8 +159,7 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         // Http request collector
-        if ($this->
-            ()) {
+        if ($this->collectHttpEvents()) {
             $this->app->tag(HttpRequestCollector::class, self::COLLECTOR_TAG);
         } else {
             $this->app->tag(CommandCollector::class, self::COLLECTOR_TAG);
