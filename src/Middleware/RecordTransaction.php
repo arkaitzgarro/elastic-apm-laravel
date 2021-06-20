@@ -146,7 +146,7 @@ class RecordTransaction
     protected function getRequestUri(): string
     {
         // Fallback to script file name, like index.php when URI is not provided
-        return parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? $_SERVER['SCRIPT_FILENAME'];
+        return parse_url($_SERVER['REQUEST_URI'] ?? null, PHP_URL_PATH) ?? $_SERVER['SCRIPT_FILENAME'];
     }
 
     protected function normalizeUri(string $uri): string
