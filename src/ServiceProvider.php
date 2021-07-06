@@ -158,7 +158,7 @@ class ServiceProvider extends BaseServiceProvider
             $this->app->tag(DBQueryCollector::class, self::COLLECTOR_TAG);
         }
 
-        // Http request collector
+        // Http request collector 
         if ($this->collectHttpEvents()) {
             $this->app->tag(HttpRequestCollector::class, self::COLLECTOR_TAG);
         } else {
