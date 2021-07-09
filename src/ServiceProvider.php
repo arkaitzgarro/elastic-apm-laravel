@@ -59,11 +59,11 @@ class ServiceProvider extends BaseServiceProvider
     public function boot(): void
     {
         $this->publishConfig();
-        
+
         if ($this->isAgentDisabled()) {
             return;
         }
-        
+
         $this->registerMiddleware();
 
         // If not collecting http events, the http middleware will not be executed and an
