@@ -60,6 +60,10 @@ class ServiceProvider extends BaseServiceProvider
     {
         $this->publishConfig();
 
+        if ($this->isAgentDisabled()) {
+            return;
+        }
+
         $this->registerMiddleware();
 
         // If not collecting http events, the http middleware will not be executed and an
