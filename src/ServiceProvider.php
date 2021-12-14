@@ -210,7 +210,7 @@ class ServiceProvider extends BaseServiceProvider
                     'defaultServiceName' => config('elastic-apm-laravel.app.appName'),
                     'frameworkName' => 'Laravel',
                     'frameworkVersion' => app()->version(),
-                    'active' => config('elastic-apm-laravel.active'),
+                    'enabled' => config('elastic-apm-laravel.active'),
                     'environment' => config('elastic-apm-laravel.env.environment'),
                     'logger' => Log::getLogger(),
                     'logLevel' => config('elastic-apm-laravel.log-level', 'error'),
@@ -225,8 +225,11 @@ class ServiceProvider extends BaseServiceProvider
     {
         $config = config('elastic-apm-laravel.app');
         if ($this->app->bound(VersionResolver::class)) {
-            $config['appVersion'] = $this->app->make(VersionResolver::class)->getVersion();
+            $config['serviceVersion'] = $this->app->make(VersionResolver::class)->getVersion();
         }
+
+        //
+        unset($config['appName']);
 
         return $config;
     }
