@@ -228,7 +228,7 @@ class ServiceProvider extends BaseServiceProvider
             $config['serviceVersion'] = $this->app->make(VersionResolver::class)->getVersion();
         }
 
-        //
+        // appName is deprecated in favour of serviceVersion
         unset($config['appName']);
 
         return $config;
