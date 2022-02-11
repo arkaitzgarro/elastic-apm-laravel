@@ -16,11 +16,11 @@
     "require": {
         "php": ">=7.3",
         "http-interop/http-factory-guzzle": "^1.0",
-        "illuminate/database": "^6 || ^7 || ^8",
-        "illuminate/http": "^6 || ^7 || ^8",
-        "illuminate/routing": "^6 || ^7 || ^8",
-        "illuminate/support": "^6 || ^7 || ^8",
-        "illuminate/contracts": "^6 || ^7 || ^8",
+        "illuminate/database": "^6 || ^7 || ^8 || ^9",
+        "illuminate/http": "^6 || ^7 || ^8 || ^9",
+        "illuminate/routing": "^6 || ^7 || ^8 || ^9",
+        "illuminate/support": "^6 || ^7 || ^8 || ^9",
+        "illuminate/contracts": "^6 || ^7 || ^8 || ^9",
         "jasny/persist-sql-query": "^2.0",
         "nipwaayoni/elastic-apm-php-agent": "^7.5"
     },
