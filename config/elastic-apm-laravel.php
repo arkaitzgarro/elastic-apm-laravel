@@ -4,7 +4,7 @@ return [
     // Sets whether the apm reporting should be active or not
     'active' => env('APM_ACTIVE', env('ELASTIC_APM_ENABLED', true)),
 
-    'log-level' => env('APM_LOG_LEVEL', 'info'),
+    'log-level' => env('APM_LOG_LEVEL', 'error'),
 
     'cli' => [
         // Sets whether the apm reporting should also be active for non-HTTP requests
