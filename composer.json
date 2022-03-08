@@ -25,7 +25,7 @@
         "nipwaayoni/elastic-apm-php-agent": "^7.5"
     },
     "require-dev": {
-        "codeception/codeception": "^4.1",
+        "codeception/codeception": "^4.1.9",
         "codeception/mockery-module": "^0.4.0",
         "friendsofphp/php-cs-fixer": "^3.0",
         "orchestra/testbench": "^4.0 || ^5.0 || ^6.0 || ^7.0",
