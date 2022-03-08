@@ -8,18 +8,13 @@ jobs:
 
         strategy:
             matrix:
-                php: [7.4, 7.3]
-                laravel: [8.*, 7.*, 6.*]
+                php: [8.0, 8.1]
+                laravel: [8.*]
                 include:
                     - laravel: 9.*
                       testbench: 7.*
-                      php: 8.0
                     - laravel: 8.*
                       testbench: 6.*
-                    - laravel: 7.*
-                      testbench: ^5.2
-                    - laravel: 6.*
-                      testbench: 4.*
 
         name: PHP${{ matrix.php }} - L${{ matrix.laravel }}
 
