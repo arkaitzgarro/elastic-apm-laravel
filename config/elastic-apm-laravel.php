@@ -24,7 +24,7 @@ return [
         'env' => ['DOCUMENT_ROOT', 'REMOTE_ADDR'],
 
         // Application environment
-        'environment' => env('APM_ENVIRONMENT', 'development'),
+        'environment' => env('APM_ENVIRONMENT', env('ELASTIC_APM_ENVIRONMENT', 'development')),
     ],
 
     'server' => [
