@@ -41,7 +41,7 @@
             "AG\\ElasticApmLaravel\\": "src/"
         }
     },
-    "minimum-stability": "RC",
+    "minimum-stability": "dev",
     "prefer-stable": true,
     "extra": {
         "laravel": {
