@@ -25,10 +25,10 @@
         "nipwaayoni/elastic-apm-php-agent": "^7.5"
     },
     "require-dev": {
-        "codeception/codeception": "^4.1.9",
-        "codeception/mockery-module": "^0.4.0",
+        "codeception/codeception": "^5",
+        "codeception/mockery-module": "^0.5",
         "friendsofphp/php-cs-fixer": "^3.0",
-        "orchestra/testbench": "^4.0 || ^5.0 || ^6.0 || ^7.0",
+        "orchestra/testbench": "^7.0",
         "php-http/guzzle7-adapter": "^1.0.0",
         "symfony/service-contracts": "^2.0"
     },
@@ -41,7 +41,7 @@
             "AG\\ElasticApmLaravel\\": "src/"
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "RC",
     "prefer-stable": true,
     "extra": {
         "laravel": {
