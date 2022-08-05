@@ -206,19 +206,19 @@ class ServiceProvider extends BaseServiceProvider
     protected function getAgentConfig(): array
     {
         return array_merge(
-                [
-                    'defaultServiceName' => config('elastic-apm-laravel.app.appName'),
-                    'frameworkName' => 'Laravel',
-                    'frameworkVersion' => app()->version(),
-                    'enabled' => config('elastic-apm-laravel.active'),
-                    'environment' => config('elastic-apm-laravel.env.environment'),
-                    'logger' => Log::getLogger(),
-                    'logLevel' => config('elastic-apm-laravel.log-level', 'error'),
-                ],
-                $this->getAppConfig(),
-                config('elastic-apm-laravel.server'),
-                config('elastic-apm-laravel.agent')
-            );
+            [
+                'defaultServiceName' => config('elastic-apm-laravel.app.appName'),
+                'frameworkName' => 'Laravel',
+                'frameworkVersion' => app()->version(),
+                'enabled' => config('elastic-apm-laravel.active'),
+                'environment' => config('elastic-apm-laravel.env.environment'),
+                'logger' => Log::getLogger(),
+                'logLevel' => config('elastic-apm-laravel.log-level', 'error'),
+            ],
+            $this->getAppConfig(),
+            config('elastic-apm-laravel.server'),
+            config('elastic-apm-laravel.agent')
+        );
     }
 
     protected function getAppConfig(): array
