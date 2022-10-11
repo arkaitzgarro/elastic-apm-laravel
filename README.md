@@ -35,8 +35,11 @@ In order to minimize potential dependency conflicts, this package does not dicta
 Require this package with composer:
 
 ```bash
-# Laravel 6+
+# Laravel 8+ and PHP 8+
 composer require arkaitzgarro/elastic-apm-laravel
+
+# Laravel 6+
+composer require arkaitzgarro/elastic-apm-laravel:^3.0
 
 # Laravel 5.5 - 5.8
 composer require arkaitzgarro/elastic-apm-laravel:^2.0
