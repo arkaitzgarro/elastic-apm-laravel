@@ -4,14 +4,12 @@ namespace AG\ElasticApmLaravel\Middleware;
 
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Collectors\RequestStartTime;
-use Closure;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Log;
 use Nipwaayoni\Events\Transaction;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 
 /**
  * This middleware will record a transaction from the moment the request hits the server, until the response is sent to the client.
@@ -42,7 +40,7 @@ class RecordTransaction
      *
      * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, \Closure $next)
     {
         $transaction_name = $this->getTransactionName($request);
 
@@ -99,7 +97,7 @@ class RecordTransaction
             // Stop the transaction and measure the time
             $this->agent->stopTransaction($transaction_name);
             $this->agent->collectEvents($transaction_name);
-        } catch (Throwable $t) {
+        } catch (\Throwable $t) {
             Log::error($t->getMessage());
         }
     }
