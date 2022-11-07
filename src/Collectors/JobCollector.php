@@ -11,7 +11,6 @@ use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Log;
 use Nipwaayoni\Events\Transaction;
-use Throwable;
 
 /**
  * Collects info about the job process.
@@ -114,7 +113,7 @@ class JobCollector extends EventDataCollector implements DataCollector
             }
         } catch (ClientException $exception) {
             Log::error($exception, ['api_response' => (string) $exception->getResponse()->getBody()]);
-        } catch (Throwable $t) {
+        } catch (\Throwable $t) {
             Log::error($t->getMessage());
         }
     }

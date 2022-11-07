@@ -9,7 +9,6 @@ use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Support\Facades\Log;
 use Nipwaayoni\Events\Transaction;
-use Throwable;
 
 /**
  * Collects info about ran commands.
@@ -75,7 +74,7 @@ class CommandCollector extends EventDataCollector implements DataCollector
             $this->agent->send();
         } catch (ClientException $exception) {
             Log::error($exception, ['api_response' => (string) $exception->getResponse()->getBody()]);
-        } catch (Throwable $t) {
+        } catch (\Throwable $t) {
             Log::error($t->getMessage());
         }
     }

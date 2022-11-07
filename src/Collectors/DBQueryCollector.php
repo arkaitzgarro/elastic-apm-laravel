@@ -3,7 +3,6 @@
 namespace AG\ElasticApmLaravel\Collectors;
 
 use AG\ElasticApmLaravel\Contracts\DataCollector;
-use Exception;
 use Illuminate\Database\Events\QueryExecuted;
 use Jasny\DB\MySQL\QuerySplitter;
 
@@ -73,7 +72,7 @@ class DBQueryCollector extends EventDataCollector implements DataCollector
             }
 
             return $fallback;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $fallback;
         }
     }

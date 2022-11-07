@@ -9,7 +9,6 @@ use Illuminate\Config\Repository as Config;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
 use Nipwaayoni\Events\Transaction;
-use Throwable;
 
 class ApmCollectorService
 {
@@ -83,7 +82,7 @@ class ApmCollectorService
         );
     }
 
-    public function captureThrowable(Throwable $thrown, array $context = [], ?Transaction $parent = null)
+    public function captureThrowable(\Throwable $thrown, array $context = [], ?Transaction $parent = null)
     {
         if ($this->is_agent_disabled) {
             return;

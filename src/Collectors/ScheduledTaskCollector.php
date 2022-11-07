@@ -11,7 +11,6 @@ use Illuminate\Console\Scheduling\CallbackEvent;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Nipwaayoni\Events\Transaction;
-use Throwable;
 
 /**
  * Collects info about scheduled tasks.
@@ -80,7 +79,7 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
             $this->agent->send();
         } catch (ClientException $exception) {
             Log::error($exception, ['api_response' => (string) $exception->getResponse()->getBody()]);
-        } catch (Throwable $t) {
+        } catch (\Throwable $t) {
             Log::error($t->getMessage());
         }
     }
