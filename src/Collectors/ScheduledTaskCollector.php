@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\ClientException;
 use Illuminate\Console\Events\ScheduledTaskFinished;
 use Illuminate\Console\Events\ScheduledTaskSkipped;
 use Illuminate\Console\Events\ScheduledTaskStarting;
+use Illuminate\Console\Scheduling\CallbackEvent;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Nipwaayoni\Events\Transaction;
@@ -91,7 +92,9 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
      */
     protected function getTransactionName($event): string
     {
-        $transaction_name = $event->task->command;
+        $transaction_name = $event->task instanceof CallbackEvent
+            ? $event->task->getSummaryForDisplay()
+            : $event->task->command;
 
         return $this->shouldIgnoreTransaction($transaction_name) ? '' : $transaction_name;
     }
