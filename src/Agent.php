@@ -104,7 +104,7 @@ class Agent extends NipwaayoniAgent
         $transaction = $this->getTransaction($transaction_name);
         $this->collectors->each(function ($collector) use ($transaction) {
             $collector->collect()->each(function ($measure) use ($transaction) {
-                $event = new Span($measure['label'], $transaction);
+                $event = $this->factory()->newSpan($measure['label'], $transaction);
                 $event->setType($measure['type']);
                 $event->setAction($measure['action']);
                 $event->setCustomContext($measure['context']);
