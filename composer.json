@@ -43,6 +43,11 @@
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [
