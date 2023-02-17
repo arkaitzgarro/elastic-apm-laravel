@@ -9,12 +9,17 @@ jobs:
         strategy:
             matrix:
                 php: [8.0, 8.1]
-                laravel: [8.*, 9.*]
+                laravel: [8.*, 9.*, 10.*]
                 include:
+                    - laravel: 10.*
+                      testbench: 8.*
                     - laravel: 8.*
                       testbench: 6.*
                     - laravel: 9.*
                       testbench: 7.*
+                exclude:
+                    - laravel: 10.*
+                      php: 8.0
 
         name: PHP${{ matrix.php }} - L${{ matrix.laravel }}
 
