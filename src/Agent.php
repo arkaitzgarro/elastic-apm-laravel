@@ -12,7 +12,6 @@ use Nipwaayoni\Config;
 use Nipwaayoni\Contexts\ContextCollection;
 use Nipwaayoni\Events\EventFactoryInterface;
 use Nipwaayoni\Events\Metadata;
-use Nipwaayoni\Events\Span;
 use Nipwaayoni\Events\Transaction;
 use Nipwaayoni\Middleware\Connector;
 use Nipwaayoni\Stores\TransactionsStore;
