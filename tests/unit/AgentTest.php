@@ -29,7 +29,6 @@ class AgentTest extends Unit
     private $transactionStore;
     /** @var \Mockery\Mock|Repository */
     private $appConfigMock;
-
     /** @var RequestStartTime */
     private $requestStartTime;
     /** @var EventCounter */
@@ -141,8 +140,25 @@ class AgentTest extends Unit
         $this->eventFactoryMock->shouldReceive('newTransaction')
             ->andReturn(new \Nipwaayoni\Events\Transaction('test-transaction', []));
 
+        $spanMock = Mockery::mock(\Nipwaayoni\Events\Span::class);
+
         $this->eventFactoryMock->shouldReceive('newSpan')
-            ->times($this->totalEvents);
+            ->withArgs(function ($name) {
+                $this->assertStringStartsWith('test-event', $name);
+
+                return true;
+            })
+            ->andReturn($spanMock);
+
+        $spanMock->shouldReceive(
+            'setType',
+            'setAction',
+            'setCustomContext',
+            'setStartOffset',
+            'setDuration',
+            'getEventType',
+        );
+        $spanMock->shouldReceive('isSampled')->passthru();
 
         // The `times()` constraint ensures we put the expected number of events
         $this->connectorMock->expects('putEvent')->times($this->totalEvents);
