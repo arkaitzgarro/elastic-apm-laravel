@@ -141,6 +141,9 @@ class AgentTest extends Unit
         $this->eventFactoryMock->shouldReceive('newTransaction')
             ->andReturn(new \Nipwaayoni\Events\Transaction('test-transaction', []));
 
+        $this->eventFactoryMock->shouldReceive('newSpan')
+            ->times($this->totalEvents);
+
         // The `times()` constraint ensures we put the expected number of events
         $this->connectorMock->expects('putEvent')->times($this->totalEvents);
 
