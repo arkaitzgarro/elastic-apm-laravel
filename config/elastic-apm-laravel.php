@@ -54,7 +54,7 @@ return [
         'maxTraceItems' => env('APM_MAXTRACEITEMS', 1000),
 
         // Depth of backtraces
-        'backtraceDepth' => env('APM_BACKTRACEDEPTH', env('ELASTIC_APM_STACK_TRACE_LIMIT', 25)),
+        'backtraceDepth' => env('APM_BACKTRACEDEPTH', env('ELASTIC_APM_STACK_TRACE_LIMIT', 0)),
 
         'querylog' => [
             // Set to false to completely disable query logging, or to 'auto' if you would like to use the threshold feature.
@@ -63,5 +63,8 @@ return [
             // If a query takes longer then 200ms, we enable the query log. Make sure you set enabled = 'auto'
             'threshold' => env('APM_THRESHOLD', 200),
         ],
+
+        // Render source code in stack traces
+        'renderSource' => env('APM_RENDERSOURCE', true),
     ],
 ];

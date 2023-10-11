@@ -88,6 +88,7 @@ The following environment variables are supported in the default configuration:
 |APM_QUERYLOG       | `true` or `false` defaults to 'true'. Set to `false` to completely disable query logging, or to `auto` if you would like to use the threshold feature. |
 |APM_THRESHOLD      | Query threshold in milliseconds, defaults to `200`. If a query takes longer then 200ms, we enable the query log. Make sure you set `APM_QUERYLOG=auto`. |
 |APM_MAXTRACEITEMS  | Defaults to `1000`. Max number of child items displayed when viewing trace details. |
+|APM_RENDERSOURCE   | Defaults to `true`. Include source code in query span. |
 
 You may also publish the `elastic-apm-laravel.php` configuration file to change additional settings:
 
