@@ -3,9 +3,9 @@
 namespace AG\ElasticApmLaravel\Helpers;
 
 use Illuminate\Config\Repository as Config;
-use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class StacktraceExtractor
 {
@@ -35,7 +35,7 @@ class StacktraceExtractor
 
     private static function getSourceCode(array $stackTrace, Config $config): Collection
     {
-        if ($config->get('elastic-apm-laravel.spans.renderSource', true) === false) {
+        if (false === $config->get('elastic-apm-laravel.spans.renderSource', true)) {
             return collect([]);
         }
 
@@ -44,8 +44,9 @@ class StacktraceExtractor
         }
 
         $fileLines = file(Arr::get($stackTrace, 'file'));
+
         return collect($fileLines)->filter(function ($code, $line) use ($stackTrace) {
-            //file starts counting from 0, debug_stacktrace from 1
+            // file starts counting from 0, debug_stacktrace from 1
             $stackTraceLine = Arr::get($stackTrace, 'line') - 1;
 
             $lineStart = $stackTraceLine - 5;
@@ -72,7 +73,7 @@ class StacktraceExtractor
     private static function stripVendorTraces(Collection $stackTrace): Collection
     {
         return $stackTrace->filter(function ($trace) {
-            return !Str::startsWith((Arr::get($trace, 'file')), [
+            return !Str::startsWith(Arr::get($trace, 'file'), [
                 base_path() . '/vendor',
             ]);
         });
