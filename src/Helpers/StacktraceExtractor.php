@@ -11,14 +11,18 @@ class StacktraceExtractor
 {
     public static function getStacktrace(Config $config): array
     {
+        if (false === $config->get('elastic-apm-laravel.spans.renderSource', false)) {
+            return [];
+        }
+
         $stackTrace = self::stripVendorTraces(
             collect(
                 debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, $config->get('elastic-apm-laravel.spans.backtraceDepth', 0))
             )
         );
 
-        return $stackTrace->map(function ($trace) use ($config) {
-            $sourceCode = self::getSourceCode($trace, $config);
+        return $stackTrace->map(static function (array $trace): array {
+            $sourceCode = self::getSourceCode($trace);
 
             return [
                 'function' => Arr::get($trace, 'class') . Arr::get($trace, 'type') . Arr::get($trace, 'function'),
@@ -33,14 +37,10 @@ class StacktraceExtractor
         })->values()->toArray();
     }
 
-    private static function getSourceCode(array $stackTrace, Config $config): Collection
+    private static function getSourceCode(array $stackTrace): Collection
     {
-        if (false === $config->get('elastic-apm-laravel.spans.renderSource', false)) {
-            return collect([]);
-        }
-
         if (empty(Arr::get($stackTrace, 'file'))) {
-            return collect([]);
+            return collect();
         }
 
         $fileLines = file(Arr::get($stackTrace, 'file'));
