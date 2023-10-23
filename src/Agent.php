@@ -109,6 +109,7 @@ class Agent extends NipwaayoniAgent
                 $event->setCustomContext($measure['context']);
                 $event->setStartOffset($measure['start']);
                 $event->setDuration($measure['duration']);
+                $event->setStacktrace($measure['stacktrace']);
 
                 $this->putEvent($event);
             });

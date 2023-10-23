@@ -34,6 +34,9 @@ class EventDataCollectorTest extends Unit
     {
         $this->appMock = Mockery::mock(Application::class);
         $this->configMock = Mockery::mock(Config::class);
+        $this->configMock->shouldReceive('get')
+            ->with('elastic-apm-laravel.spans.renderSource', Mockery::any())
+            ->andReturn(false);
         $this->requestStartTimeMock = Mockery::mock(RequestStartTime::class);
         $this->requestStartTimeMock->shouldReceive('microseconds')->andReturn(1000.0);
         $this->eventClock = Mockery::mock(EventClock::class);
@@ -79,6 +82,7 @@ class EventDataCollectorTest extends Unit
             'type' => 'request',
             'action' => 'GET',
             'context' => [],
+            'stacktrace' => [],
         ], $event);
     }
 
@@ -104,6 +108,7 @@ class EventDataCollectorTest extends Unit
             'type' => 'request',
             'action' => 'GET',
             'context' => [],
+            'stacktrace' => [],
         ], $event);
     }
 

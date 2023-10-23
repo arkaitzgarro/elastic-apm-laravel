@@ -5,6 +5,7 @@ namespace AG\ElasticApmLaravel\Collectors;
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Contracts\DataCollector;
 use AG\ElasticApmLaravel\EventClock;
+use AG\ElasticApmLaravel\Helpers\StacktraceExtractor;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Collection;
@@ -173,6 +174,7 @@ abstract class EventDataCollector implements DataCollector
             'type' => $type,
             'action' => $action,
             'context' => $context,
+            'stacktrace' => StacktraceExtractor::getStacktrace($this->config),
         ]);
     }
 

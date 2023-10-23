@@ -187,8 +187,6 @@ class ServiceProvider extends BaseServiceProvider
 
     /**
      * Publish the config file.
-     *
-     * @param string $configPath
      */
     protected function publishConfig(): void
     {

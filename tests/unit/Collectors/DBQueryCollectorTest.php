@@ -42,6 +42,9 @@ class DBQueryCollectorTest extends Unit
 
         $this->agentMock = Mockery::mock(Agent::class);
         $this->configMock = Mockery::mock(Config::class);
+        $this->configMock->shouldReceive('get')
+            ->with('elastic-apm-laravel.spans.renderSource', Mockery::any())
+            ->andReturn(false);
         $this->connectionMock = Mockery::mock(Connection::class);
 
         $this->connectionMock
