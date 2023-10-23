@@ -59,7 +59,7 @@ class ApmConfigTest extends \Codeception\Test\Unit
         $this->assertEquals(1000, $this->config['spans']['maxTraceItems']);
         $this->assertEquals(25, $this->config['spans']['querylog']['enabled']);
         $this->assertEquals(200, $this->config['spans']['querylog']['threshold']);
-        $this->assertEquals(25, $this->config['spans']['backtraceDepth']);
+        $this->assertEquals(0, $this->config['spans']['backtraceDepth']);
     }
 
     public function testAppConfigEnvVariables()
