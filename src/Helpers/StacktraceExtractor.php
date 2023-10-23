@@ -35,7 +35,7 @@ class StacktraceExtractor
 
     private static function getSourceCode(array $stackTrace, Config $config): Collection
     {
-        if (false === $config->get('elastic-apm-laravel.spans.renderSource', true)) {
+        if (false === $config->get('elastic-apm-laravel.spans.renderSource', false)) {
             return collect([]);
         }
 

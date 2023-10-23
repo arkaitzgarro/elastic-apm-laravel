@@ -65,6 +65,6 @@ return [
         ],
 
         // Render source code in stack traces
-        'renderSource' => env('APM_RENDERSOURCE', true),
+        'renderSource' => env('APM_RENDERSOURCE', false),
     ],
 ];
