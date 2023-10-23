@@ -9,10 +9,7 @@ class RecordTransaction
     /**
      * Wrap the job processing in an APM transaction.
      *
-     * @param mixed    $job
      * @param callable $next
-     *
-     * @return mixed
      */
     public function handle($job, $next)
     {

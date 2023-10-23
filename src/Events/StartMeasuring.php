@@ -22,9 +22,9 @@ class StartMeasuring
     public function __construct(
         string $name,
         string $type = 'request',
-        ?string $action = null,
-        ?string $label = null,
-        ?float $start_time = null
+        string $action = null,
+        string $label = null,
+        float $start_time = null
     ) {
         $this->name = $name;
         $this->type = $type;
