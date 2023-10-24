@@ -44,10 +44,10 @@ class ApmCollectorService
     public function startMeasure(
         string $name,
         string $type = 'request',
-        ?string $action = null,
-        ?string $label = null,
-        ?float $start_time = null
-    ) {
+        string $action = null,
+        string $label = null,
+        float $start_time = null
+    ): void {
         $this->events->dispatch(
             new StartMeasuring(
                 $name,
@@ -62,7 +62,7 @@ class ApmCollectorService
     public function stopMeasure(
         string $name,
         array $params = []
-    ) {
+    ): void {
         $this->events->dispatch(
             new StopMeasuring(
                 $name,
@@ -82,7 +82,7 @@ class ApmCollectorService
         );
     }
 
-    public function captureThrowable(\Throwable $thrown, array $context = [], ?Transaction $parent = null)
+    public function captureThrowable(\Throwable $thrown, array $context = [], Transaction $parent = null): void
     {
         if ($this->is_agent_disabled) {
             return;
