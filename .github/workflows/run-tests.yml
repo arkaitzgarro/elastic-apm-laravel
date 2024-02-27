@@ -1,64 +1,72 @@
 name: Unit tests
 
-on: [push, pull_request]
+on:
+  - push
+  - pull_request
 
 jobs:
-    unit-tests:
-        runs-on: ubuntu-latest
+  unit-tests:
+    runs-on: ubuntu-latest
 
-        strategy:
-            matrix:
-                php: [8.0, 8.1]
-                laravel: [8.*, 9.*, 10.*]
-                include:
-                    - laravel: 10.*
-                      testbench: 8.*
-                    - laravel: 8.*
-                      testbench: 6.*
-                    - laravel: 9.*
-                      testbench: 7.*
-                exclude:
-                    - laravel: 10.*
-                      php: 8.0
+    strategy:
+      matrix:
+        php: [8.0, 8.1, '8.2']
+        laravel: ['8.*', '9.*', '10.*', '11.*']
+        include:
+          - laravel: 10.*
+            testbench: 8.*
+          - laravel: 8.*
+            testbench: 6.*
+          - laravel: 9.*
+            testbench: 7.*
+          - laravel: 11.*
+            testbench: 9.*
+        exclude:
+          - laravel: 10.*
+            php: 8.0
+          - laravel: 11.*
+            php: 8.0
+          - laravel: 11.*
+            php: 8.1
 
-        name: PHP${{ matrix.php }} - L${{ matrix.laravel }}
+    name: PHP${{ matrix.php }} - L${{ matrix.laravel }}
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
 
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: ${{ matrix.php }}
-                  tools: composer:v2
-                  coverage: xdebug
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer:v2
+          coverage: xdebug
 
-            - name: Get Composer Cache Directory
-              id: composer-cache
-              run: |
-                echo "::set-output name=dir::$(composer config cache-files-dir)"
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-            - uses: actions/cache@v2
-              with:
-                path: ${{ steps.composer-cache.outputs.dir }}
-                key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php }}-php${{ matrix.php }}-L${{ matrix.laravel }}
-                restore-keys: |
-                  ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php }}-php${{ matrix.php }}
-                  ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php }}
-                  ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-                  ${{ runner.os }}-composer-
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php }}-php${{ matrix.php }}-L${{ matrix.laravel }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php }}-php${{ matrix.php }}
+            ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php }}
+            ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+            ${{ runner.os }}-composer-
 
-            - name: Install dependencies
-              run: |
-                  composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
-                  composer update --prefer-dist --no-interaction --no-suggest
+      - name: Install dependencies
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer update --prefer-dist --no-interaction --no-suggest
 
-            - name: Execute tests
-              uses: paambaati/codeclimate-action@v2.7.4
-              env:
-                  CC_TEST_REPORTER_ID: 23639f09f4ef515ddb5fea9baf90f9f5cd9bb5e0801cf1dc062d993a3d70d3eb
-              with:
-                  coverageCommand: vendor/bin/codecept run --xml test_report.xml --coverage --coverage-html --coverage-xml
-                  coverageLocations: |
-                    ${{github.workspace}}/tests/_output/coverage.xml:clover
+      - name: Execute tests
+        uses: paambaati/codeclimate-action@v2.7.4
+        env:
+          CC_TEST_REPORTER_ID: 23639f09f4ef515ddb5fea9baf90f9f5cd9bb5e0801cf1dc062d993a3d70d3eb
+        with:
+          coverageCommand: vendor/bin/codecept run --xml test_report.xml --coverage --coverage-html --coverage-xml
+          coverageLocations: |
+            ${{github.workspace}}/tests/_output/coverage.xml:clover
