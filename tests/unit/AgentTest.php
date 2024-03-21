@@ -89,7 +89,7 @@ class AgentTest extends Unit
 
     public function testAssertsDoesHaveCurrentTransaction(): void
     {
-        $this->agent->setCurrentTransaction(new \Nipwaayoni\Events\Transaction('test-transaction', []));
+        $this->agent->setCurrentTransaction(new Nipwaayoni\Events\Transaction('test-transaction', []));
 
         $this->assertTrue($this->agent->hasCurrentTransaction());
     }
@@ -97,7 +97,7 @@ class AgentTest extends Unit
     public function testStartingTransactionSetsCurrentTransaction(): void
     {
         $this->eventFactoryMock->shouldReceive('newTransaction')
-            ->andReturn(new \Nipwaayoni\Events\Transaction('test-transaction', []));
+            ->andReturn(new Nipwaayoni\Events\Transaction('test-transaction', []));
 
         $this->assertFalse($this->agent->hasCurrentTransaction());
 
@@ -108,7 +108,7 @@ class AgentTest extends Unit
 
     public function testReturnsCurrentTransaction(): void
     {
-        $transaction = new \Nipwaayoni\Events\Transaction('test-transaction', []);
+        $transaction = new Nipwaayoni\Events\Transaction('test-transaction', []);
 
         $this->agent->setCurrentTransaction($transaction);
 
@@ -124,7 +124,7 @@ class AgentTest extends Unit
 
     public function testClearsCurrentTransaction(): void
     {
-        $this->agent->setCurrentTransaction(new \Nipwaayoni\Events\Transaction('test-transaction', []));
+        $this->agent->setCurrentTransaction(new Nipwaayoni\Events\Transaction('test-transaction', []));
 
         $this->assertTrue($this->agent->hasCurrentTransaction());
 
@@ -138,9 +138,9 @@ class AgentTest extends Unit
         $this->setupCollectors();
 
         $this->eventFactoryMock->shouldReceive('newTransaction')
-            ->andReturn(new \Nipwaayoni\Events\Transaction('test-transaction', []));
+            ->andReturn(new Nipwaayoni\Events\Transaction('test-transaction', []));
 
-        $spanMock = Mockery::mock(\Nipwaayoni\Events\Span::class);
+        $spanMock = Mockery::mock(Nipwaayoni\Events\Span::class);
 
         $this->eventFactoryMock->shouldReceive('newSpan')
             ->withArgs(function ($name) {
@@ -169,7 +169,7 @@ class AgentTest extends Unit
 
     public function testStartNewTransactionSetsAsCurrent(): void
     {
-        $transaction = new \Nipwaayoni\Events\Transaction('test-transaction', []);
+        $transaction = new Nipwaayoni\Events\Transaction('test-transaction', []);
 
         $this->eventFactoryMock->shouldReceive('newTransaction')
             ->andReturn($transaction);
@@ -183,7 +183,7 @@ class AgentTest extends Unit
     {
         $this->connectorMock->shouldReceive('commit');
 
-        $this->agent->setCurrentTransaction(new \Nipwaayoni\Events\Transaction('test-transaction', []));
+        $this->agent->setCurrentTransaction(new Nipwaayoni\Events\Transaction('test-transaction', []));
 
         $this->assertTrue($this->agent->hasCurrentTransaction());
 
@@ -235,7 +235,7 @@ class AgentTest extends Unit
 
         $this->totalEvents = 0;
 
-        $app = Mockery::mock(\Illuminate\Foundation\Application::class);
+        $app = Mockery::mock(Illuminate\Foundation\Application::class);
         // Expect the array accessor for `events` which returns an object with a listen() method
         $app->shouldReceive('offsetGet->listen');
 

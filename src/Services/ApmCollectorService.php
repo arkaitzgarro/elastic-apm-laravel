@@ -2,7 +2,6 @@
 
 namespace AG\ElasticApmLaravel\Services;
 
-use Throwable;
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Events\StartMeasuring;
 use AG\ElasticApmLaravel\Events\StopMeasuring;
@@ -83,7 +82,7 @@ class ApmCollectorService
         );
     }
 
-    public function captureThrowable(Throwable $thrown, array $context = [], ?Transaction $parent = null): void
+    public function captureThrowable(\Throwable $thrown, array $context = [], ?Transaction $parent = null): void
     {
         if ($this->is_agent_disabled) {
             return;
