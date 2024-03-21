@@ -67,9 +67,9 @@ abstract class EventDataCollector implements DataCollector
     public function startMeasure(
         string $name,
         string $type = 'request',
-        string $action = null,
-        string $label = null,
-        float $start_time = null
+        ?string $action = null,
+        ?string $label = null,
+        ?float $start_time = null
     ): void {
         $start = $start_time ?? $this->event_clock->microtime();
         if ($this->hasStartedMeasure($name)) {

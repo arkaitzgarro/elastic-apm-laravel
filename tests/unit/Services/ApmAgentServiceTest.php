@@ -26,7 +26,7 @@ class ApmAgentServiceTest extends Unit
 
     public function testGetsCurrentTransaction()
     {
-        $transaction = Mockery::mock(\Nipwaayoni\Events\Transaction::class);
+        $transaction = Mockery::mock(Nipwaayoni\Events\Transaction::class);
 
         $this->agentMock->shouldReceive('currentTransaction')
             ->once()
@@ -37,9 +37,9 @@ class ApmAgentServiceTest extends Unit
 
     public function testAddsTraceparentHeaderToRequest()
     {
-        $request = Mockery::mock(\Psr\Http\Message\RequestInterface::class);
+        $request = Mockery::mock(Psr\Http\Message\RequestInterface::class);
 
-        $transaction = Mockery::mock(\Nipwaayoni\Events\Transaction::class);
+        $transaction = Mockery::mock(Nipwaayoni\Events\Transaction::class);
 
         $this->agentMock->shouldReceive('currentTransaction')
             ->once()

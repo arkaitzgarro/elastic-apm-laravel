@@ -21,13 +21,13 @@ class AgentTest extends Unit
     private $config;
     /** @var ContextCollection */
     private $context;
-    /** @var \Mockery\Mock|Connector */
+    /** @var Mockery\Mock|Connector */
     private $connectorMock;
-    /** @var \Mockery\Mock|EventFactoryInterface */
+    /** @var Mockery\Mock|EventFactoryInterface */
     private $eventFactoryMock;
     /** @var TransactionsStore */
     private $transactionStore;
-    /** @var \Mockery\Mock|Repository */
+    /** @var Mockery\Mock|Repository */
     private $appConfigMock;
     /** @var RequestStartTime */
     private $requestStartTime;
@@ -64,8 +64,8 @@ class AgentTest extends Unit
 
     public function testAddsCollector(): void
     {
-        /** @var \Mockery\Mock|\AG\ElasticApmLaravel\Contracts\DataCollector $collector */
-        $collector = Mockery::mock(\AG\ElasticApmLaravel\Collectors\SpanCollector::class)->makePartial();
+        /** @var Mockery\Mock|AG\ElasticApmLaravel\Contracts\DataCollector $collector */
+        $collector = Mockery::mock(AG\ElasticApmLaravel\Collectors\SpanCollector::class)->makePartial();
 
         $this->agent->addCollector($collector);
 
@@ -74,8 +74,8 @@ class AgentTest extends Unit
 
     public function testSetsSelfAsAgentWhenAddingCollector(): void
     {
-        /** @var \Mockery\Mock|\AG\ElasticApmLaravel\Contracts\DataCollector $collector */
-        $collector = Mockery::mock(\AG\ElasticApmLaravel\Collectors\SpanCollector::class)->makePartial();
+        /** @var Mockery\Mock|AG\ElasticApmLaravel\Contracts\DataCollector $collector */
+        $collector = Mockery::mock(AG\ElasticApmLaravel\Collectors\SpanCollector::class)->makePartial();
 
         $collector->shouldReceive('useAgent')->with($this->agent);
 
@@ -89,7 +89,7 @@ class AgentTest extends Unit
 
     public function testAssertsDoesHaveCurrentTransaction(): void
     {
-        $this->agent->setCurrentTransaction(new \Nipwaayoni\Events\Transaction('test-transaction', []));
+        $this->agent->setCurrentTransaction(new Nipwaayoni\Events\Transaction('test-transaction', []));
 
         $this->assertTrue($this->agent->hasCurrentTransaction());
     }
@@ -97,7 +97,7 @@ class AgentTest extends Unit
     public function testStartingTransactionSetsCurrentTransaction(): void
     {
         $this->eventFactoryMock->shouldReceive('newTransaction')
-            ->andReturn(new \Nipwaayoni\Events\Transaction('test-transaction', []));
+            ->andReturn(new Nipwaayoni\Events\Transaction('test-transaction', []));
 
         $this->assertFalse($this->agent->hasCurrentTransaction());
 
@@ -108,7 +108,7 @@ class AgentTest extends Unit
 
     public function testReturnsCurrentTransaction(): void
     {
-        $transaction = new \Nipwaayoni\Events\Transaction('test-transaction', []);
+        $transaction = new Nipwaayoni\Events\Transaction('test-transaction', []);
 
         $this->agent->setCurrentTransaction($transaction);
 
@@ -117,14 +117,14 @@ class AgentTest extends Unit
 
     public function testThrowsExceptionWhenNoCurrentTransaction(): void
     {
-        $this->expectException(\AG\ElasticApmLaravel\Exception\NoCurrentTransactionException::class);
+        $this->expectException(AG\ElasticApmLaravel\Exception\NoCurrentTransactionException::class);
 
         $this->agent->currentTransaction();
     }
 
     public function testClearsCurrentTransaction(): void
     {
-        $this->agent->setCurrentTransaction(new \Nipwaayoni\Events\Transaction('test-transaction', []));
+        $this->agent->setCurrentTransaction(new Nipwaayoni\Events\Transaction('test-transaction', []));
 
         $this->assertTrue($this->agent->hasCurrentTransaction());
 
@@ -138,9 +138,9 @@ class AgentTest extends Unit
         $this->setupCollectors();
 
         $this->eventFactoryMock->shouldReceive('newTransaction')
-            ->andReturn(new \Nipwaayoni\Events\Transaction('test-transaction', []));
+            ->andReturn(new Nipwaayoni\Events\Transaction('test-transaction', []));
 
-        $spanMock = Mockery::mock(\Nipwaayoni\Events\Span::class);
+        $spanMock = Mockery::mock(Nipwaayoni\Events\Span::class);
 
         $this->eventFactoryMock->shouldReceive('newSpan')
             ->withArgs(function ($name) {
@@ -169,7 +169,7 @@ class AgentTest extends Unit
 
     public function testStartNewTransactionSetsAsCurrent(): void
     {
-        $transaction = new \Nipwaayoni\Events\Transaction('test-transaction', []);
+        $transaction = new Nipwaayoni\Events\Transaction('test-transaction', []);
 
         $this->eventFactoryMock->shouldReceive('newTransaction')
             ->andReturn($transaction);
@@ -183,7 +183,7 @@ class AgentTest extends Unit
     {
         $this->connectorMock->shouldReceive('commit');
 
-        $this->agent->setCurrentTransaction(new \Nipwaayoni\Events\Transaction('test-transaction', []));
+        $this->agent->setCurrentTransaction(new Nipwaayoni\Events\Transaction('test-transaction', []));
 
         $this->assertTrue($this->agent->hasCurrentTransaction());
 
@@ -222,12 +222,12 @@ class AgentTest extends Unit
     {
         $this->expectedCollectors = [
             'span' => [
-                'class' => \AG\ElasticApmLaravel\Collectors\SpanCollector::class,
+                'class' => AG\ElasticApmLaravel\Collectors\SpanCollector::class,
                 'eventCount' => 3,
                 'object' => null,
             ],
             'db-query' => [
-                'class' => \AG\ElasticApmLaravel\Collectors\DBQueryCollector::class,
+                'class' => AG\ElasticApmLaravel\Collectors\DBQueryCollector::class,
                 'eventCount' => 5,
                 'object' => null,
             ],
@@ -235,7 +235,7 @@ class AgentTest extends Unit
 
         $this->totalEvents = 0;
 
-        $app = Mockery::mock(\Illuminate\Foundation\Application::class);
+        $app = Mockery::mock(Illuminate\Foundation\Application::class);
         // Expect the array accessor for `events` which returns an object with a listen() method
         $app->shouldReceive('offsetGet->listen');
 
@@ -243,7 +243,7 @@ class AgentTest extends Unit
 
         // create collectors with events
         foreach (array_keys($this->expectedCollectors) as $type) {
-            /** @var \AG\ElasticApmLaravel\Collectors\EventDataCollector $collector */
+            /** @var AG\ElasticApmLaravel\Collectors\EventDataCollector $collector */
             $collector = new $this->expectedCollectors[$type]['class']($app, $config, $this->requestStartTime, $this->eventCounter, $this->eventClock);
 
             for ($i = 0; $i < $this->expectedCollectors[$type]['eventCount']; ++$i) {

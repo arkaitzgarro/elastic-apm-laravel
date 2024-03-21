@@ -99,7 +99,7 @@ class CommandCollectorTest extends Unit
     public function testCommandStartingListenerIgnored(): void
     {
         $this->patternConfigReturn(self::COMMAND_IGNORE_PATTERN);
-        $this->agentMock->shouldNotReceive(['startTransaction', 'getTransaction']);
+        $this->agentMock->shouldNotReceive('startTransaction', 'getTransaction');
 
         $this->dispatcher->dispatch(new CommandStarting(
             self::COMMAND_NAME,
@@ -111,7 +111,7 @@ class CommandCollectorTest extends Unit
     public function testCommandFinishedListenerIgnored(): void
     {
         $this->patternConfigReturn(self::COMMAND_IGNORE_PATTERN);
-        $this->agentMock->shouldNotReceive(['getTransaction', 'captureThrowable', 'stopTransaction']);
+        $this->agentMock->shouldNotReceive('getTransaction', 'captureThrowable', 'stopTransaction');
 
         $this->dispatcher->dispatch(new CommandFinished(
             self::COMMAND_NAME,
