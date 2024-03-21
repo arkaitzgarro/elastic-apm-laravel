@@ -36,16 +36,16 @@ class JobCollectorTest extends Unit
      */
     private $collector;
 
-    /** @var Agent|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
+    /** @var Agent|Mockery\LegacyMockInterface|Mockery\MockInterface */
     private $agentMock;
 
-    /** @var Job|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
+    /** @var Job|Mockery\LegacyMockInterface|Mockery\MockInterface */
     private $jobMock;
 
-    /** @var Transaction|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
+    /** @var Transaction|Mockery\LegacyMockInterface|Mockery\MockInterface */
     private $transactionMock;
 
-    /** @var Config|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
+    /** @var Config|Mockery\LegacyMockInterface|Mockery\MockInterface */
     private $configMock;
 
     protected function _before()

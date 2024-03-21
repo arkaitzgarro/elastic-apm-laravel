@@ -2,6 +2,7 @@
 
 namespace AG\ElasticApmLaravel\Services;
 
+use Throwable;
 use AG\ElasticApmLaravel\Agent;
 use AG\ElasticApmLaravel\Events\StartMeasuring;
 use AG\ElasticApmLaravel\Events\StopMeasuring;
@@ -13,12 +14,12 @@ use Nipwaayoni\Events\Transaction;
 class ApmCollectorService
 {
     /**
-     * @var \Illuminate\Contracts\Foundation\Application
+     * @var Application
      */
     protected $app;
 
     /**
-     * @var \Illuminate\Events\Dispatcher
+     * @var Dispatcher
      */
     protected $events;
 
@@ -44,9 +45,9 @@ class ApmCollectorService
     public function startMeasure(
         string $name,
         string $type = 'request',
-        string $action = null,
-        string $label = null,
-        float $start_time = null
+        ?string $action = null,
+        ?string $label = null,
+        ?float $start_time = null
     ): void {
         $this->events->dispatch(
             new StartMeasuring(
@@ -82,7 +83,7 @@ class ApmCollectorService
         );
     }
 
-    public function captureThrowable(\Throwable $thrown, array $context = [], Transaction $parent = null): void
+    public function captureThrowable(Throwable $thrown, array $context = [], ?Transaction $parent = null): void
     {
         if ($this->is_agent_disabled) {
             return;

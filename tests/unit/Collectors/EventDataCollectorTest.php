@@ -17,15 +17,15 @@ class EventDataCollectorTest extends Unit
     /** @var EventDataCollector */
     private $eventDataCollector;
 
-    /** @var Application|\Mockery\Mock */
+    /** @var Application|Mockery\Mock */
     private $appMock;
-    /** @var Config|\Mockery\Mock */
+    /** @var Config|Mockery\Mock */
     private $configMock;
-    /** @var RequestStartTime|\Mockery\Mock */
+    /** @var RequestStartTime|Mockery\Mock */
     private $requestStartTimeMock;
     /** @var EventCounter */
     private $eventCounter;
-    /** @var EventClock|\Mockery\Mock */
+    /** @var EventClock|Mockery\Mock */
     private $eventClock;
 
     public static $registeredListeners = false;
