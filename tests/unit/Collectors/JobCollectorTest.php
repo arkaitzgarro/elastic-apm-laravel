@@ -15,7 +15,6 @@ use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Jobs\SyncJob;
-use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
 use Nipwaayoni\Events\Transaction;
 use Nipwaayoni\Exception\Transaction\UnknownTransactionException;
@@ -105,11 +104,14 @@ class JobCollectorTest extends Unit
     {
         $this->patternConfigReturn(self::JOB_IGNORE_PATTERN);
         $this->jobMock->shouldReceive('resolveName')->once()->andReturn(self::JOB_NAME);
-        $this->jobMock->shouldReceive('payload');
         $this->agentMock->shouldNotReceive('startTransaction');
         $this->agentMock->shouldNotReceive('getTransaction');
-
-        Context::shouldReceive('hydrate');
+        
+        // For Laravel 11+ 
+        if (class_exists('\Illuminate\Support\Facades\Context')) {
+            \Illuminate\Support\Facades\Context::shouldReceive('hydrate');
+            $this->jobMock->shouldReceive('payload');
+        }
 
         $this->dispatcher->dispatch(new JobProcessing('test', $this->jobMock));
     }
