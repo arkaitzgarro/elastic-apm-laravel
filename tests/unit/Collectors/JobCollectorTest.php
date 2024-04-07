@@ -15,6 +15,7 @@ use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Jobs\SyncJob;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
 use Nipwaayoni\Events\Transaction;
 use Nipwaayoni\Exception\Transaction\UnknownTransactionException;
@@ -107,6 +108,8 @@ class JobCollectorTest extends Unit
         $this->jobMock->shouldReceive('payload');
         $this->agentMock->shouldNotReceive('startTransaction');
         $this->agentMock->shouldNotReceive('getTransaction');
+
+        Context::shouldReceive('hydrate');
 
         $this->dispatcher->dispatch(new JobProcessing('test', $this->jobMock));
     }
