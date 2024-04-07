@@ -106,10 +106,10 @@ class JobCollectorTest extends Unit
         $this->jobMock->shouldReceive('resolveName')->once()->andReturn(self::JOB_NAME);
         $this->agentMock->shouldNotReceive('startTransaction');
         $this->agentMock->shouldNotReceive('getTransaction');
-        
-        // For Laravel 11+ 
+
+        // For Laravel 11+
         if (class_exists('\Illuminate\Support\Facades\Context')) {
-            \Illuminate\Support\Facades\Context::shouldReceive('hydrate');
+            Illuminate\Support\Facades\Context::shouldReceive('hydrate');
             $this->jobMock->shouldReceive('payload');
         }
 
