@@ -104,7 +104,6 @@ class JobCollectorTest extends Unit
     {
         $this->patternConfigReturn(self::JOB_IGNORE_PATTERN);
         $this->jobMock->shouldReceive('resolveName')->once()->andReturn(self::JOB_NAME);
-        $this->jobMock->shouldReceive('payload');
         $this->agentMock->shouldNotReceive('startTransaction');
         $this->agentMock->shouldNotReceive('getTransaction');
 
