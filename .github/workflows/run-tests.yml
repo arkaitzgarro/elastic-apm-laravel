@@ -2,7 +2,6 @@ name: Unit tests
 
 on: 
   - push
-  - pull_request
 
 jobs:
   unit-tests:
@@ -41,6 +40,21 @@ jobs:
           php-version: ${{ matrix.php }}
           tools: composer:v2
           coverage: xdebug
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php }}-php${{ matrix.php }}-L${{ matrix.laravel }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php }}-php${{ matrix.php }}
+            ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php }}
+            ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+            ${{ runner.os }}-composer-
 
       - name: Install dependencies
         run: |
