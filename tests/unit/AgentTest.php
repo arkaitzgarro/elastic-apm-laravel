@@ -47,6 +47,9 @@ class AgentTest extends Unit
         $this->eventFactoryMock = Mockery::mock(EventFactoryInterface::class);
         $this->transactionStore = new TransactionsStore();
         $this->appConfigMock = Mockery::mock(Repository::class);
+        $this->appConfigMock->shouldReceive('get')
+            ->with('elastic-apm-laravel.spans.renderSource', Mockery::any())
+            ->andReturn(false);
 
         $this->requestStartTime = new RequestStartTime(microtime(true));
         $this->eventCounter = new EventCounter();
@@ -157,6 +160,7 @@ class AgentTest extends Unit
             'setStartOffset',
             'setDuration',
             'getEventType',
+            'setStacktrace'
         );
         $spanMock->shouldReceive('isSampled')->passthru();
 
@@ -240,6 +244,9 @@ class AgentTest extends Unit
         $app->shouldReceive('offsetGet->listen');
 
         $config = Mockery::mock(Repository::class);
+        $config->shouldReceive('get')
+            ->with('elastic-apm-laravel.spans.renderSource', Mockery::any())
+            ->andReturn(false);
 
         // create collectors with events
         foreach (array_keys($this->expectedCollectors) as $type) {
