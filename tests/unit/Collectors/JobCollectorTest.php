@@ -36,16 +36,16 @@ class JobCollectorTest extends Unit
      */
     private $collector;
 
-    /** @var Agent|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
+    /** @var Agent|Mockery\LegacyMockInterface|Mockery\MockInterface */
     private $agentMock;
 
-    /** @var Job|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
+    /** @var Job|Mockery\LegacyMockInterface|Mockery\MockInterface */
     private $jobMock;
 
-    /** @var Transaction|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
+    /** @var Transaction|Mockery\LegacyMockInterface|Mockery\MockInterface */
     private $transactionMock;
 
-    /** @var Config|\Mockery\LegacyMockInterface|\Mockery\MockInterface */
+    /** @var Config|Mockery\LegacyMockInterface|Mockery\MockInterface */
     private $configMock;
 
     protected function _before()
@@ -106,6 +106,12 @@ class JobCollectorTest extends Unit
         $this->jobMock->shouldReceive('resolveName')->once()->andReturn(self::JOB_NAME);
         $this->agentMock->shouldNotReceive('startTransaction');
         $this->agentMock->shouldNotReceive('getTransaction');
+
+        // For Laravel 11+
+        if (class_exists('\Illuminate\Support\Facades\Context')) {
+            Illuminate\Support\Facades\Context::shouldReceive('hydrate');
+            $this->jobMock->shouldReceive('payload');
+        }
 
         $this->dispatcher->dispatch(new JobProcessing('test', $this->jobMock));
     }

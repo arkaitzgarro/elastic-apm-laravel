@@ -116,7 +116,7 @@ class Agent extends NipwaayoniAgent
         });
     }
 
-    public function startTransaction(string $name, array $context = [], float $start = null): Transaction
+    public function startTransaction(string $name, array $context = [], ?float $start = null): Transaction
     {
         $transaction = parent::startTransaction($name, $context, $start);
         $this->setCurrentTransaction($transaction);

@@ -8,10 +8,8 @@ class RecordTransaction
 {
     /**
      * Wrap the job processing in an APM transaction.
-     *
-     * @param callable $next
      */
-    public function handle($job, $next)
+    public function handle(mixed $job, callable $next)
     {
         if (false === config('elastic-apm-laravel.active') || false === config('elastic-apm-laravel.cli.active')) {
             return $next($job);

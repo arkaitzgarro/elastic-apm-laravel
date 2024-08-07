@@ -14,32 +14,32 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 class RecordTransactionTest extends Unit
 {
     /**
-     * @var AG\ElasticApmLaravel\Agent|\Mockery\MockInterface
+     * @var Agent|Mockery\MockInterface
      */
     private $agent;
 
     /**
-     * @var RequestStartTime|\Mockery\MockInterface
+     * @var RequestStartTime|Mockery\MockInterface
      */
     private $requestStartTimeMock;
 
     /**
-     * @var Illuminate\Http\Request
+     * @var Request
      */
     private $request;
 
     /**
-     * @var Response|\Mockery\MockInterface
+     * @var Response|Mockery\MockInterface
      */
     private $response;
 
     /**
-     * @var AG\ElasticApmLaravel\Middleware\RecordTransaction
+     * @var RecordTransaction
      */
     private $middleware;
 
     /**
-     * @var Nipwaayoni\Events\Transaction
+     * @var Transaction
      */
     private $transaction;
 

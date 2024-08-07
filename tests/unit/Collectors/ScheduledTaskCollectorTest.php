@@ -99,7 +99,7 @@ class ScheduledTaskCollectorTest extends Unit
     {
         $this->eventMock->command = 'work:do';
         $this->patternConfigReturn(self::TASK_IGNORE_PATTERN);
-        $this->agentMock->shouldNotReceive(['startTransaction', 'getTransaction']);
+        $this->agentMock->shouldNotReceive('startTransaction', 'getTransaction');
 
         $this->dispatcher->dispatch(new ScheduledTaskStarting($this->eventMock));
     }
@@ -108,7 +108,7 @@ class ScheduledTaskCollectorTest extends Unit
     {
         $this->eventMock->command = 'work:do';
         $this->patternConfigReturn(self::TASK_IGNORE_PATTERN);
-        $this->agentMock->shouldNotReceive(['startTransaction', 'getTransaction']);
+        $this->agentMock->shouldNotReceive('startTransaction', 'getTransaction');
 
         $this->dispatcher->dispatch(new ScheduledTaskSkipped($this->eventMock));
     }
@@ -117,7 +117,7 @@ class ScheduledTaskCollectorTest extends Unit
     {
         $this->eventMock->command = 'work:do';
         $this->patternConfigReturn(self::TASK_IGNORE_PATTERN);
-        $this->agentMock->shouldNotReceive(['startTransaction', 'getTransaction']);
+        $this->agentMock->shouldNotReceive('startTransaction', 'getTransaction');
 
         $this->dispatcher->dispatch(new ScheduledTaskFinished($this->eventMock, 1000.0));
     }
