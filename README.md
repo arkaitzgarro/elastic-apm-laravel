@@ -5,7 +5,7 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/e5a66b9bf5161e299c8c/test_coverage)](https://codeclimate.com/github/arkaitzgarro/elastic-apm-laravel/test_coverage)
 [![License](https://poser.pugx.org/arkaitzgarro/elastic-apm-laravel/license)](https://packagist.org/packages/arkaitzgarro/elastic-apm-laravel)
 
-Elastic APM agent for v2 intake API. Compatible with Laravel 6+.
+Elastic APM agent for v2 intake API. Compatible with Laravel 11+.
 
 | Transactions list                             | Transaction detail                              |
 | --------------------------------------------- | ----------------------------------------------- |
@@ -35,14 +35,8 @@ In order to minimize potential dependency conflicts, this package does not dicta
 Require this package with composer:
 
 ```bash
-# Laravel 8+ and PHP 8+
+# Laravel 11+ and PHP 8.2+
 composer require arkaitzgarro/elastic-apm-laravel
-
-# Laravel 6+
-composer require arkaitzgarro/elastic-apm-laravel:^3.0
-
-# Laravel 5.5 - 5.8
-composer require arkaitzgarro/elastic-apm-laravel:^2.0
 ```
 
 Laravel's provider auto-discover should find the package ServiceProvider. Otherwise, add the ServiceProvider class to the providers array in `config/app.php`:
