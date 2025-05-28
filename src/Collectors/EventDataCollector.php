@@ -70,7 +70,7 @@ abstract class EventDataCollector implements DataCollector
         string $type = 'request',
         ?string $action = null,
         ?string $label = null,
-        ?float $start_time = null
+        ?float $start_time = null,
     ): void {
         $start = $start_time ?? $this->event_clock->microtime();
         if ($this->hasStartedMeasure($name)) {
@@ -140,7 +140,7 @@ abstract class EventDataCollector implements DataCollector
         float $end,
         string $type = 'request',
         ?string $action = 'request',
-        ?array $context = []
+        ?array $context = [],
     ): void {
         if ($this->event_counter->reachedLimit()) {
             return;
@@ -165,7 +165,7 @@ abstract class EventDataCollector implements DataCollector
         float $end,
         string $type = 'request',
         ?string $action = 'request',
-        ?array $context = []
+        ?array $context = [],
     ): void {
         $this->measures->push([
             'label' => $label,

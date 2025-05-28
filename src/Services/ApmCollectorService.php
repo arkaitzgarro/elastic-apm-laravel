@@ -46,7 +46,7 @@ class ApmCollectorService
         string $type = 'request',
         ?string $action = null,
         ?string $label = null,
-        ?float $start_time = null
+        ?float $start_time = null,
     ): void {
         $this->events->dispatch(
             new StartMeasuring(
@@ -61,7 +61,7 @@ class ApmCollectorService
 
     public function stopMeasure(
         string $name,
-        array $params = []
+        array $params = [],
     ): void {
         $this->events->dispatch(
             new StopMeasuring(

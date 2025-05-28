@@ -10,7 +10,7 @@ jobs:
 
     strategy:
       matrix:
-        php: [8.1, 8.2]
+        php: [8.1, 8.2, 8.3]
 
     name: PHP${{ matrix.php }}
 
@@ -29,7 +29,7 @@ jobs:
         run: |
           echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-php${{ matrix.php }}

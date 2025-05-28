@@ -44,7 +44,7 @@ class Agent extends NipwaayoniAgent
         Connector $connector,
         EventFactoryInterface $eventFactory,
         TransactionsStore $transactionsStore,
-        Repository $app_config
+        Repository $app_config,
     ) {
         parent::__construct($config, $sharedContext, $connector, $eventFactory, $transactionsStore);
 

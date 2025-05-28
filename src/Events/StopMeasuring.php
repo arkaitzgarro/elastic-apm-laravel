@@ -12,7 +12,7 @@ class StopMeasuring
 
     public function __construct(
         string $name,
-        array $params = []
+        array $params = [],
     ) {
         $this->name = $name;
         $this->params = $params;

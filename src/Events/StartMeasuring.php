@@ -24,7 +24,7 @@ class StartMeasuring
         string $type = 'request',
         ?string $action = null,
         ?string $label = null,
-        ?float $start_time = null
+        ?float $start_time = null,
     ) {
         $this->name = $name;
         $this->type = $type;
