@@ -3,10 +3,10 @@ name: Unit tests
 on:
   push:
     branches:
-    - master
+      - master
   pull_request:
     branches:
-    - master
+      - master
 
 jobs:
   unit-tests:
@@ -15,12 +15,17 @@ jobs:
     strategy:
       matrix:
         php: [8.2, 8.3]
-        laravel: ['11.*', '12.*']
+        laravel: ['11.*', '12.*', '13.*']
         include:
           - laravel: 11.*
             testbench: 9.*
           - laravel: 12.*
             testbench: 10.*
+          - laravel: 13.*
+            testbench: 11.*
+        exclude:
+          - laravel: 13.*
+            php: 8.2
 
     name: PHP${{ matrix.php }} - L${{ matrix.laravel }}
 
@@ -61,5 +66,4 @@ jobs:
           CC_TEST_REPORTER_ID: 23639f09f4ef515ddb5fea9baf90f9f5cd9bb5e0801cf1dc062d993a3d70d3eb
         with:
           coverageCommand: vendor/bin/codecept run --xml test_report.xml --coverage --coverage-html --coverage-xml
-          coverageLocations: |
-            ${{github.workspace}}/tests/_output/coverage.xml:clover
+          coverageLocations: ${{github.workspace}}/tests/_output/coverage.xml:clover
