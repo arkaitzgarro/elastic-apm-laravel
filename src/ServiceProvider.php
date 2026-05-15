@@ -17,8 +17,6 @@ use AG\ElasticApmLaravel\Services\ApmAgentService;
 use AG\ElasticApmLaravel\Services\ApmCollectorService;
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Nipwaayoni\Config;
@@ -114,7 +112,7 @@ class ServiceProvider extends BaseServiceProvider
         });
 
         // Register a callback on terminating to send the events
-        $this->app->terminating(function (Request $request, Response $response) {
+        $this->app->terminating(function () {
             /** @var Agent $agent */
             $agent = $this->app->make(Agent::class);
 
