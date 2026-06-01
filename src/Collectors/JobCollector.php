@@ -107,7 +107,7 @@ class JobCollector extends EventDataCollector implements DataCollector
     protected function send(Job $job): void
     {
         try {
-            if (!($job instanceof SyncJob)) {
+            if (!$job instanceof SyncJob) {
                 // When using a queued driver, send/flush transaction to make room for the next job in the queue
                 $this->agent->send();
             }
