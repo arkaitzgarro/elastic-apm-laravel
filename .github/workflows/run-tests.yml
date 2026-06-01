@@ -14,11 +14,9 @@ jobs:
 
     strategy:
       matrix:
-        php: [8.2, 8.3]
-        laravel: ['11.*', '12.*']
+        php: [8.3]
+        laravel: ['12.*']
         include:
-          - laravel: 11.*
-            testbench: 9.*
           - laravel: 12.*
             testbench: 10.*
 
@@ -56,10 +54,4 @@ jobs:
           composer update --prefer-dist --no-interaction --no-suggest
 
       - name: Execute tests
-        uses: paambaati/codeclimate-action@v2.7.4
-        env:
-          CC_TEST_REPORTER_ID: 23639f09f4ef515ddb5fea9baf90f9f5cd9bb5e0801cf1dc062d993a3d70d3eb
-        with:
-          coverageCommand: vendor/bin/codecept run --xml test_report.xml --coverage --coverage-html --coverage-xml
-          coverageLocations: |
-            ${{github.workspace}}/tests/_output/coverage.xml:clover
+        run: vendor/bin/codecept run --xml test_report.xml --coverage --coverage-html --coverage-xml
