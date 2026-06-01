@@ -5,7 +5,7 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/e5a66b9bf5161e299c8c/test_coverage)](https://codeclimate.com/github/arkaitzgarro/elastic-apm-laravel/test_coverage)
 [![License](https://poser.pugx.org/arkaitzgarro/elastic-apm-laravel/license)](https://packagist.org/packages/arkaitzgarro/elastic-apm-laravel)
 
-Elastic APM agent for v2 intake API. Compatible with Laravel 11+.
+Elastic APM agent for v2 intake API. Compatible with Laravel 12+.
 
 | Transactions list                             | Transaction detail                              |
 | --------------------------------------------- | ----------------------------------------------- |
@@ -35,7 +35,7 @@ In order to minimize potential dependency conflicts, this package does not dicta
 Require this package with composer:
 
 ```bash
-# Laravel 11+ and PHP 8.2+
+# Laravel 12+ and PHP 8.3+
 composer require arkaitzgarro/elastic-apm-laravel
 ```
 
