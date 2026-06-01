@@ -183,6 +183,12 @@ class JobCollectorTest extends Unit
             ->with(self::JOB_NAME)
             ->andReturn(null, $this->transactionMock, $this->transactionMock);
 
+        // For Laravel 11+
+        if (class_exists('\Illuminate\Support\Facades\Context')) {
+            Illuminate\Support\Facades\Context::shouldReceive('hydrate');
+            $this->jobMock->shouldReceive('payload');
+        }
+
         $this->dispatcher->dispatch(new JobProcessing('test', $this->jobMock));
     }
 
