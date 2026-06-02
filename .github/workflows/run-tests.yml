@@ -14,11 +14,13 @@ jobs:
 
     strategy:
       matrix:
-        php: [8.3]
-        laravel: ['12.*']
+        php: [8.3, 8.4, 8.5]
+        laravel: ['12.*', '13.*']
         include:
           - laravel: 12.*
             testbench: 10.*
+          - laravel: 13.*
+            testbench: 11.*
 
     name: PHP${{ matrix.php }} - L${{ matrix.laravel }}
 
@@ -36,7 +38,7 @@ jobs:
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - uses: actions/cache@v4
         with:
