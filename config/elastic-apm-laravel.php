@@ -50,6 +50,10 @@ return [
     ],
 
     'spans' => [
+        // Set to false to stop collecting spans entirely. Only transactions will be
+        // sent to APM, no matter what the other options in this block are set to.
+        'enabled' => env('APM_SPANS_ENABLED', true),
+
         // Max number of child items displayed when viewing trace details.
         'maxTraceItems' => env('APM_MAXTRACEITEMS', 1000),
 

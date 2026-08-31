@@ -38,6 +38,7 @@ class AgentTest extends Unit
 
     private $expectedCollectors = [];
     private $totalEvents = 0;
+    private $spansEnabled = true;
 
     protected function _before(): void
     {
@@ -50,6 +51,11 @@ class AgentTest extends Unit
         $this->appConfigMock->shouldReceive('get')
             ->with('elastic-apm-laravel.spans.renderSource', Mockery::any())
             ->andReturn(false);
+        $this->appConfigMock->shouldReceive('get')
+            ->with('elastic-apm-laravel.spans.enabled', Mockery::any())
+            ->andReturnUsing(function () {
+                return $this->spansEnabled;
+            });
 
         $this->requestStartTime = new RequestStartTime(microtime(true));
         $this->eventCounter = new EventCounter();
@@ -166,6 +172,24 @@ class AgentTest extends Unit
 
         // The `times()` constraint ensures we put the expected number of events
         $this->connectorMock->expects('putEvent')->times($this->totalEvents);
+
+        $this->agent->startTransaction('test-transaction');
+        $this->agent->collectEvents('test-transaction');
+    }
+
+    public function testNoEventsAreAddedToConnectorWhenSpansAreDisabled(): void
+    {
+        $this->spansEnabled = false;
+
+        $this->setupCollectors();
+
+        $this->eventFactoryMock->shouldReceive('newTransaction')
+            ->andReturn(new Nipwaayoni\Events\Transaction('test-transaction', []));
+
+        $this->eventFactoryMock->shouldNotReceive('newSpan');
+
+        // Only the transaction is put on the connector, none of the collected measures
+        $this->connectorMock->expects('putEvent')->never();
 
         $this->agent->startTransaction('test-transaction');
         $this->agent->collectEvents('test-transaction');

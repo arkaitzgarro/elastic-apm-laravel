@@ -100,6 +100,10 @@ class Agent extends NipwaayoniAgent
 
     public function collectEvents(string $transaction_name): void
     {
+        if (!$this->collectSpans()) {
+            return;
+        }
+
         $transaction = $this->getTransaction($transaction_name);
         $this->collectors->each(function ($collector) use ($transaction) {
             $collector->collect()->each(function ($measure) use ($transaction) {
@@ -114,6 +118,14 @@ class Agent extends NipwaayoniAgent
                 $this->putEvent($event);
             });
         });
+    }
+
+    /**
+     * Spans can be disabled entirely, in which case only transactions are sent to APM.
+     */
+    private function collectSpans(): bool
+    {
+        return false !== $this->app_config->get('elastic-apm-laravel.spans.enabled', true);
     }
 
     public function startTransaction(string $name, array $context = [], ?float $start = null): Transaction
