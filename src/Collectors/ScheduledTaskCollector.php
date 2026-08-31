@@ -17,6 +17,14 @@ use Nipwaayoni\Events\Transaction;
  */
 class ScheduledTaskCollector extends EventDataCollector implements DataCollector
 {
+    /**
+     * When the task currently running started. Recorded for every task, including the
+     * ones which are not being recorded as a transaction.
+     *
+     * @var float|null
+     */
+    private $task_started_at;
+
     public function getName(): string
     {
         return 'scheduled-task-collector';
@@ -25,6 +33,8 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
     public function registerEventListeners(): void
     {
         $this->app->events->listen(ScheduledTaskStarting::class, function (ScheduledTaskStarting $event) {
+            $this->task_started_at = $this->event_clock->microtime();
+
             $transaction_name = $this->getTransactionName($event);
             if ($transaction_name) {
                 $transaction = $this->getTransaction($transaction_name);
@@ -49,7 +59,7 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
                 }
             }
 
-            $this->agent->discardEvents();
+            $this->agent->discardEvents($this->taskStartedAt());
         });
 
         $this->app->events->listen(ScheduledTaskFinished::class, function (ScheduledTaskFinished $event) {
@@ -64,8 +74,16 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
                 }
             }
 
-            $this->agent->discardEvents();
+            $this->agent->discardEvents($this->taskStartedAt());
         });
+    }
+
+    /**
+     * Fall back to now, which discards nothing, when the task start was never seen.
+     */
+    private function taskStartedAt(): float
+    {
+        return $this->task_started_at ?? $this->event_clock->microtime();
     }
 
     protected function startTransaction(string $transaction_name): Transaction

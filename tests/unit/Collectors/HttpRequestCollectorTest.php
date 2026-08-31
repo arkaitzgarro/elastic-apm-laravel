@@ -84,16 +84,18 @@ class HttpRequestCollectorTest extends Unit
             )
         );
 
-        self::assertCount(2, $this->collector->collect());
+        // Collecting consumes the measures, so gather them once
+        $measures = $this->collector->collect();
+        self::assertCount(2, $measures);
 
-        $measure = $this->collector->collect()->get(0);
+        $measure = $measures->get(0);
         self::assertEquals('Route matching', $measure['label']);
         self::assertEquals('laravel', $measure['type']);
         self::assertEquals('request', $measure['action']);
         self::assertGreaterThan(0.0, $measure['start']);
         self::assertGreaterThan(0.0, $measure['duration']);
 
-        $measure = $this->collector->collect()->get(1);
+        $measure = $measures->get(1);
         self::assertEquals('request_handled', $measure['label']);
         self::assertEquals('laravel', $measure['type']);
         self::assertEquals('request', $measure['action']);

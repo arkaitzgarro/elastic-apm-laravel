@@ -122,17 +122,17 @@ class Agent extends NipwaayoniAgent
      * or send() for it, so its pending measures would otherwise be turned into spans
      * on the next transaction this process records.
      *
-     * Discarding is skipped while a transaction is in progress, because the collectors
-     * are shared: the pending measures belong to that transaction. This is the case for
-     * an ignored sync job or nested Artisan command running inside a recorded request.
+     * The measures to drop are the ones recorded since the unit of work began, rather
+     * than everything pending. The collectors are shared by the whole process, so an
+     * ignored sync job or nested Artisan command must not discard the measures of the
+     * request it runs inside, and an ignored job must not be protected by the
+     * long-running worker command that happens to enclose it.
      */
-    public function discardEvents(): void
+    public function discardEvents(float $since): void
     {
-        if ($this->hasCurrentTransaction()) {
-            return;
-        }
-
-        $this->resetCollectors();
+        $this->collectors->each(function (EventDataCollector $collector) use ($since) {
+            $collector->discardMeasuresRecordedSince($since);
+        });
     }
 
     private function resetCollectors(): void

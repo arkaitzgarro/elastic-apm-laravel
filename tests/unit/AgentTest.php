@@ -171,38 +171,54 @@ class AgentTest extends Unit
         $this->agent->collectEvents('test-transaction');
     }
 
-    public function testDiscardsPendingEventsWhenNoTransactionIsInProgress(): void
+    public function testDiscardsOnlyTheMeasuresRecordedSinceTheUnitOfWorkStarted(): void
     {
         $this->setupCollectors();
 
-        $this->agent->discardEvents();
+        // The measures gathered so far belong to an enclosing request or command.
+        $enclosing = $this->expectedCollectors['span']['object']->collect()->pluck('label');
+        $this->expectedCollectors['span']['object']->reset();
+        $enclosing->each(function ($label) {
+            $this->expectedCollectors['span']['object']->addMeasure($label, 100, 200);
+        });
+
+        usleep(2000);
+        $unit_started_at = microtime(true);
+        usleep(2000);
+
+        // Work done by a unit of work which is not being recorded as a transaction.
+        $this->expectedCollectors['span']['object']->addMeasure('work-in-ignored-unit', 100, 200);
+
+        $this->agent->discardEvents($unit_started_at);
+
+        $remaining = $this->expectedCollectors['span']['object']->collect()->pluck('label');
+
+        $this->assertNotContains('work-in-ignored-unit', $remaining->all());
+        $this->assertEquals($enclosing->all(), $remaining->all());
+    }
+
+    public function testDiscardsEverythingRecordedAfterTheGivenTime(): void
+    {
+        $unit_started_at = microtime(true);
+        usleep(2000);
+
+        $this->setupCollectors();
+
+        $this->agent->discardEvents($unit_started_at);
 
         foreach (array_keys($this->expectedCollectors) as $type) {
             $this->assertTrue($this->expectedCollectors[$type]['object']->collect()->isEmpty());
         }
     }
 
-    public function testKeepsPendingEventsWhileTransactionIsInProgress(): void
-    {
-        $this->setupCollectors();
-
-        // An ignored sync job or nested command can ask to discard while the request
-        // it runs inside is still being recorded. Its measures belong to that request.
-        $this->agent->setCurrentTransaction(new Nipwaayoni\Events\Transaction('in-progress', []));
-
-        $this->agent->discardEvents();
-
-        foreach (array_keys($this->expectedCollectors) as $type) {
-            $this->assertFalse($this->expectedCollectors[$type]['object']->collect()->isEmpty());
-        }
-    }
-
     public function testDiscardedEventsAreNotAttachedToTheNextTransaction(): void
     {
-        $this->setupCollectors();
+        $unit_started_at = microtime(true);
+        usleep(2000);
 
         // Measures pile up while a transaction is ignored, so nothing collects or sends them.
-        $this->agent->discardEvents();
+        $this->setupCollectors();
+        $this->agent->discardEvents($unit_started_at);
 
         $this->eventFactoryMock->shouldReceive('newTransaction')
             ->andReturn(new Nipwaayoni\Events\Transaction('not-ignored', []));

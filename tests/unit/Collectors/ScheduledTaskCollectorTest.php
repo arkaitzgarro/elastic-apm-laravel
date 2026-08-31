@@ -59,6 +59,8 @@ class ScheduledTaskCollectorTest extends Unit
         $this->configMock = Mockery::mock(Config::class);
         $this->eventMock = Mockery::mock(Event::class);
         $this->eventClockMock = Mockery::mock(EventClock::class);
+        // Every command/task start is timestamped so its measures can be attributed
+        $this->eventClockMock->shouldReceive('microtime')->andReturn(1000);
 
         $this->eventMock->command = self::COMMAND_NAME;
         $this->eventMock->exitCode = 0;
@@ -129,8 +131,6 @@ class ScheduledTaskCollectorTest extends Unit
     public function testScheduledTaskStartingListener(): void
     {
         $this->patternConfigReturn();
-
-        $this->eventClockMock->expects('microtime')->andReturn(1000);
 
         $this->agentMock->expects('getTransaction')
             ->with(self::COMMAND_NAME)

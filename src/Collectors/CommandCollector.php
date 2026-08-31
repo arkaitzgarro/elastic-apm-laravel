@@ -15,6 +15,14 @@ use Nipwaayoni\Events\Transaction;
  */
 class CommandCollector extends EventDataCollector implements DataCollector
 {
+    /**
+     * When the command currently running started. Recorded for every command, including
+     * the ones which are not being recorded as a transaction.
+     *
+     * @var float|null
+     */
+    private $command_started_at;
+
     public function getName(): string
     {
         return 'command-collector';
@@ -23,6 +31,8 @@ class CommandCollector extends EventDataCollector implements DataCollector
     public function registerEventListeners(): void
     {
         $this->app->events->listen(CommandStarting::class, function (CommandStarting $event) {
+            $this->command_started_at = $this->event_clock->microtime();
+
             $transaction_name = $this->getTransactionName($event);
             if ($transaction_name) {
                 $transaction = $this->getTransaction($transaction_name);
@@ -48,7 +58,7 @@ class CommandCollector extends EventDataCollector implements DataCollector
                 }
             }
 
-            $this->agent->discardEvents();
+            $this->agent->discardEvents($this->command_started_at ?? $this->event_clock->microtime());
         });
     }
 

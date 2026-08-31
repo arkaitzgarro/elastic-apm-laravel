@@ -17,6 +17,15 @@ use Nipwaayoni\Events\Transaction;
  */
 class JobCollector extends EventDataCollector implements DataCollector
 {
+    /**
+     * When the job currently being processed started. Recorded for every job, including
+     * the ones which are not being recorded as a transaction, so that their measures can
+     * be discarded without touching those of an enclosing request or worker command.
+     *
+     * @var float|null
+     */
+    private $job_started_at;
+
     public function getName(): string
     {
         return 'job-collector';
@@ -25,6 +34,8 @@ class JobCollector extends EventDataCollector implements DataCollector
     public function registerEventListeners(): void
     {
         $this->app->events->listen(JobProcessing::class, function (JobProcessing $event) {
+            $this->job_started_at = $this->event_clock->microtime();
+
             if ($this->app->runningInConsole()) {
                 // Since the application starts only once for async queues, make sure
                 // the transaction and all spans have the correct start time.
@@ -54,7 +65,7 @@ class JobCollector extends EventDataCollector implements DataCollector
                 }
             }
 
-            $this->agent->discardEvents();
+            $this->agent->discardEvents($this->jobStartedAt());
         });
 
         $this->app->events->listen(JobFailed::class, function (JobFailed $event) {
@@ -70,8 +81,16 @@ class JobCollector extends EventDataCollector implements DataCollector
                 }
             }
 
-            $this->agent->discardEvents();
+            $this->agent->discardEvents($this->jobStartedAt());
         });
+    }
+
+    /**
+     * Fall back to now, which discards nothing, when the job start was never seen.
+     */
+    private function jobStartedAt(): float
+    {
+        return $this->job_started_at ?? $this->event_clock->microtime();
     }
 
     protected function startTransaction(string $transaction_name): Transaction

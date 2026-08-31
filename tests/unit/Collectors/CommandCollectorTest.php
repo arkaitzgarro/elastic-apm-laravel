@@ -64,6 +64,8 @@ class CommandCollectorTest extends Unit
         $requestStartTimeMock = Mockery::mock(RequestStartTime::class);
         $this->configMock = Mockery::mock(Config::class);
         $this->eventClockMock = Mockery::mock(EventClock::class);
+        // Every command/task start is timestamped so its measures can be attributed
+        $this->eventClockMock->shouldReceive('microtime')->andReturn(1000);
 
         $eventCounter = new EventCounter();
 
@@ -86,6 +88,7 @@ class CommandCollectorTest extends Unit
 
     protected function patternConfigReturn($configIgnore = null): void
     {
+
         $this->configMock->expects('get')
             ->with('elastic-apm-laravel.transactions.ignorePatterns')
             ->andReturn($configIgnore);
@@ -143,8 +146,6 @@ class CommandCollectorTest extends Unit
     public function testCommandStartingListener(): void
     {
         $this->patternConfigReturn();
-
-        $this->eventClockMock->shouldReceive('microtime')->andReturn(1000);
 
         $this->agentMock->expects('getTransaction')
             ->with(self::COMMAND_NAME)

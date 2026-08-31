@@ -41,16 +41,18 @@ class FrameworkCollectorTest extends Unit
     {
         $this->app->boot();
 
-        self::assertCount(2, $this->collector->collect());
+        // Collecting consumes the measures, so gather them once
+        $measures = $this->collector->collect();
+        self::assertCount(2, $measures);
 
-        $measure = $this->collector->collect()->get(0);
+        $measure = $measures->get(0);
         self::assertEquals('App boot', $measure['label']);
         self::assertEquals('app', $measure['type']);
         self::assertEquals('boot', $measure['action']);
         self::assertEquals(0.0, $measure['start']);
         self::assertGreaterThan(0.0, $measure['duration']);
 
-        $measure = $this->collector->collect()->get(1);
+        $measure = $measures->get(1);
         self::assertEquals('Laravel boot', $measure['label']);
         self::assertEquals('laravel', $measure['type']);
         self::assertEquals('boot', $measure['action']);
