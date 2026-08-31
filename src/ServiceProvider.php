@@ -142,7 +142,7 @@ class ServiceProvider extends BaseServiceProvider
      */
     protected function registerCollectors(): void
     {
-        if ($this->collectFrameworkEvents()) {
+        if ($this->collectSpans() && $this->collectFrameworkEvents()) {
             // Force the FrameworkCollector instance to be created and used. While this appears odd,
             // the collector instance registers itself to listen for booting events, so that instance
             // must be made available for collection later.
@@ -151,14 +151,16 @@ class ServiceProvider extends BaseServiceProvider
             $this->app->tag(FrameworkCollector::class, self::COLLECTOR_TAG);
         }
 
-        if (false !== config('elastic-apm-laravel.spans.querylog.enabled')) {
+        if ($this->collectSpans() && false !== config('elastic-apm-laravel.spans.querylog.enabled')) {
             // DB Queries collector
             $this->app->tag(DBQueryCollector::class, self::COLLECTOR_TAG);
         }
 
         // Http request collector
         if ($this->collectHttpEvents()) {
-            $this->app->tag(HttpRequestCollector::class, self::COLLECTOR_TAG);
+            if ($this->collectSpans()) {
+                $this->app->tag(HttpRequestCollector::class, self::COLLECTOR_TAG);
+            }
         } else {
             $this->app->tag(CommandCollector::class, self::COLLECTOR_TAG);
             $this->app->tag(ScheduledTaskCollector::class, self::COLLECTOR_TAG);
@@ -168,7 +170,20 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->tag(JobCollector::class, self::COLLECTOR_TAG);
 
         // Collector for manual measurements throughout the app
-        $this->app->tag(SpanCollector::class, self::COLLECTOR_TAG);
+        if ($this->collectSpans()) {
+            $this->app->tag(SpanCollector::class, self::COLLECTOR_TAG);
+        }
+    }
+
+    /**
+     * When spans are disabled, the collectors which only produce spans are never
+     * registered, so they don't spend any time measuring events which would be
+     * discarded by the Agent anyway. Collectors which start and stop transactions
+     * are still registered.
+     */
+    private function collectSpans(): bool
+    {
+        return false !== config('elastic-apm-laravel.spans.enabled', true);
     }
 
     private function collectFrameworkEvents(): bool

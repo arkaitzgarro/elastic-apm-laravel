@@ -21,6 +21,7 @@ class ApmConfigTest extends \Codeception\Test\Unit
         putenv('APM_USEROUTEURI');
         putenv('APM_MAXTRACEITEMS');
         putenv('APM_BACKTRACEDEPTH');
+        putenv('APM_SPANS_ENABLED');
         putenv('APM_QUERYLOG');
         putenv('APM_THRESHOLD');
 
@@ -56,6 +57,7 @@ class ApmConfigTest extends \Codeception\Test\Unit
         $this->assertTrue($this->config['transactions']['useRouteUri']);
 
         // spans block
+        $this->assertTrue($this->config['spans']['enabled']);
         $this->assertEquals(1000, $this->config['spans']['maxTraceItems']);
         $this->assertEquals(25, $this->config['spans']['querylog']['enabled']);
         $this->assertEquals(200, $this->config['spans']['querylog']['threshold']);
@@ -111,12 +113,14 @@ class ApmConfigTest extends \Codeception\Test\Unit
 
     public function testSpansConfigEnvVariables()
     {
+        putenv('APM_SPANS_ENABLED=false');
         putenv('APM_MAXTRACEITEMS=10');
         putenv('APM_BACKTRACEDEPTH=10');
         putenv('APM_QUERYLOG="auto"');
         putenv('APM_THRESHOLD=50');
         $this->config = include $this->configFilePath;
 
+        $this->assertFalse($this->config['spans']['enabled']);
         $this->assertEquals(10, $this->config['spans']['maxTraceItems']);
         $this->assertEquals(10, $this->config['spans']['backtraceDepth']);
         $this->assertEquals('auto', $this->config['spans']['querylog']['enabled']);
