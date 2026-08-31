@@ -155,6 +155,8 @@ class ScheduledTaskCollectorTest extends Unit
             ->with(self::COMMAND_NAME, ['result' => 0]);
         $this->agentMock->expects('collectEvents')
             ->with(self::COMMAND_NAME);
+        // Without sending, the skipped task's spans are collected again by the next task
+        $this->agentMock->expects('send');
 
         $this->dispatcher->dispatch(new ScheduledTaskSkipped($this->eventMock));
     }

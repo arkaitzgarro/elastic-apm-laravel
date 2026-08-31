@@ -41,6 +41,9 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
                 $transaction = $this->getTransaction($transaction_name);
                 if ($transaction) {
                     $this->stopTransaction($transaction_name, $event->task->exitCode);
+                    // A skipped task is a completed unit of work. Without sending, its
+                    // spans stay pending and are collected again by the next task.
+                    $this->send($event);
 
                     return;
                 }
