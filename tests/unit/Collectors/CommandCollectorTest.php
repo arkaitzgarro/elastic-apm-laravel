@@ -88,6 +88,9 @@ class CommandCollectorTest extends Unit
 
     protected function patternConfigReturn($configIgnore = null): void
     {
+        $this->configMock->shouldReceive('get')
+            ->with('elastic-apm-laravel.transactions.ignoreCommands', Mockery::any())
+            ->andReturn([]);
 
         $this->configMock->expects('get')
             ->with('elastic-apm-laravel.transactions.ignorePatterns')
@@ -137,6 +140,26 @@ class CommandCollectorTest extends Unit
         $this->dispatcher->dispatch(
             new CommandStarting(
                 self::COMMAND_NAME,
+                $this->commandInputMock,
+                $this->commandOutputMock
+            )
+        );
+    }
+
+    public function testLongRunningCommandIsNotRecordedAsATransaction(): void
+    {
+        $this->configMock->shouldReceive('get')
+            ->with('elastic-apm-laravel.transactions.ignoreCommands', Mockery::any())
+            ->andReturn(['queue:work']);
+
+        // A worker command is not a unit of work: recording one produces a transaction
+        // with no duration and keeps it current for the jobs which follow.
+        $this->agentMock->shouldNotReceive('startTransaction');
+        $this->agentMock->shouldNotReceive('getTransaction');
+
+        $this->dispatcher->dispatch(
+            new CommandStarting(
+                'queue:work',
                 $this->commandInputMock,
                 $this->commandOutputMock
             )

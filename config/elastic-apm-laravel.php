@@ -47,6 +47,14 @@ return [
         'useRouteUri' => env('APM_USEROUTEURI', true),
         // This is a regular expression to match and filter out transactions by name. Use | in regex for multiple patterns.
         'ignorePatterns' => env('APM_IGNORE_PATTERNS', null),
+
+        // Commands which run for the lifetime of the process rather than for a single
+        // unit of work. They are not recorded as transactions: the jobs and tasks they
+        // run are recorded instead. Add your own long running commands here.
+        'ignoreCommands' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', env('APM_IGNORE_COMMANDS', 'queue:work,queue:listen,horizon,horizon:work,schedule:work,octane:start'))
+        ))),
     ],
 
     'spans' => [

@@ -106,7 +106,23 @@ class CommandCollector extends EventDataCollector implements DataCollector
             return '';
         }
 
+        if ($this->isLongRunningCommand($transaction_name)) {
+            return '';
+        }
+
         return $this->shouldIgnoreTransaction($transaction_name) ? '' : $transaction_name;
+    }
+
+    /**
+     * A worker command is not a unit of work. Recording one as a transaction produces
+     * an entry with no duration, sent as soon as the first job it runs completes, and
+     * keeps that transaction current for the jobs which follow.
+     */
+    protected function isLongRunningCommand(string $command): bool
+    {
+        $commands = $this->config->get('elastic-apm-laravel.transactions.ignoreCommands', []);
+
+        return in_array($command, (array) $commands, true);
     }
 
     protected function addMetadata(Transaction $transaction): void
