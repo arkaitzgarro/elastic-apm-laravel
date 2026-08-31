@@ -88,6 +88,10 @@ class RecordTransaction
         $transaction_name = $this->getTransactionName($request);
 
         if ($this->shouldIgnoreTransaction($transaction_name)) {
+            // Nothing will turn the measures recorded during this request into spans,
+            // so make sure they are not attached to a later transaction.
+            $this->agent->discardEvents($this->start_time->microseconds());
+
             return;
         }
 

@@ -186,6 +186,9 @@ class RecordTransactionTest extends Unit
     {
         $this->agent->shouldNotReceive('stopTransaction');
         $this->agent->shouldNotReceive('collectEvents');
+        // Measures recorded while the transaction was ignored must be discarded.
+        // Twice, because this test terminates two ignored requests below.
+        $this->agent->shouldReceive('discardEvents')->twice();
 
         $this->createMiddlewareInstance(false, '/\/health-check|^OPTIONS /');
         $this->middleware->terminate(Request::create('/posts', 'OPTIONS'));

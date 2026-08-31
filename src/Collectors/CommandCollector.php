@@ -15,6 +15,14 @@ use Nipwaayoni\Events\Transaction;
  */
 class CommandCollector extends EventDataCollector implements DataCollector
 {
+    /**
+     * When the command currently running started. Recorded for every command, including
+     * the ones which are not being recorded as a transaction.
+     *
+     * @var float|null
+     */
+    private $command_started_at;
+
     public function getName(): string
     {
         return 'command-collector';
@@ -23,6 +31,8 @@ class CommandCollector extends EventDataCollector implements DataCollector
     public function registerEventListeners(): void
     {
         $this->app->events->listen(CommandStarting::class, function (CommandStarting $event) {
+            $this->command_started_at = $this->event_clock->microtime();
+
             $transaction_name = $this->getTransactionName($event);
             if ($transaction_name) {
                 $transaction = $this->getTransaction($transaction_name);
@@ -43,8 +53,12 @@ class CommandCollector extends EventDataCollector implements DataCollector
                         $event->exitCode
                     );
                     $this->send($event);
+
+                    return;
                 }
             }
+
+            $this->agent->discardEvents($this->command_started_at ?? $this->event_clock->microtime());
         });
     }
 
@@ -92,7 +106,23 @@ class CommandCollector extends EventDataCollector implements DataCollector
             return '';
         }
 
+        if ($this->isLongRunningCommand($transaction_name)) {
+            return '';
+        }
+
         return $this->shouldIgnoreTransaction($transaction_name) ? '' : $transaction_name;
+    }
+
+    /**
+     * A worker command is not a unit of work. Recording one as a transaction produces
+     * an entry with no duration, sent as soon as the first job it runs completes, and
+     * keeps that transaction current for the jobs which follow.
+     */
+    protected function isLongRunningCommand(string $command): bool
+    {
+        $commands = $this->config->get('elastic-apm-laravel.transactions.ignoreCommands', []);
+
+        return in_array($command, (array) $commands, true);
     }
 
     protected function addMetadata(Transaction $transaction): void

@@ -123,6 +123,8 @@ class JobCollectorTest extends Unit
         $this->agentMock->shouldNotReceive('stopTransaction');
         $this->agentMock->shouldNotReceive('collectEvents');
         $this->agentMock->shouldNotReceive('send');
+        // Measures recorded during the ignored job must not leak into the next transaction
+        $this->agentMock->shouldReceive('discardEvents')->once();
 
         $this->dispatcher->dispatch(new JobProcessed('test', $this->jobMock));
     }
@@ -134,6 +136,8 @@ class JobCollectorTest extends Unit
         $this->agentMock->shouldNotReceive('getTransaction');
         $this->agentMock->shouldNotReceive('captureThrowable');
         $this->agentMock->shouldNotReceive('stopTransaction');
+        // Measures recorded during the ignored job must not leak into the next transaction
+        $this->agentMock->shouldReceive('discardEvents')->once();
 
         $this->dispatcher->dispatch(new JobFailed('test', $this->jobMock, new Exception()));
     }
@@ -277,6 +281,10 @@ class JobCollectorTest extends Unit
             ->shouldNotReceive('collectEvents');
         $this->agentMock
             ->shouldNotReceive('send');
+        // Measures recorded during the job must not leak into the next transaction
+        $this->agentMock
+            ->shouldReceive('discardEvents')
+            ->once();
 
         $this->dispatcher->dispatch(new JobFailed('test', $this->jobMock, $exception));
     }

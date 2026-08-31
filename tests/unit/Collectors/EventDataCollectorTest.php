@@ -72,9 +72,11 @@ class EventDataCollectorTest extends Unit
             'GET',
             'GET /endpoint'
         );
-        $event = $this->eventDataCollector->collect()->first();
+        // Collecting consumes the measures, so gather them once
+        $events = $this->eventDataCollector->collect();
+        $event = $events->first();
 
-        $this->assertEquals(1, $this->eventDataCollector->collect()->count());
+        $this->assertEquals(1, $events->count());
         $this->assertSame([
             'label' => 'GET /endpoint',
             'start' => 500000.0,
@@ -98,9 +100,11 @@ class EventDataCollectorTest extends Unit
             'GET /endpoint',
             1500.0
         );
-        $event = $this->eventDataCollector->collect()->first();
+        // Collecting consumes the measures, so gather them once
+        $events = $this->eventDataCollector->collect();
+        $event = $events->first();
 
-        $this->assertEquals(1, $this->eventDataCollector->collect()->count());
+        $this->assertEquals(1, $events->count());
         $this->assertSame([
             'label' => 'GET /endpoint',
             'start' => 500000.0,
@@ -215,6 +219,8 @@ class EventDataCollectorTest extends Unit
 
     public function testDirectAddingOfMeasuresRespectsLimit(): void
     {
+        $this->eventClock->shouldReceive('microtime')->andReturn(1500);
+
         $this->eventDataCollector->addMeasure(uniqid('test-event'), 100, 200);
         $this->eventDataCollector->addMeasure(uniqid('test-event'), 100, 200);
         $this->eventDataCollector->addMeasure(uniqid('test-event'), 100, 200);
@@ -222,6 +228,44 @@ class EventDataCollectorTest extends Unit
         $events = $this->eventDataCollector->collect();
 
         $this->assertCount(self::EVENT_LIMIT, $events);
+    }
+
+    public function testCollectingConsumesTheMeasures(): void
+    {
+        $this->eventClock->shouldReceive('microtime')->andReturn(1500);
+
+        $this->eventDataCollector->addMeasure('only-measure', 100, 200);
+
+        // A measure belongs to one transaction, so the next collect must not see it again
+        $this->assertCount(1, $this->eventDataCollector->collect());
+        $this->assertCount(0, $this->eventDataCollector->collect());
+    }
+
+    public function testDiscardsOnlyTheMeasuresRecordedSinceTheGivenTime(): void
+    {
+        $this->eventClock->shouldReceive('microtime')->andReturn(1000, 2000);
+
+        $this->eventDataCollector->addMeasure('recorded-before', 100, 200);
+        $this->eventDataCollector->addMeasure('recorded-after', 100, 200);
+
+        $this->eventDataCollector->discardMeasuresRecordedSince(2000);
+
+        $labels = $this->eventDataCollector->collect()->pluck('label')->all();
+
+        $this->assertSame(['recorded-before'], $labels);
+    }
+
+    public function testDiscardsStartedMeasuresBegunSinceTheGivenTime(): void
+    {
+        $this->eventClock->shouldReceive('microtime')->andReturn(1000, 2000, 3000);
+
+        $this->eventDataCollector->startMeasure('started-before', 'request', 'GET', 'before');
+        $this->eventDataCollector->startMeasure('started-after', 'request', 'GET', 'after');
+
+        $this->eventDataCollector->discardMeasuresRecordedSince(2000);
+
+        $this->assertTrue($this->eventDataCollector->hasStartedMeasure('started-before'));
+        $this->assertFalse($this->eventDataCollector->hasStartedMeasure('started-after'));
     }
 
     private function createEventCollector(): EventDataCollector

@@ -59,6 +59,8 @@ class ScheduledTaskCollectorTest extends Unit
         $this->configMock = Mockery::mock(Config::class);
         $this->eventMock = Mockery::mock(Event::class);
         $this->eventClockMock = Mockery::mock(EventClock::class);
+        // Every command/task start is timestamped so its measures can be attributed
+        $this->eventClockMock->shouldReceive('microtime')->andReturn(1000);
 
         $this->eventMock->command = self::COMMAND_NAME;
         $this->eventMock->exitCode = 0;
@@ -109,6 +111,8 @@ class ScheduledTaskCollectorTest extends Unit
         $this->eventMock->command = 'work:do';
         $this->patternConfigReturn(self::TASK_IGNORE_PATTERN);
         $this->agentMock->shouldNotReceive('startTransaction', 'getTransaction');
+        // Measures recorded while the task was ignored must be discarded
+        $this->agentMock->shouldReceive('discardEvents')->once();
 
         $this->dispatcher->dispatch(new ScheduledTaskSkipped($this->eventMock));
     }
@@ -118,6 +122,8 @@ class ScheduledTaskCollectorTest extends Unit
         $this->eventMock->command = 'work:do';
         $this->patternConfigReturn(self::TASK_IGNORE_PATTERN);
         $this->agentMock->shouldNotReceive('startTransaction', 'getTransaction');
+        // Measures recorded while the task was ignored must be discarded
+        $this->agentMock->shouldReceive('discardEvents')->once();
 
         $this->dispatcher->dispatch(new ScheduledTaskFinished($this->eventMock, 1000.0));
     }
@@ -125,8 +131,6 @@ class ScheduledTaskCollectorTest extends Unit
     public function testScheduledTaskStartingListener(): void
     {
         $this->patternConfigReturn();
-
-        $this->eventClockMock->expects('microtime')->andReturn(1000);
 
         $this->agentMock->expects('getTransaction')
             ->with(self::COMMAND_NAME)
@@ -151,6 +155,8 @@ class ScheduledTaskCollectorTest extends Unit
             ->with(self::COMMAND_NAME, ['result' => 0]);
         $this->agentMock->expects('collectEvents')
             ->with(self::COMMAND_NAME);
+        // Without sending, the skipped task's spans are collected again by the next task
+        $this->agentMock->expects('send');
 
         $this->dispatcher->dispatch(new ScheduledTaskSkipped($this->eventMock));
     }

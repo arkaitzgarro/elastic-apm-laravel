@@ -83,6 +83,7 @@ abstract class EventDataCollector implements DataCollector
         $data = [
             'label' => $label ?: $name,
             'start' => $start - $transactionStart,
+            'started_at' => $start,
             'type' => $type,
             'action' => $action,
             'exceeds_limit' => $this->event_counter->reachedLimit(),
@@ -171,6 +172,7 @@ abstract class EventDataCollector implements DataCollector
             'label' => $label,
             'start' => $this->toMilliseconds($start),
             'duration' => $this->toMilliseconds($end - $start),
+            'recorded_at' => $this->event_clock->microtime(),
             'type' => $type,
             'action' => $action,
             'context' => $context,
@@ -178,13 +180,49 @@ abstract class EventDataCollector implements DataCollector
         ]);
     }
 
+    /**
+     * Collecting consumes the measures. A measure belongs to exactly one transaction,
+     * so leaving it pending would let the next transaction to collect claim it again.
+     * This happens for a sync job, which stops its own transaction and collects, but
+     * does not send because the request it runs inside has not finished yet.
+     */
     public function collect(): Collection
     {
         $this->started_measures->keys()->each(function ($name) {
             $this->stopMeasure($name);
         });
 
-        return $this->measures;
+        // recorded_at is internal bookkeeping used to attribute a measure to the unit
+        // of work it belongs to, and is not part of the collected measure.
+        $measures = $this->measures->map(function (array $measure) {
+            unset($measure['recorded_at']);
+
+            return $measure;
+        });
+
+        $this->measures = new Collection();
+
+        return $measures;
+    }
+
+    /**
+     * Drop the measures recorded since the given time, leaving anything recorded
+     * before it untouched. Used when a unit of work is not being recorded as a
+     * transaction, so that its measures are not attributed to a later one, while
+     * an enclosing request or command keeps its own.
+     */
+    public function discardMeasuresRecordedSince(float $since): void
+    {
+        $this->measures = $this->measures
+            ->reject(function (array $measure) use ($since) {
+                return $measure['recorded_at'] >= $since;
+            })
+            ->values();
+
+        $this->started_measures = $this->started_measures
+            ->reject(function (array $measure) use ($since) {
+                return $measure['started_at'] >= $since;
+            });
     }
 
     private function toMilliseconds(float $time): float

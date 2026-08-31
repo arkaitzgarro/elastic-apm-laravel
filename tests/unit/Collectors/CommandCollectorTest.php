@@ -64,6 +64,8 @@ class CommandCollectorTest extends Unit
         $requestStartTimeMock = Mockery::mock(RequestStartTime::class);
         $this->configMock = Mockery::mock(Config::class);
         $this->eventClockMock = Mockery::mock(EventClock::class);
+        // Every command/task start is timestamped so its measures can be attributed
+        $this->eventClockMock->shouldReceive('microtime')->andReturn(1000);
 
         $eventCounter = new EventCounter();
 
@@ -86,6 +88,10 @@ class CommandCollectorTest extends Unit
 
     protected function patternConfigReturn($configIgnore = null): void
     {
+        $this->configMock->shouldReceive('get')
+            ->with('elastic-apm-laravel.transactions.ignoreCommands', Mockery::any())
+            ->andReturn([]);
+
         $this->configMock->expects('get')
             ->with('elastic-apm-laravel.transactions.ignorePatterns')
             ->andReturn($configIgnore);
@@ -112,6 +118,8 @@ class CommandCollectorTest extends Unit
     {
         $this->patternConfigReturn(self::COMMAND_IGNORE_PATTERN);
         $this->agentMock->shouldNotReceive('getTransaction', 'captureThrowable', 'stopTransaction');
+        // Measures recorded while the transaction was ignored must be discarded
+        $this->agentMock->shouldReceive('discardEvents')->once();
 
         $this->dispatcher->dispatch(new CommandFinished(
             self::COMMAND_NAME,
@@ -138,11 +146,29 @@ class CommandCollectorTest extends Unit
         );
     }
 
+    public function testLongRunningCommandIsNotRecordedAsATransaction(): void
+    {
+        $this->configMock->shouldReceive('get')
+            ->with('elastic-apm-laravel.transactions.ignoreCommands', Mockery::any())
+            ->andReturn(['queue:work']);
+
+        // A worker command is not a unit of work: recording one produces a transaction
+        // with no duration and keeps it current for the jobs which follow.
+        $this->agentMock->shouldNotReceive('startTransaction');
+        $this->agentMock->shouldNotReceive('getTransaction');
+
+        $this->dispatcher->dispatch(
+            new CommandStarting(
+                'queue:work',
+                $this->commandInputMock,
+                $this->commandOutputMock
+            )
+        );
+    }
+
     public function testCommandStartingListener(): void
     {
         $this->patternConfigReturn();
-
-        $this->eventClockMock->shouldReceive('microtime')->andReturn(1000);
 
         $this->agentMock->expects('getTransaction')
             ->with(self::COMMAND_NAME)

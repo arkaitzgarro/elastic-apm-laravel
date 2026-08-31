@@ -68,9 +68,11 @@ class SpanCollectorTest extends Unit
             new StopMeasuring('custom_span')
         );
 
-        self::assertCount(1, $this->collector->collect());
+        // Collecting consumes the measures, so gather them once
+        $measures = $this->collector->collect();
+        self::assertCount(1, $measures);
 
-        $measure = $this->collector->collect()->get(0);
+        $measure = $measures->get(0);
         self::assertEquals('test_label', $measure['label']);
         self::assertEquals('test_type', $measure['type']);
         self::assertEquals('test_action', $measure['action']);
