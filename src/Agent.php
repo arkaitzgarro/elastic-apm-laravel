@@ -116,6 +116,32 @@ class Agent extends NipwaayoniAgent
         });
     }
 
+    /**
+     * Measures are recorded continuously, whether or not a transaction is being
+     * recorded for them. When a transaction is ignored, nothing calls collectEvents()
+     * or send() for it, so its pending measures would otherwise be turned into spans
+     * on the next transaction this process records.
+     *
+     * Discarding is skipped while a transaction is in progress, because the collectors
+     * are shared: the pending measures belong to that transaction. This is the case for
+     * an ignored sync job or nested Artisan command running inside a recorded request.
+     */
+    public function discardEvents(): void
+    {
+        if ($this->hasCurrentTransaction()) {
+            return;
+        }
+
+        $this->resetCollectors();
+    }
+
+    private function resetCollectors(): void
+    {
+        $this->collectors->each(function (EventDataCollector $collector) {
+            $collector->reset();
+        });
+    }
+
     public function startTransaction(string $name, array $context = [], ?float $start = null): Transaction
     {
         $transaction = parent::startTransaction($name, $context, $start);
@@ -131,9 +157,7 @@ class Agent extends NipwaayoniAgent
         $this->clearCurrentTransaction();
 
         // Ensure collectors are reset after data is sent to APM
-        $this->collectors->each(function (EventDataCollector $collector) {
-            $collector->reset();
-        });
+        $this->resetCollectors();
 
         // TODO reset started event counter
 

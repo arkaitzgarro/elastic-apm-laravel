@@ -41,8 +41,12 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
                 $transaction = $this->getTransaction($transaction_name);
                 if ($transaction) {
                     $this->stopTransaction($transaction_name, $event->task->exitCode);
+
+                    return;
                 }
             }
+
+            $this->agent->discardEvents();
         });
 
         $this->app->events->listen(ScheduledTaskFinished::class, function (ScheduledTaskFinished $event) {
@@ -52,8 +56,12 @@ class ScheduledTaskCollector extends EventDataCollector implements DataCollector
                 if ($transaction) {
                     $this->stopTransaction($transaction_name, $event->task->exitCode);
                     $this->send($event);
+
+                    return;
                 }
             }
+
+            $this->agent->discardEvents();
         });
     }
 

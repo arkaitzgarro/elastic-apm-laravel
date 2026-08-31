@@ -43,8 +43,12 @@ class CommandCollector extends EventDataCollector implements DataCollector
                         $event->exitCode
                     );
                     $this->send($event);
+
+                    return;
                 }
             }
+
+            $this->agent->discardEvents();
         });
     }
 

@@ -109,6 +109,8 @@ class ScheduledTaskCollectorTest extends Unit
         $this->eventMock->command = 'work:do';
         $this->patternConfigReturn(self::TASK_IGNORE_PATTERN);
         $this->agentMock->shouldNotReceive('startTransaction', 'getTransaction');
+        // Measures recorded while the task was ignored must be discarded
+        $this->agentMock->shouldReceive('discardEvents')->once();
 
         $this->dispatcher->dispatch(new ScheduledTaskSkipped($this->eventMock));
     }
@@ -118,6 +120,8 @@ class ScheduledTaskCollectorTest extends Unit
         $this->eventMock->command = 'work:do';
         $this->patternConfigReturn(self::TASK_IGNORE_PATTERN);
         $this->agentMock->shouldNotReceive('startTransaction', 'getTransaction');
+        // Measures recorded while the task was ignored must be discarded
+        $this->agentMock->shouldReceive('discardEvents')->once();
 
         $this->dispatcher->dispatch(new ScheduledTaskFinished($this->eventMock, 1000.0));
     }

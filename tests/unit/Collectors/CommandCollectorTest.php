@@ -112,6 +112,8 @@ class CommandCollectorTest extends Unit
     {
         $this->patternConfigReturn(self::COMMAND_IGNORE_PATTERN);
         $this->agentMock->shouldNotReceive('getTransaction', 'captureThrowable', 'stopTransaction');
+        // Measures recorded while the transaction was ignored must be discarded
+        $this->agentMock->shouldReceive('discardEvents')->once();
 
         $this->dispatcher->dispatch(new CommandFinished(
             self::COMMAND_NAME,

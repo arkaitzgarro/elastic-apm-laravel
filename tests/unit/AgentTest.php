@@ -171,6 +171,49 @@ class AgentTest extends Unit
         $this->agent->collectEvents('test-transaction');
     }
 
+    public function testDiscardsPendingEventsWhenNoTransactionIsInProgress(): void
+    {
+        $this->setupCollectors();
+
+        $this->agent->discardEvents();
+
+        foreach (array_keys($this->expectedCollectors) as $type) {
+            $this->assertTrue($this->expectedCollectors[$type]['object']->collect()->isEmpty());
+        }
+    }
+
+    public function testKeepsPendingEventsWhileTransactionIsInProgress(): void
+    {
+        $this->setupCollectors();
+
+        // An ignored sync job or nested command can ask to discard while the request
+        // it runs inside is still being recorded. Its measures belong to that request.
+        $this->agent->setCurrentTransaction(new Nipwaayoni\Events\Transaction('in-progress', []));
+
+        $this->agent->discardEvents();
+
+        foreach (array_keys($this->expectedCollectors) as $type) {
+            $this->assertFalse($this->expectedCollectors[$type]['object']->collect()->isEmpty());
+        }
+    }
+
+    public function testDiscardedEventsAreNotAttachedToTheNextTransaction(): void
+    {
+        $this->setupCollectors();
+
+        // Measures pile up while a transaction is ignored, so nothing collects or sends them.
+        $this->agent->discardEvents();
+
+        $this->eventFactoryMock->shouldReceive('newTransaction')
+            ->andReturn(new Nipwaayoni\Events\Transaction('not-ignored', []));
+        $this->eventFactoryMock->shouldNotReceive('newSpan');
+
+        $this->connectorMock->expects('putEvent')->never();
+
+        $this->agent->startTransaction('not-ignored');
+        $this->agent->collectEvents('not-ignored');
+    }
+
     public function testStartNewTransactionSetsAsCurrent(): void
     {
         $transaction = new Nipwaayoni\Events\Transaction('test-transaction', []);

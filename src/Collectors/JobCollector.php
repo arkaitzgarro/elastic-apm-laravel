@@ -49,8 +49,12 @@ class JobCollector extends EventDataCollector implements DataCollector
                 if ($transaction) {
                     $this->stopTransaction($transaction_name, 200);
                     $this->send($event->job);
+
+                    return;
                 }
             }
+
+            $this->agent->discardEvents();
         });
 
         $this->app->events->listen(JobFailed::class, function (JobFailed $event) {
@@ -61,8 +65,12 @@ class JobCollector extends EventDataCollector implements DataCollector
                     $this->agent->captureThrowable($event->exception, [], $transaction);
                     $this->stopTransaction($transaction_name, 500);
                     $this->send($event->job);
+
+                    return;
                 }
             }
+
+            $this->agent->discardEvents();
         });
     }
 
