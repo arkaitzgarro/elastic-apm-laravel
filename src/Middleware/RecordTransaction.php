@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Log;
 use Nipwaayoni\Events\Transaction;
+use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -24,6 +25,13 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class RecordTransaction
 {
+    /**
+     * Laravel resolves a new instance of the middleware to terminate the request, so
+     * anything handle() needs to pass on to terminate() is stored on the request.
+     */
+    public const TRANSACTION_NAME_ATTRIBUTE = 'elastic-apm-laravel.transaction_name';
+    public const REJECTED_REQUEST_ATTRIBUTE = 'elastic-apm-laravel.rejected_request';
+
     protected $agent;
     protected $config;
     protected $start_time;
@@ -40,6 +48,16 @@ class RecordTransaction
      */
     public function handle(Request $request, \Closure $next)
     {
+        try {
+            $request->method();
+        } catch (SuspiciousOperationException $exception) {
+            // Symfony rejects the request because of an invalid method override. Record it, then
+            // let the exception reach the application's handler as if this middleware was not here.
+            $this->recordRejectedRequest($request);
+
+            throw $exception;
+        }
+
         $transaction_name = $this->getTransactionName($request);
 
         if ($this->shouldIgnoreTransaction($transaction_name)) {
@@ -49,6 +67,7 @@ class RecordTransaction
 
         // Start a new transaction
         $transaction = $this->startTransaction($transaction_name);
+        $request->attributes->set(self::TRANSACTION_NAME_ATTRIBUTE, $transaction_name);
 
         // Execute the application logic
         $response = $next($request);
@@ -83,7 +102,30 @@ class RecordTransaction
         ]);
     }
 
-    public function terminate(Request $request): void
+    public function terminate(Request $request, ?Response $response = null): void
+    {
+        $transaction_name = $request->attributes->get(self::TRANSACTION_NAME_ATTRIBUTE);
+
+        if (null === $transaction_name) {
+            // No transaction was started: the request was ignored, or never reached handle()
+            return;
+        }
+
+        try {
+            if (null !== $response && $request->attributes->get(self::REJECTED_REQUEST_ATTRIBUTE)) {
+                // handle() never got a response for a rejected request
+                $this->addMetadata($this->agent->getTransaction($transaction_name), $request, $response);
+            }
+
+            // Stop the transaction and measure the time
+            $this->agent->stopTransaction($transaction_name);
+            $this->agent->collectEvents($transaction_name);
+        } catch (\Throwable $t) {
+            Log::error($t->getMessage());
+        }
+    }
+
+    protected function recordRejectedRequest(Request $request): void
     {
         $transaction_name = $this->getTransactionName($request);
 
@@ -91,13 +133,9 @@ class RecordTransaction
             return;
         }
 
-        try {
-            // Stop the transaction and measure the time
-            $this->agent->stopTransaction($transaction_name);
-            $this->agent->collectEvents($transaction_name);
-        } catch (\Throwable $t) {
-            Log::error($t->getMessage());
-        }
+        $this->startTransaction($transaction_name);
+        $request->attributes->set(self::TRANSACTION_NAME_ATTRIBUTE, $transaction_name);
+        $request->attributes->set(self::REJECTED_REQUEST_ATTRIBUTE, true);
     }
 
     protected function shouldIgnoreTransaction(string $transaction_name): bool
@@ -124,7 +162,7 @@ class RecordTransaction
     {
         $uri = $request->path() ?? $this->getRequestUri();
 
-        return $request->method() . ' ' . $this->normalizeUri($uri);
+        return $this->getRequestMethod($request) . ' ' . $this->normalizeUri($uri);
     }
 
     protected function getRouteUriTransactionName(Request $request): string
@@ -136,7 +174,17 @@ class RecordTransaction
             $uri = $this->getRequestUri();
         }
 
-        return $request->method() . ' ' . $this->normalizeUri($uri);
+        return $this->getRequestMethod($request) . ' ' . $this->normalizeUri($uri);
+    }
+
+    protected function getRequestMethod(Request $request): string
+    {
+        try {
+            return $request->method();
+        } catch (SuspiciousOperationException $exception) {
+            // The method override is invalid, so use the method the client sent
+            return $request->getRealMethod();
+        }
     }
 
     protected function getRequestUri(): string

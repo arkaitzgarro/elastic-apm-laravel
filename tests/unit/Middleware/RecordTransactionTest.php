@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Nipwaayoni\Events\Transaction;
+use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class RecordTransactionTest extends Unit
@@ -171,6 +172,11 @@ class RecordTransactionTest extends Unit
     {
         $this->createMiddlewareInstance(false, '/\/health-check|^OPTIONS /');
 
+        $this->response->shouldReceive('getStatusCode')->andReturn(200);
+        $this->agent->shouldReceive('startTransaction')
+            ->once()
+            ->andReturn($this->transaction);
+
         $this->agent->shouldReceive('stopTransaction')
             ->once()
             ->with('GET /ping');
@@ -179,24 +185,35 @@ class RecordTransactionTest extends Unit
             ->once()
             ->with('GET /ping');
 
-        $this->middleware->terminate($this->request);
+        $this->middleware->handle($this->request, function () {
+            return $this->response;
+        });
+        $this->middleware->terminate($this->request, $this->response);
     }
 
     public function testTransactionTerminateIgnored()
     {
+        $this->agent->shouldNotReceive('startTransaction');
         $this->agent->shouldNotReceive('stopTransaction');
         $this->agent->shouldNotReceive('collectEvents');
 
-        $this->createMiddlewareInstance(false, '/\/health-check|^OPTIONS /');
-        $this->middleware->terminate(Request::create('/posts', 'OPTIONS'));
-
-        $this->createMiddlewareInstance(false, '/\/health-check|^OPTIONS /'); // reset the mock ->once() count
-        $this->middleware->terminate(Request::create('/health-check', 'GET'));
+        foreach ([Request::create('/posts', 'OPTIONS'), Request::create('/health-check', 'GET')] as $request) {
+            $this->createMiddlewareInstance(false, '/\/health-check|^OPTIONS /'); // reset the mock ->once() count
+            $this->middleware->handle($request, function () {
+                return $this->response;
+            });
+            $this->middleware->terminate($request, $this->response);
+        }
     }
 
     public function testTransactionTerminateError()
     {
         $this->createMiddlewareInstance(false);
+
+        $this->response->shouldReceive('getStatusCode')->andReturn(200);
+        $this->agent->shouldReceive('startTransaction')
+            ->once()
+            ->andReturn($this->transaction);
 
         $this->agent->shouldReceive('stopTransaction')
             ->once()
@@ -206,7 +223,149 @@ class RecordTransactionTest extends Unit
             ->once()
             ->with('error message');
 
-        $this->middleware->terminate($this->request);
+        $this->middleware->handle($this->request, function () {
+            return $this->response;
+        });
+        $this->middleware->terminate($this->request, $this->response);
+    }
+
+    public function testTerminateWithoutStartedTransaction()
+    {
+        // An exception thrown before this middleware runs means handle() never starts a transaction
+        $this->config = Mockery::mock(Config::class);
+        $this->middleware = new RecordTransaction($this->agent, $this->config, $this->requestStartTimeMock);
+
+        $this->agent->shouldNotReceive('stopTransaction');
+        $this->agent->shouldNotReceive('collectEvents');
+        Log::shouldReceive('error')->never();
+
+        $this->middleware->terminate($this->request, $this->response);
+    }
+
+    public function testValidMethodOverrideNamesTransaction()
+    {
+        $this->createMiddlewareInstance(false);
+
+        $request = $this->createMethodOverrideRequest('PUT');
+
+        $this->response->shouldReceive('getStatusCode')->andReturn(200);
+        $this->agent->shouldReceive('startTransaction')
+            ->once()
+            ->with('PUT /ping', [], 1000.0)
+            ->andReturn($this->transaction);
+
+        $this->agent->shouldReceive('stopTransaction')
+            ->once()
+            ->with('PUT /ping');
+
+        $this->agent->shouldReceive('collectEvents')
+            ->once()
+            ->with('PUT /ping');
+
+        $this->middleware->handle($request, function () {
+            return $this->response;
+        });
+        $this->middleware->terminate($request, $this->response);
+    }
+
+    public function testInvalidMethodOverrideIsRethrown()
+    {
+        $this->createMiddlewareInstance(false);
+
+        $request = $this->createMethodOverrideRequest('/../../etc/passwd');
+
+        $this->agent->shouldReceive('startTransaction')
+            ->once()
+            ->with('POST /ping', [], 1000.0)
+            ->andReturn($this->transaction);
+
+        $next_called = false;
+
+        try {
+            $this->middleware->handle($request, function () use (&$next_called) {
+                $next_called = true;
+
+                return $this->response;
+            });
+            $this->fail('The SuspiciousOperationException must reach the application\'s exception handler');
+        } catch (SuspiciousOperationException $exception) {
+            $this->assertEquals('Invalid HTTP method override.', $exception->getMessage());
+        }
+
+        $this->assertFalse($next_called);
+    }
+
+    public function testInvalidMethodOverrideTerminate()
+    {
+        $this->createMiddlewareInstance(false);
+
+        $request = $this->createMethodOverrideRequest('/../../etc/passwd');
+
+        $this->agent->shouldReceive('startTransaction')
+            ->once()
+            ->andReturn($this->transaction);
+
+        $this->agent->shouldReceive('getTransaction')
+            ->once()
+            ->with('POST /ping')
+            ->andReturn($this->transaction);
+
+        $this->agent->shouldReceive('stopTransaction')
+            ->once()
+            ->with('POST /ping');
+
+        $this->agent->shouldReceive('collectEvents')
+            ->once()
+            ->with('POST /ping');
+
+        Log::shouldReceive('error')->never();
+
+        try {
+            $this->middleware->handle($request, function () {
+                return $this->response;
+            });
+        } catch (SuspiciousOperationException $exception) {
+            // The application renders this exception into the response terminate() receives
+        }
+
+        $this->response->shouldReceive('getStatusCode')->andReturn(400);
+        $this->middleware->terminate($request, $this->response);
+
+        $data = $this->getTransactionData();
+
+        $this->assertEquals(400, $data['result']);
+        $this->assertEquals('HTTP', $data['type']);
+        $this->assertEquals(400, $data['context']['response']['status_code']);
+    }
+
+    public function testInvalidMethodOverrideIgnored()
+    {
+        $this->createMiddlewareInstance(false, '/^POST \/ping/');
+
+        $request = $this->createMethodOverrideRequest('/../../etc/passwd');
+
+        $this->agent->shouldNotReceive('startTransaction');
+        $this->agent->shouldNotReceive('stopTransaction');
+        $this->agent->shouldNotReceive('collectEvents');
+
+        $this->expectException(SuspiciousOperationException::class);
+
+        try {
+            $this->middleware->handle($request, function () {
+                return $this->response;
+            });
+        } finally {
+            $this->middleware->terminate($request, $this->response);
+        }
+    }
+
+    private function createMethodOverrideRequest(string $method): Request
+    {
+        // The header is always honoured, while the _method parameter needs a global opt-in
+        $request = Request::create('/ping', 'POST');
+        $request->headers->set('X-HTTP-METHOD-OVERRIDE', $method);
+
+        return $request;
     }
 
     private function getTransactionData(): array
